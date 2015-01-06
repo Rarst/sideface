@@ -24,6 +24,7 @@
   },
   "autoload": {
     "files": [
+      "php/functions.php",
       "uprofiler_lib/utils/uprofiler_lib.php",
       "uprofiler_lib/utils/uprofiler_runs.php"
     ]
