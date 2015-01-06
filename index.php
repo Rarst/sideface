@@ -50,7 +50,7 @@ $app->get('/', function () {
     echo "<html>";
 
     echo "<head><title>uprofiler: Hierarchical Profiler Report</title>";
-    uprofiler_include_js_css('assets');
+    uprofiler_include_js_css('/assets');
     echo "</head>";
 
     echo "<body>";
@@ -69,11 +69,58 @@ $app->get('/', function () {
         $params,
         $GLOBALS['source'],
         $GLOBALS['run'],
-        $GLOBALS['wts'],
-        $GLOBALS['symbol'],
-        $GLOBALS['sort'],
-        $GLOBALS['run1'],
-        $GLOBALS['run2']
+        null,
+        null,
+        null,
+        null,
+        null
+    );
+
+
+    echo "</body>";
+    echo "</html>";
+
+    return ob_get_clean();
+});
+
+$app->get('/{source}/{run}', function ($source, $run) {
+    require_once $GLOBALS['UPROFILER_LIB_ROOT'] . '/display/uprofiler.php';
+
+    global $params;
+
+    // param name, its type, and default value
+    $params = [
+        'run'    => [ UPROFILER_STRING_PARAM, '' ],
+        'wts'    => [ UPROFILER_STRING_PARAM, '' ],
+        'symbol' => [ UPROFILER_STRING_PARAM, '' ],
+        'sort'   => [ UPROFILER_STRING_PARAM, 'wt' ], // wall time
+        'run1'   => [ UPROFILER_STRING_PARAM, '' ],
+        'run2'   => [ UPROFILER_STRING_PARAM, '' ],
+        'source' => [ UPROFILER_STRING_PARAM, 'uprofiler' ],
+        'all'    => [ UPROFILER_UINT_PARAM, 0 ],
+    ];
+
+    // pull values of these params, and create named globals for each param
+    uprofiler_param_init($params);
+    echo "<html>";
+
+    echo "<head><title>uprofiler: Hierarchical Profiler Report</title>";
+    uprofiler_include_js_css('/assets');
+    echo "</head>";
+
+    echo "<body>";
+    $uprofiler_runs_impl = new UprofilerRuns_Default();
+
+    displayUprofilerReport(
+        $uprofiler_runs_impl,
+        $params,
+        $source,
+        $run,
+        null,
+        null,
+        null,
+        null,
+        null
     );
 
 
