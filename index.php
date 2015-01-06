@@ -3,7 +3,7 @@
 namespace Rarst\Sideface;
 
 use Silex\Application;
-use UprofilerRuns_Default;
+use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
 $GLOBALS['UPROFILER_LIB_ROOT'] = __DIR__ . '/uprofiler_lib';
@@ -109,7 +109,7 @@ $app->get('/{source}/{run}', function ($source, $run) {
     echo "</head>";
 
     echo "<body>";
-    $uprofiler_runs_impl = new UprofilerRuns_Default();
+    $uprofiler_runs_impl = new uprofilerRuns_Default();
 
     displayUprofilerReport(
         $uprofiler_runs_impl,
