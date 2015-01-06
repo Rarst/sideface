@@ -19,7 +19,8 @@
     "issues": "https://github.com/Rarst/side-face/issues"
   },
   "require": {
-    "php": ">=5.2.0"
+    "php": ">=5.4",
+    "silex/silex":"^1.2.2"
   },
   "autoload": {
     "files": [
