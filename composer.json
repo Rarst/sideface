@@ -1,17 +1,30 @@
 {
-    "name": "friendsofphp/uprofiler",
-    "type": "library",
-    "description": "uprofiler: A lightweight profiler for PHP",
-    "keywords": ["profiling", "performance"],
-    "homepage": "http://github.com/FriendsOfPHP/uprofiler",
-    "license": "Apache-2.0",
-    "require": {
-        "php": ">=5.2.0"
-    },
-    "autoload": {
-        "files": [
-            "uprofiler_lib/utils/uprofiler_lib.php",
-            "uprofiler_lib/utils/uprofiler_runs.php"
-        ]
+  "name": "rarst/side-face",
+  "description": "Web viewer for xhprof/uprofiler performance profilers.",
+  "type": "project",
+  "keywords": [
+    "profiling",
+    "performance"
+  ],
+  "homepage": "http://github.com/Rarst/side-face",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Andrey Savchenko",
+      "email": "contact@rarst.net",
+      "homepage": "http://www.Rarst.net/"
     }
+  ],
+  "support": {
+    "issues": "https://github.com/Rarst/side-face/issues"
+  },
+  "require": {
+    "php": ">=5.2.0"
+  },
+  "autoload": {
+    "files": [
+      "uprofiler_lib/utils/uprofiler_lib.php",
+      "uprofiler_lib/utils/uprofiler_runs.php"
+    ]
+  }
 }
