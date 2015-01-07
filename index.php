@@ -6,6 +6,15 @@ use Silex\Application;
 use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
+
+/**
+ * Type definitions for URL params
+ */
+define('UPROFILER_STRING_PARAM', 1);
+define('UPROFILER_UINT_PARAM',   2);
+define('UPROFILER_FLOAT_PARAM',  3);
+define('UPROFILER_BOOL_PARAM',   4);
+
 $GLOBALS['UPROFILER_LIB_ROOT'] = __DIR__ . '/uprofiler_lib';
 
 $app = new Application();

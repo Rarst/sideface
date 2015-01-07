@@ -33,7 +33,6 @@ if (! isset( $GLOBALS['UPROFILER_LIB_ROOT'] )) {
     $GLOBALS['UPROFILER_LIB_ROOT'] = realpath(dirname(__FILE__) . '/..');
 }
 
-require_once $GLOBALS['UPROFILER_LIB_ROOT'] . '/utils/uprofiler_lib.php';
 require_once $GLOBALS['UPROFILER_LIB_ROOT'] . '/utils/callgraph_utils.php';
 require_once $GLOBALS['UPROFILER_LIB_ROOT'] . '/utils/uprofiler_runs.php';
 
