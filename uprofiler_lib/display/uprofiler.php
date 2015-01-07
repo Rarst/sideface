@@ -33,7 +33,6 @@ if (! isset( $GLOBALS['UPROFILER_LIB_ROOT'] )) {
     $GLOBALS['UPROFILER_LIB_ROOT'] = realpath(dirname(__FILE__) . '/..');
 }
 
-require_once $GLOBALS['UPROFILER_LIB_ROOT'] . '/utils/callgraph_utils.php';
 
 /**
  * Our coding convention disallows relative paths in hrefs.

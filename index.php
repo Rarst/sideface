@@ -11,11 +11,20 @@ require __DIR__ . '/vendor/autoload.php';
  * Type definitions for URL params
  */
 define('UPROFILER_STRING_PARAM', 1);
-define('UPROFILER_UINT_PARAM',   2);
-define('UPROFILER_FLOAT_PARAM',  3);
-define('UPROFILER_BOOL_PARAM',   4);
+define('UPROFILER_UINT_PARAM', 2);
+define('UPROFILER_FLOAT_PARAM', 3);
+define('UPROFILER_BOOL_PARAM', 4);
 
 $GLOBALS['UPROFILER_LIB_ROOT'] = __DIR__ . '/uprofiler_lib';
+
+// Supported output format
+$uprofiler_legal_image_types = [
+    "jpg" => 1,
+    "gif" => 1,
+    "png" => 1,
+    "svg" => 1, // support scalable vector graphic
+    "ps"  => 1,
+];
 
 $app = new Application();
 
