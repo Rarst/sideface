@@ -34,8 +34,6 @@ if (! isset( $GLOBALS['UPROFILER_LIB_ROOT'] )) {
 }
 
 require_once $GLOBALS['UPROFILER_LIB_ROOT'] . '/utils/callgraph_utils.php';
-require_once $GLOBALS['UPROFILER_LIB_ROOT'] . '/utils/uprofiler_runs.php';
-
 
 /**
  * Our coding convention disallows relative paths in hrefs.

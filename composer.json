@@ -23,9 +23,9 @@
     "silex/silex":"^1.2.2"
   },
   "autoload": {
+    "classmap": ["php/"],
     "files": [
-      "php/functions.php",
-      "uprofiler_lib/utils/uprofiler_runs.php"
+      "php/functions.php"
     ]
   }
 }
