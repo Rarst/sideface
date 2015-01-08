@@ -247,6 +247,9 @@ $app->get('/{source}/{run1}|{run2}', function (Application $app, $source, $run1,
 
     global $params, $symbol, $sort;
 
+    $params['run1'] = $run1;
+    $params['run2'] = $run2;
+
     ob_start();
 
     $uprofiler_runs_impl = new uprofilerRuns_Default();
