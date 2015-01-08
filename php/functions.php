@@ -1151,53 +1151,6 @@ function profiler_diff_report(
         $uprofiler_data2);
 }
 
-
-/**
- * Generate a uprofiler Display View given the various URL parameters
- * as arguments. The first argument is an object that implements
- * the iUprofilerRuns interface.
- *
- * @param object $uprofiler_runs_impl An object that implements
- *                                    the iUprofilerRuns interface
- *                                    .
- * @param array  $url_params          Array of non-default URL params.
- *
- * @param string $source              Category/type of the run. The source in
- *                                    combination with the run id uniquely
- *                                    determines a profiler run.
- *
- * @param string $run                 run id, or comma separated sequence of
- *                                    run ids. The latter is used if an aggregate
- *                                    report of the runs is desired.
- *
- * @param string $wts                 Comma separate list of integers.
- *                                    Represents the weighted ratio in
- *                                    which which a set of runs will be
- *                                    aggregated. [Used only for aggregate
- *                                    reports.]
- *
- * @param string $symbol              Function symbol. If non-empty then the
- *                                    parent/child view of this function is
- *                                    displayed. If empty, a flat-profile view
- *                                    of the functions is displayed.
- *
- * @param string $run1                Base run id (for diff reports)
- *
- * @param string $run2                New run id (for diff reports)
- *
- */
-function displayUprofilerReport(
-    $uprofiler_runs_impl,
-    $url_params,
-    $source,
-    $run,
-    $wts,
-    $symbol,
-    $sort,
-    $run1,
-    $run2
-) {}
-
 function uprofiler_error($message)
 {
     error_log($message);
