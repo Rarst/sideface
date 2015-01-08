@@ -1098,59 +1098,6 @@ function symbol_report(
 
 }
 
-/**
- * Generate the profiler report for a single run.
- *
- * @author Kannan
- */
-function profiler_single_run_report(
-    $url_params,
-    $uprofiler_data,
-    $run_desc,
-    $rep_symbol,
-    $sort,
-    $run
-) {
-
-    init_metrics($uprofiler_data, $rep_symbol, $sort, false);
-
-    profiler_report($url_params, $rep_symbol, $sort, $run, $run_desc,
-        $uprofiler_data);
-}
-
-
-/**
- * Generate the profiler report for diff mode (delta between two runs).
- *
- * @author Kannan
- */
-function profiler_diff_report(
-    $url_params,
-    $uprofiler_data1,
-    $run1_desc,
-    $uprofiler_data2,
-    $run2_desc,
-    $rep_symbol,
-    $sort,
-    $run1,
-    $run2
-) {
-
-
-    // Initialize what metrics we'll display based on data in Run2
-    init_metrics($uprofiler_data2, $rep_symbol, $sort, true);
-
-    profiler_report($url_params,
-        $rep_symbol,
-        $sort,
-        $run1,
-        $run1_desc,
-        $uprofiler_data1,
-        $run2,
-        $run2_desc,
-        $uprofiler_data2);
-}
-
 function uprofiler_error($message)
 {
     error_log($message);

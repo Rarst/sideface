@@ -247,20 +247,22 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
 
     ob_start();
 
-    $runsHandler     = new RunsHandler();
-    $uprofiler_data1 = $runsHandler->get_run($run1, $source, $description1);
-    $uprofiler_data2 = $runsHandler->get_run($run2, $source, $description2);
+    $runsHandler = new RunsHandler();
+    $data1       = $runsHandler->get_run($run1, $source, $description1);
+    $data2       = $runsHandler->get_run($run2, $source, $description2);
 
-    profiler_diff_report(
+    init_metrics($data2, $symbol, $sort, true);
+
+    profiler_report(
         $params,
-        $uprofiler_data1,
-        $description1,
-        $uprofiler_data2,
-        $description2,
         $symbol,
         $sort,
         $run1,
-        $run2
+        $description1,
+        $data1,
+        $run2,
+        $description2,
+        $data2
     );
 
     $body = ob_get_clean();
@@ -303,14 +305,8 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
         $description    = $data['description'];
     }
 
-    profiler_single_run_report(
-        $params,
-        $uprofiler_data,
-        $description,
-        $symbol,
-        $sort,
-        $run
-    );
+    init_metrics($uprofiler_data, $symbol, $sort, false);
+    profiler_report($params, $symbol, $sort, $run, $description, $uprofiler_data);
 
     $body = ob_get_clean();
     /** @var Twig_Environment $twig */
