@@ -233,8 +233,8 @@ $app->get('/', function (Application $app) {
     ob_start();
 
     echo '<h1>No runs specified in the URL.</h1>';
-    $uprofiler_runs_impl = new UprofilerRuns_Default();
     $uprofiler_runs_impl->list_runs();
+    $runsHandler = new RunsHandler();
 
     $body = ob_get_clean();
     /** @var Twig_Environment $twig */
@@ -252,9 +252,9 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
 
     ob_start();
 
-    $uprofiler_runs_impl = new uprofilerRuns_Default();
-    $uprofiler_data1     = $uprofiler_runs_impl->get_run($run1, $source, $description1);
-    $uprofiler_data2     = $uprofiler_runs_impl->get_run($run2, $source, $description2);
+    $runsHandler     = new RunsHandler();
+    $uprofiler_data1 = $runsHandler->get_run($run1, $source, $description1);
+    $uprofiler_data2 = $runsHandler->get_run($run2, $source, $description2);
 
     profiler_diff_report(
         $params,
@@ -280,7 +280,7 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
     ob_start();
 
-    $uprofiler_runs_impl = new uprofilerRuns_Default();
+    $runsHandler = new RunsHandler();
 
     // run may be a single run or a comma separate list of runs
     // that'll be aggregated. If "wts" (a comma separated list
@@ -290,7 +290,7 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
     $runs_array = explode(",", $run);
 
     if (count($runs_array) == 1) {
-        $uprofiler_data = $uprofiler_runs_impl->get_run($runs_array[0], $source, $description);
+        $uprofiler_data = $runsHandler->get_run($runs_array[0], $source, $description);
     } else {
         if (! empty( $wts )) {
             $wts_array = explode(",", $wts);
@@ -298,7 +298,7 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
             $wts_array = null;
         }
         $data           = uprofiler_aggregate_runs(
-            $uprofiler_runs_impl,
+            $runsHandler,
             $runs_array,
             $wts_array,
             $source,
