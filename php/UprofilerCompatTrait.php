@@ -12,6 +12,13 @@ trait UprofilerCompatTrait
         return false;
     }
 
+    /**
+     * @param $run_id
+     * @param $type
+     * @param $run_desc
+     *
+     * @return array|bool
+     */
     public function get_run($run_id, $type, &$run_desc)
     {
         $run = $this->getRun($run_id, $type);
@@ -28,6 +35,13 @@ trait UprofilerCompatTrait
         return false;
     }
 
+    /**
+     * @param      $uprofiler_data
+     * @param      $type
+     * @param null $run_id
+     *
+     * @return string|bool
+     */
     public function save_run($uprofiler_data, $type, $run_id = null)
     {
         return $this->saveRun($uprofiler_data, $type, $run_id);
