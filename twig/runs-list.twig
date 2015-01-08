@@ -1,10 +1,21 @@
 {% extends 'index.twig' %}
 
 {% block body %}
-    <h1>Runs List</h1>
-    <ul>
+    {{ block('breadcrumb') }}
+    <table class="table table-condensed">
+        <tr>
+            <th>Source</th>
+            <th>ID</th>
+            <th>Date</th>
+            <th>Type</th>
+        </tr>
         {% for run in runs %}
-            <li>{{ run.id }} {{ run.source }} {{ run.suffix }} {{ run.time }}</li>
+            <tr>
+                <td>{{ run.source }}</td>
+                <td>{{ run.id }}</td>
+                <td>{{ run.time }}</td>
+                <td>{{ run.suffix }}</td>
+            </tr>
         {% endfor %}
-    </ul>
+    </table>
 {% endblock %}
