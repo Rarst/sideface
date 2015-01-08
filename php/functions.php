@@ -1,41 +1,6 @@
 <?php
 
 /**
- * Generate references to required stylesheets & javascript.
- *
- * If the calling script (such as index.php) resides in
- * a different location that than 'uprofiler_html' directory the
- * caller must provide the URL path to 'uprofiler_html' directory
- * so that the correct location of the style sheets/javascript
- * can be specified in the generated HTML.
- *
- * @param string $ui_dir_url_path
- */
-function uprofiler_include_js_css($ui_dir_url_path = '')
-{
-    if (empty( $ui_dir_url_path )) {
-        $ui_dir_url_path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-    }
-
-    // style sheets
-    echo "<link href='$ui_dir_url_path/css/uprofiler.css' rel='stylesheet' " .
-         " type='text/css' />";
-    echo "<link href='$ui_dir_url_path/jquery/jquery.tooltip.css' " .
-         " rel='stylesheet' type='text/css' />";
-    echo "<link href='$ui_dir_url_path/jquery/jquery.autocomplete.css' " .
-         " rel='stylesheet' type='text/css' />";
-
-    // javascript
-    echo "<script src='$ui_dir_url_path/jquery/jquery-1.2.6.js'>" .
-         "</script>";
-    echo "<script src='$ui_dir_url_path/jquery/jquery.tooltip.js'>" .
-         "</script>";
-    echo "<script src='$ui_dir_url_path/jquery/jquery.autocomplete.js'>"
-         . "</script>";
-    echo "<script src='$ui_dir_url_path/js/uprofiler_report.js'></script>";
-}
-
-/**
  * Formats call counts for uprofiler reports.
  *
  * Description:

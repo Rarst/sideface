@@ -234,21 +234,13 @@ $app->get('/', function (Application $app) {
 
     ob_start();
 
-    echo "<html>";
-
-    echo "<head><title>uprofiler: Hierarchical Profiler Report</title>";
-    uprofiler_include_js_css('/assets');
-    echo "</head>";
-
-    echo "<body>";
-
     $uprofiler_runs_impl = new UprofilerRuns_Default();
 
     displayUprofilerReport(
         $uprofiler_runs_impl,
         $params,
-        $GLOBALS['source'],
-        $GLOBALS['run'],
+        null,
+        null,
         null,
         null,
         null,
@@ -256,26 +248,19 @@ $app->get('/', function (Application $app) {
         null
     );
 
+    $body = ob_get_clean();
+    /** @var Twig_Environment $twig */
+    $twig = $app['twig'];
 
-    echo "</body>";
-    echo "</html>";
-
-    return ob_get_clean();
+    return $twig->render('index.twig', [ 'body' => $body ]);
 });
 
-$app->get('/{source}/{run}', function ($source, $run) {
+$app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
     global $params;
 
     ob_start();
 
-    echo "<html>";
-
-    echo "<head><title>uprofiler: Hierarchical Profiler Report</title>";
-    uprofiler_include_js_css('/assets');
-    echo "</head>";
-
-    echo "<body>";
     $uprofiler_runs_impl = new uprofilerRuns_Default();
 
     displayUprofilerReport(
@@ -290,11 +275,10 @@ $app->get('/{source}/{run}', function ($source, $run) {
         null
     );
 
-
-    echo "</body>";
-    echo "</html>";
-
-    return ob_get_clean();
+    $body = ob_get_clean();
+    /** @var Twig_Environment $twig */
+    $twig = $app['twig'];
+    return $twig->render('index.twig', [ 'body' => $body ]);
 });
 
 $app->run();
