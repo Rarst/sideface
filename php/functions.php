@@ -1198,40 +1198,7 @@ function displayUprofilerReport(
     $run2
 ) {
 
-    if ($run) {                              // specific run to display?
-
-        // run may be a single run or a comma separate list of runs
-        // that'll be aggregated. If "wts" (a comma separated list
-        // of integral weights is specified), the runs will be
-        // aggregated in that ratio.
-        //
-        $runs_array = explode(",", $run);
-
-        if (count($runs_array) == 1) {
-            $uprofiler_data = $uprofiler_runs_impl->get_run($runs_array[0],
-                $source,
-                $description);
-        } else {
-            if (! empty( $wts )) {
-                $wts_array = explode(",", $wts);
-            } else {
-                $wts_array = null;
-            }
-            $data           = uprofiler_aggregate_runs($uprofiler_runs_impl,
-                $runs_array, $wts_array, $source, false);
-            $uprofiler_data = $data['raw'];
-            $description    = $data['description'];
-        }
-
-
-        profiler_single_run_report($url_params,
-            $uprofiler_data,
-            $description,
-            $symbol,
-            $sort,
-            $run);
-
-    } else if ($run1 && $run2) {                  // diff report for two runs
+    if ($run1 && $run2) {                  // diff report for two runs
 
         $uprofiler_data1 = $uprofiler_runs_impl->get_run($run1, $source, $description1);
         $uprofiler_data2 = $uprofiler_runs_impl->get_run($run2, $source, $description2);

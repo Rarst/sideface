@@ -245,22 +245,45 @@ $app->get('/', function (Application $app) {
 
 $app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
-    global $params;
+    global $params, $wts, $symbol, $sort;
 
     ob_start();
 
     $uprofiler_runs_impl = new uprofilerRuns_Default();
 
-    displayUprofilerReport(
-        $uprofiler_runs_impl,
+    // run may be a single run or a comma separate list of runs
+    // that'll be aggregated. If "wts" (a comma separated list
+    // of integral weights is specified), the runs will be
+    // aggregated in that ratio.
+    //
+    $runs_array = explode(",", $run);
+
+    if (count($runs_array) == 1) {
+        $uprofiler_data = $uprofiler_runs_impl->get_run($runs_array[0], $source, $description);
+    } else {
+        if (! empty( $wts )) {
+            $wts_array = explode(",", $wts);
+        } else {
+            $wts_array = null;
+        }
+        $data           = uprofiler_aggregate_runs(
+            $uprofiler_runs_impl,
+            $runs_array,
+            $wts_array,
+            $source,
+            false
+        );
+        $uprofiler_data = $data['raw'];
+        $description    = $data['description'];
+    }
+
+    profiler_single_run_report(
         $params,
-        $source,
-        $run,
-        null,
-        null,
-        null,
-        null,
-        null
+        $uprofiler_data,
+        $description,
+        $symbol,
+        $sort,
+        $run
     );
 
     $body = ob_get_clean();
