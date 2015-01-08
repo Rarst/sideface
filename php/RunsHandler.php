@@ -81,20 +81,21 @@ class RunsHandler implements iUprofilerRuns
     public function getRunsList()
     {
         $runs = [ ];
-        if (is_dir($this->dir)) {
-            $files = glob("{$this->dir}/*.{$this->suffix}");
-            usort($files, function ($a, $b) {
-                return filemtime($b) - filemtime($a);
-            });
-            foreach ($files as $file) {
-                list( $run, $source ) = explode('.', basename($file, '.' . $this->suffix), 2);
-                $runs[] = [
-                    'id'     => $run,
-                    'source' => $source,
-                    'suffix' => $this->suffix,
-                    'time'   => filemtime($file),
-                ];
-            }
+        if (! is_dir($this->dir)) {
+            return $runs;
+        }
+        $files = glob("{$this->dir}/*.{$this->suffix}");
+        usort($files, function ($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+        foreach ($files as $file) {
+            list( $run, $source ) = explode('.', basename($file, '.' . $this->suffix), 2);
+            $runs[] = [
+                'id'     => $run,
+                'source' => $source,
+                'suffix' => $this->suffix,
+                'time'   => filemtime($file),
+            ];
         }
         return $runs;
     }
