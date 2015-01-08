@@ -230,15 +230,10 @@ $app->register(new TwigServiceProvider(), [
 
 $app->get('/', function (Application $app) {
 
-    ob_start();
-
-    echo '<h1>No runs specified in the URL.</h1>';
+    /** @var Twig_Environment $twig */
+    $twig        = $app['twig'];
     $runsHandler = new RunsHandler();
     $runsList    = $runsHandler->getRunsList();
-
-    $body = ob_get_clean();
-    /** @var Twig_Environment $twig */
-    $twig = $app['twig'];
 
     return $twig->render('runs-list.twig', [ 'runs' => $runsList ]);
 });
