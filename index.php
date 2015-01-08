@@ -3,6 +3,8 @@
 namespace Rarst\Sideface;
 
 use Silex\Application;
+use Silex\Provider\TwigServiceProvider;
+use Twig_Environment;
 use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -222,7 +224,11 @@ $app = new Application([
     'debug' => true,
 ]);
 
-$app->get('/', function () {
+$app->register(new TwigServiceProvider(), [
+    'twig.path' => __DIR__ . '/twig',
+]);
+
+$app->get('/', function (Application $app) {
 
     global $params;
 
