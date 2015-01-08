@@ -218,7 +218,9 @@ $vbbar  = ' class="vbbar"';
 $vrbar  = ' class="vrbar"';
 $vgbar  = ' class="vgbar"';
 
-$app = new Application();
+$app = new Application([
+    'debug' => true,
+]);
 
 $app->get('/', function () {
 
