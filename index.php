@@ -243,7 +243,7 @@ $app->get('/', function (Application $app) {
     return $twig->render('index.twig', [ 'body' => $body ]);
 });
 
-$app->get('/{source}/{run1}|{run2}', function (Application $app, $source, $run1, $run2) {
+$app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1, $run2) {
 
     global $params, $symbol, $sort;
 
