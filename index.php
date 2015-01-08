@@ -230,23 +230,11 @@ $app->register(new TwigServiceProvider(), [
 
 $app->get('/', function (Application $app) {
 
-    global $params;
-
     ob_start();
 
+    echo '<h1>No runs specified in the URL.</h1>';
     $uprofiler_runs_impl = new UprofilerRuns_Default();
-
-    displayUprofilerReport(
-        $uprofiler_runs_impl,
-        $params,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null
-    );
+    $uprofiler_runs_impl->list_runs();
 
     $body = ob_get_clean();
     /** @var Twig_Environment $twig */

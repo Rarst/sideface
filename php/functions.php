@@ -1246,11 +1246,6 @@ function displayUprofilerReport(
             $run1,
             $run2);
 
-    } else {
-        echo "No uprofiler runs specified in the URL.";
-        if (method_exists($uprofiler_runs_impl, 'list_runs')) {
-            $uprofiler_runs_impl->list_runs();
-        }
     }
 }
 
