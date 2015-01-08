@@ -1,12 +1,12 @@
 {
-  "name": "rarst/side-face",
+  "name": "rarst/sideface",
   "description": "Web viewer for xhprof/uprofiler performance profilers.",
   "type": "project",
   "keywords": [
     "profiling",
     "performance"
   ],
-  "homepage": "http://github.com/Rarst/side-face",
+  "homepage": "http://github.com/Rarst/sideface",
   "license": "Apache-2.0",
   "authors": [
     {
@@ -16,7 +16,7 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/Rarst/side-face/issues"
+    "issues": "https://github.com/Rarst/sideface/issues"
   },
   "require": {
     "php": ">=5.4",
