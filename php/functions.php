@@ -1196,25 +1196,7 @@ function displayUprofilerReport(
     $sort,
     $run1,
     $run2
-) {
-
-    if ($run1 && $run2) {                  // diff report for two runs
-
-        $uprofiler_data1 = $uprofiler_runs_impl->get_run($run1, $source, $description1);
-        $uprofiler_data2 = $uprofiler_runs_impl->get_run($run2, $source, $description2);
-
-        profiler_diff_report($url_params,
-            $uprofiler_data1,
-            $description1,
-            $uprofiler_data2,
-            $description2,
-            $symbol,
-            $sort,
-            $run1,
-            $run2);
-
-    }
-}
+) {}
 
 function uprofiler_error($message)
 {

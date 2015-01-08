@@ -243,6 +243,34 @@ $app->get('/', function (Application $app) {
     return $twig->render('index.twig', [ 'body' => $body ]);
 });
 
+$app->get('/{source}/{run1}|{run2}', function (Application $app, $source, $run1, $run2) {
+
+    global $params, $symbol, $sort;
+
+    ob_start();
+
+    $uprofiler_runs_impl = new uprofilerRuns_Default();
+    $uprofiler_data1     = $uprofiler_runs_impl->get_run($run1, $source, $description1);
+    $uprofiler_data2     = $uprofiler_runs_impl->get_run($run2, $source, $description2);
+
+    profiler_diff_report(
+        $params,
+        $uprofiler_data1,
+        $description1,
+        $uprofiler_data2,
+        $description2,
+        $symbol,
+        $sort,
+        $run1,
+        $run2
+    );
+
+    $body = ob_get_clean();
+    /** @var Twig_Environment $twig */
+    $twig = $app['twig'];
+    return $twig->render('index.twig', [ 'body' => $body ]);
+});
+
 $app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
     global $params, $wts, $symbol, $sort;
