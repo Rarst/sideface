@@ -1,0 +1,10 @@
+{% extends 'index.twig' %}
+
+{% block body %}
+    <h1>Runs List</h1>
+    <ul>
+        {% for run in runs %}
+            <li>{{ run.id }} {{ run.source }} {{ run.suffix }} {{ run.time }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

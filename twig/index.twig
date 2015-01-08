@@ -8,7 +8,9 @@
     <link href='/assets/jquery/jquery.autocomplete.css' rel='stylesheet' type='text/css'/>
 </head>
 <body>
-{{ body|raw }}
+{% block body %}
+    {{ body|raw }}
+{% endblock %}
 <script src='/assets/jquery/jquery-1.2.6.js'></script>
 <script src='/assets/jquery/jquery.tooltip.js'></script>
 <script src='/assets/jquery/jquery.autocomplete.js'></script>

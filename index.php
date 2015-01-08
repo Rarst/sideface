@@ -233,14 +233,14 @@ $app->get('/', function (Application $app) {
     ob_start();
 
     echo '<h1>No runs specified in the URL.</h1>';
-    $uprofiler_runs_impl->list_runs();
     $runsHandler = new RunsHandler();
+    $runsList    = $runsHandler->getRunsList();
 
     $body = ob_get_clean();
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
 
-    return $twig->render('index.twig', [ 'body' => $body ]);
+    return $twig->render('runs-list.twig', [ 'runs' => $runsList ]);
 });
 
 $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1, $run2) {
