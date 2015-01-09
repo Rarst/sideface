@@ -17,7 +17,9 @@
             {#<th><a href="#">Aggregate</a></th>#}
             <th><a href="#">Compare</a></th>
             <th>ID</th>
-            <th>Source</th>
+            {% if not source %}
+                <th>Source</th>
+            {% endif %}
             <th>Date</th>
             <th>Type</th>
         </tr>
@@ -31,9 +33,7 @@
                     <label class="radio-inline"><input type="radio" name="to" value="{{ run.id }}"/> to</label>
                 </td>
                 <td><a href="{{ url('single_run', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
-                {% if source %}
-                    <td>{{ run.source }}</td>
-                {% else %}
+                {% if not source %}
                     <td><a href="{{ url('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
                 {% endif %}
                 <td>{{ run.time|date('Y-m-d h:m:s') }}</td>
