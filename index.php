@@ -4,6 +4,7 @@ namespace Rarst\Sideface;
 
 use Silex\Application;
 use Silex\Provider\TwigServiceProvider;
+use Silex\Provider\UrlGeneratorServiceProvider;
 use Twig_Environment;
 use uprofilerRuns_Default;
 
@@ -227,6 +228,8 @@ $app = new Application([
 $app->register(new TwigServiceProvider(), [
     'twig.path' => __DIR__ . '/twig',
 ]);
+
+$app->register(new UrlGeneratorServiceProvider());
 
 $app->get('/', function (Application $app) {
 
