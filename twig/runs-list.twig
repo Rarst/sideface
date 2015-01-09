@@ -1,5 +1,14 @@
 {% extends 'index.twig' %}
 
+{% block breadcrumb_items %}
+    {% if source %}
+        <li><a href="{{ url('runs_list') }}">Runs</a></li>
+        <li>{{ source }}</li>
+    {% else %}
+        <li>Runs</li>
+    {% endif %}
+{% endblock %}
+
 {% block body %}
     {{ block('breadcrumb') }}
     <table class="table table-condensed table-hover">
@@ -12,7 +21,7 @@
         {% for run in runs %}
             <tr>
                 <td><a href="{{ url('single_run', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
-                <td>{{ run.source }}</td>
+                <td><a href="{{ url('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
                 <td>{{ run.time }}</td>
                 <td>{{ run.suffix }}</td>
             </tr>
