@@ -25,7 +25,7 @@
             <tr>
                 <td><a href="{{ url('single_run', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
                 <td><a href="{{ url('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
-                <td>{{ run.time }}</td>
+                <td>{{ run.time|date('Y-m-d h:m:s') }}</td>
                 <td>{{ run.suffix }}</td>
             </tr>
         {% endfor %}
