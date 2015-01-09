@@ -239,7 +239,8 @@ $app->get('/', function (Application $app) {
     $runsList    = $runsHandler->getRunsList();
 
     return $twig->render('runs-list.twig', [ 'runs' => $runsList ]);
-});
+})
+->bind('runs_list');
 
 $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1, $run2) {
 
@@ -272,7 +273,8 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
     return $twig->render('index.twig', [ 'body' => $body ]);
-});
+})
+->bind('diff_runs');
 
 $app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
@@ -315,6 +317,7 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
     return $twig->render('index.twig', [ 'body' => $body ]);
-});
+})
+->bind('single_run');
 
 $app->run();
