@@ -14,6 +14,8 @@
     <table class="table table-condensed table-hover">
         <thead>
         <tr>
+            {#<th><a href="#">Aggregate</a></th>#}
+            <th><a href="#">Compare</a></th>
             <th>ID</th>
             <th>Source</th>
             <th>Date</th>
@@ -23,6 +25,11 @@
         <tbody>
         {% for run in runs %}
             <tr>
+                {#<td><input type="checkbox" name="aggregate" /></td>#}
+                <td>
+                    <label class="radio-inline"><input type="radio" name="from" value="{{ run.id }}"/> from</label>
+                    <label class="radio-inline"><input type="radio" name="to" value="{{ run.id }}"/> to</label>
+                </td>
                 <td><a href="{{ url('single_run', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
                 <td><a href="{{ url('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
                 <td>{{ run.time|date('Y-m-d h:m:s') }}</td>
