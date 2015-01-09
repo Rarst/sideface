@@ -2,17 +2,17 @@
 
 {% block body %}
     {{ block('breadcrumb') }}
-    <table class="table table-condensed">
+    <table class="table table-condensed table-hover">
         <tr>
-            <th>Source</th>
             <th>ID</th>
+            <th>Source</th>
             <th>Date</th>
             <th>Type</th>
         </tr>
         {% for run in runs %}
             <tr>
+                <td><a href="{{ url('single_run', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
                 <td>{{ run.source }}</td>
-                <td>{{ run.id }}</td>
                 <td>{{ run.time }}</td>
                 <td>{{ run.suffix }}</td>
             </tr>
