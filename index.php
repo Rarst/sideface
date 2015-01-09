@@ -231,16 +231,23 @@ $app->register(new TwigServiceProvider(), [
 
 $app->register(new UrlGeneratorServiceProvider());
 
-$app->get('/', function (Application $app) {
+$app->get('/{source}', function (Application $app, $source) {
 
     /** @var Twig_Environment $twig */
     $twig        = $app['twig'];
     $runsHandler = new RunsHandler();
     $runsList    = $runsHandler->getRunsList();
 
-    return $twig->render('runs-list.twig', [ 'runs' => $runsList ]);
+    if ($source) {
+        $runsList = array_filter($runsList, function ($run) use ($source) {
+            return $run['source'] === $source;
+        });
+    }
+
+    return $twig->render('runs-list.twig', [ 'runs' => $runsList, 'source' => $source ]);
 })
-->bind('runs_list');
+    ->value('source', false)
+    ->bind('runs_list');
 
 $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1, $run2) {
 
@@ -274,7 +281,7 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
     $twig = $app['twig'];
     return $twig->render('index.twig', [ 'body' => $body ]);
 })
-->bind('diff_runs');
+    ->bind('diff_runs');
 
 $app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
@@ -318,6 +325,6 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
     $twig = $app['twig'];
     return $twig->render('index.twig', [ 'body' => $body ]);
 })
-->bind('single_run');
+    ->bind('single_run');
 
 $app->run();
