@@ -255,29 +255,16 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
 
     $params['run1'] = $run1;
     $params['run2'] = $run2;
-
-    ob_start();
-
-    $runsHandler = new RunsHandler();
-    $data1       = $runsHandler->getRun($run1, $source);
-    $data2       = $runsHandler->getRun($run2, $source);
-
-    $report = new Report();
+    $runsHandler    = new RunsHandler();
+    $data1          = $runsHandler->getRun($run1, $source);
+    $data2          = $runsHandler->getRun($run2, $source);
+    $report         = new Report();
     $report->init_metrics($data2, $symbol, $sort, true);
 
-    profiler_report(
-        $params,
-        $symbol,
-        $sort,
-        $run1,
-        '',
-        $data1,
-        $run2,
-        '',
-        $data2
-    );
-
+    ob_start();
+    profiler_report($params, $symbol, $sort, $run1, '', $data1, $run2, '', $data2);
     $body = ob_get_clean();
+
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
     return $twig->render('index.twig', [ 'body' => $body ]);
@@ -321,7 +308,11 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
-    return $twig->render('index.twig', [ 'body' => $report->getBody() ]);
+    return $twig->render('report.twig', [
+        'source' => $source,
+        'run'    => $run,
+        'body'   => $report->getBody(),
+    ]);
 })
     ->bind('single_run');
 
