@@ -93,7 +93,7 @@ class Report
         $run2_data = [ ]
     ) {
         ob_start();
-        profiler_report($url_params, $rep_symbol, $sort, $run1, $run1_desc, $run1_data);
+        profiler_report($url_params, $rep_symbol, $sort, $run1, $run1_desc, $run1_data, $run2, $run2_desc, $run2_data);
 
         $this->body = ob_get_clean();
     }

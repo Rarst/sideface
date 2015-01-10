@@ -260,14 +260,11 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
     $data2          = $runsHandler->getRun($run2, $source);
     $report         = new Report();
     $report->init_metrics($data2, $symbol, $sort, true);
-
-    ob_start();
-    profiler_report($params, $symbol, $sort, $run1, '', $data1, $run2, '', $data2);
-    $body = ob_get_clean();
+    $report->profiler_report($params, $symbol, $sort, $run1, '', $data1, $run2, '', $data2);
 
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
-    return $twig->render('index.twig', [ 'body' => $body ]);
+    return $twig->render('index.twig', [ 'body' => $report->getBody() ]);
 })
     ->bind('diff_runs');
 
