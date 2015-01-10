@@ -86,10 +86,8 @@ class Report
         $rep_symbol,
         $sort,
         $run1,
-        $run1_desc,
         $run1_data,
         $run2 = 0,
-        $run2_desc = "",
         $run2_data = [ ]
     ) {
         ob_start();
@@ -118,25 +116,6 @@ class Report
         } else {
             $symbol_tab = uprofiler_compute_flat_info($run1_data, $totals);
         }
-
-        $run1_txt              = sprintf('<b>Run #%s:</b> %s', $run1, $run1_desc);
-
-        if ($diff_mode) {
-            $diff_text       = 'Diff';
-            $run2_txt        = sprintf('<b>Run #%s:</b> %s', $run2, $run2_desc);
-        } else {
-            $diff_text = 'Run';
-        }
-
-        echo
-            '<dl class=phprof_report_info>' .
-            '  <dt>' . $diff_text . ' Report</dt>' .
-            '  <dd>' . ( $diff_mode ? $run1_txt . '<br><b>vs.</b><br>' . $run2_txt : $run1_txt ) .
-            '  </dd>' .
-            '  <dt>Tip</dt>' .
-            '  <dd>Click a function name below to drill down.</dd>' .
-            '</dl>' .
-            '<div style="clear: both; margin: 3em 0;"></div>';
 
         // data tables
         if (! empty( $rep_symbol )) {
