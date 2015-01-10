@@ -262,7 +262,8 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
     $data1       = $runsHandler->getRun($run1, $source);
     $data2       = $runsHandler->getRun($run2, $source);
 
-    init_metrics($data2, $symbol, $sort, true);
+    $report = new Report();
+    $report->init_metrics($data2, $symbol, $sort, true);
 
     profiler_report(
         $params,

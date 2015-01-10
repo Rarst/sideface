@@ -12,7 +12,73 @@ class Report
 
     public function init_metrics($uprofiler_data, $rep_symbol, $sort, $diff_report = false)
     {
-        init_metrics($uprofiler_data, $rep_symbol, $sort, $diff_report);
+        global $stats;
+        global $pc_stats;
+        global $metrics;
+        global $diff_mode;
+        global $sortable_columns;
+        global $sort_col;
+        global $display_calls;
+
+        $diff_mode = $diff_report;
+
+        if (! empty( $sort )) {
+            if (array_key_exists($sort, $sortable_columns)) {
+                $sort_col = $sort;
+            } else {
+                print( "Invalid Sort Key $sort specified in URL" );
+            }
+        }
+
+        // For C++ profiler runs, walltime attribute isn't present.
+        // In that case, use "samples" as the default sort column.
+        if (! isset( $uprofiler_data["main()"]["wt"] )) {
+
+            if ($sort_col == "wt") {
+                $sort_col = "samples";
+            }
+
+            // C++ profiler data doesn't have call counts.
+            // ideally we should check to see if "ct" metric
+            // is present for "main()". But currently "ct"
+            // metric is artificially set to 1. So, relying
+            // on absence of "wt" metric instead.
+            $display_calls = false;
+        } else {
+            $display_calls = true;
+        }
+
+        // parent/child report doesn't support exclusive times yet.
+        // So, change sort hyperlinks to closest fit.
+        if (! empty( $rep_symbol )) {
+            $sort_col = str_replace("excl_", "", $sort_col);
+        }
+
+        if ($display_calls) {
+            $stats = [ "fn", "ct", "Calls%" ];
+        } else {
+            $stats = [ "fn" ];
+        }
+
+        $pc_stats = $stats;
+
+        $possible_metrics = uprofiler_get_possible_metrics($uprofiler_data);
+        foreach ($possible_metrics as $metric => $desc) {
+            if (isset( $uprofiler_data["main()"][$metric] )) {
+                $metrics[] = $metric;
+                // flat (top-level reports): we can compute
+                // exclusive metrics reports as well.
+                $stats[] = $metric;
+                $stats[] = "I" . $desc[0] . "%";
+                $stats[] = "excl_" . $metric;
+                $stats[] = "E" . $desc[0] . "%";
+
+                // parent/child report for a function: we can
+                // only breakdown inclusive times correctly.
+                $pc_stats[] = $metric;
+                $pc_stats[] = "I" . $desc[0] . "%";
+            }
+        }
     }
 
     public function profiler_report(
