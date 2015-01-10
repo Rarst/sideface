@@ -287,8 +287,6 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
 
     global $params, $wts, $symbol, $sort;
 
-    ob_start();
-
     $runsHandler = new RunsHandler();
 
     // run may be a single run or a comma separate list of runs
@@ -316,13 +314,13 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
         $uprofiler_data = $data['raw'];
     }
 
-    init_metrics($uprofiler_data, $symbol, $sort, false);
-    profiler_report($params, $symbol, $sort, $run, '', $uprofiler_data);
+    $report = new Report();
+    $report->init_metrics($uprofiler_data, $symbol, $sort, false);
+    $report->profiler_report($params, $symbol, $sort, $run, '', $uprofiler_data);
 
-    $body = ob_get_clean();
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
-    return $twig->render('index.twig', [ 'body' => $body ]);
+    return $twig->render('index.twig', [ 'body' => $report->getBody() ]);
 })
     ->bind('single_run');
 
