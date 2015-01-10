@@ -259,8 +259,8 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
     ob_start();
 
     $runsHandler = new RunsHandler();
-    $data1       = $runsHandler->get_run($run1, $source, $description1);
-    $data2       = $runsHandler->get_run($run2, $source, $description2);
+    $data1       = $runsHandler->getRun($run1, $source);
+    $data2       = $runsHandler->getRun($run2, $source);
 
     init_metrics($data2, $symbol, $sort, true);
 
@@ -269,10 +269,10 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
         $symbol,
         $sort,
         $run1,
-        $description1,
+        '',
         $data1,
         $run2,
-        $description2,
+        '',
         $data2
     );
 
@@ -299,7 +299,7 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
     $runs_array = explode(",", $run);
 
     if (count($runs_array) == 1) {
-        $uprofiler_data = $runsHandler->get_run($runs_array[0], $source, $description);
+        $uprofiler_data = $runsHandler->getRun($runs_array[0], $source);
     } else {
         if (! empty( $wts )) {
             $wts_array = explode(",", $wts);
@@ -314,11 +314,10 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
             false
         );
         $uprofiler_data = $data['raw'];
-        $description    = $data['description'];
     }
 
     init_metrics($uprofiler_data, $symbol, $sort, false);
-    profiler_report($params, $symbol, $sort, $run, $description, $uprofiler_data);
+    profiler_report($params, $symbol, $sort, $run, '', $uprofiler_data);
 
     $body = ob_get_clean();
     /** @var Twig_Environment $twig */
