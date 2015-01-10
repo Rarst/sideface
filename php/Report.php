@@ -98,7 +98,6 @@ class Report
         global $totals_1;
         global $totals_2;
         global $diff_mode;
-        global $base_path;
 
         // if we are reporting on a specific function, we can trim down
         // the report(s) to just stuff that is relevant to this function.
@@ -121,48 +120,13 @@ class Report
         }
 
         $run1_txt              = sprintf('<b>Run #%s:</b> %s', $run1, $run1_desc);
-        $base_url_params       = uprofiler_array_unset(uprofiler_array_unset($url_params, 'symbol'), 'all');
-        $top_link_query_string = "$base_path/?" . http_build_query($base_url_params);
 
         if ($diff_mode) {
             $diff_text       = 'Diff';
-            $base_url_params = uprofiler_array_unset($base_url_params, 'run1');
-            $base_url_params = uprofiler_array_unset($base_url_params, 'run2');
-            $run1_link       = uprofiler_render_link(
-                'View Run #' . $run1,
-                "$base_path/?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run1))
-            );
             $run2_txt        = sprintf('<b>Run #%s:</b> %s', $run2, $run2_desc);
-            $run2_link       = uprofiler_render_link(
-                'View Run #' . $run2,
-                "$base_path/?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run2))
-            );
         } else {
             $diff_text = 'Run';
         }
-
-        // set up the action links for operations that can be done on this report
-        $links   = [ ];
-        $links[] = uprofiler_render_link("View Top Level $diff_text Report", $top_link_query_string);
-
-        if ($diff_mode) {
-            $inverted_params         = $url_params;
-            $inverted_params['run1'] = $url_params['run2'];
-            $inverted_params['run2'] = $url_params['run1'];
-
-            // view the different runs or invert the current diff
-            $links [] = $run1_link;
-            $links [] = $run2_link;
-            $links [] = uprofiler_render_link(
-                'Invert ' . $diff_text . ' Report',
-                "$base_path/?" . http_build_query($inverted_params)
-            );
-        }
-
-        // lookup function typeahead form
-        $links [] = '<input class="function_typeahead" type="input" size="40" maxlength="100" />';
-
-        echo uprofiler_render_actions($links);
 
         echo
             '<dl class=phprof_report_info>' .

@@ -41,30 +41,6 @@ function uprofiler_percent_format($s, $precision = 1)
 }
 
 /**
- * Implodes the text for a bunch of actions (such as links, forms,
- * into a HTML list and returns the text.
- *
- * @param array $actions
- *
- * @return string
- */
-function uprofiler_render_actions($actions)
-{
-    $out = [ ];
-
-    if (count($actions)) {
-        $out[] = '<ul class="uprofiler_actions">';
-        foreach ($actions as $action) {
-            $out[] = '<li>' . $action . '</li>';
-        }
-        $out[] = '</ul>';
-    }
-
-    return implode('', $out);
-}
-
-
-/**
  * @param string $content the text/image/innerhtml/whatever for the link
  * @param string $href
  * @param string $class
