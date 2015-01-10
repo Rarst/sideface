@@ -7,12 +7,11 @@ namespace Rarst\Sideface;
  */
 trait UprofilerCompatTrait
 {
-    public function getRun($runId, $source)
-    {
-        return false;
-    }
+    abstract public function getRun($runId, $source);
 
     /**
+     * @deprecated
+     *
      * @param $run_id
      * @param $type
      * @param $run_desc
@@ -30,12 +29,11 @@ trait UprofilerCompatTrait
         return $run;
     }
 
-    public function saveRun($data, $source, $runId = null)
-    {
-        return false;
-    }
+    abstract public function saveRun($data, $source, $runId = null);
 
     /**
+     * @deprecated
+     *
      * @param      $uprofiler_data
      * @param      $type
      * @param null $run_id
