@@ -264,7 +264,11 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
 
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
-    return $twig->render('index.twig', [ 'body' => $report->getBody() ]);
+    return $twig->render('report.twig', [
+            'source' => $source,
+            'run'    => $run1,
+            'body'   => $report->getBody(),
+        ]);
 })
     ->bind('diff_runs');
 
