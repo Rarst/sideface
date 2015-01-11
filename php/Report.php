@@ -127,11 +127,10 @@ class Report
             if ($diff_mode) {
                 $info1 = isset( $symbol_tab1[$rep_symbol] ) ? $symbol_tab1[$rep_symbol] : null;
                 $info2 = isset( $symbol_tab2[$rep_symbol] ) ? $symbol_tab2[$rep_symbol] : null;
-                symbol_report(
+                $this->symbol_report(
                     $url_params,
                     $run_delta,
                     $symbol_tab[$rep_symbol],
-                    $sort,
                     $rep_symbol,
                     $run1,
                     $info1,
@@ -139,7 +138,7 @@ class Report
                     $info2
                 );
             } else {
-                symbol_report($url_params, $run1_data, $symbol_tab[$rep_symbol], $sort, $rep_symbol, $run1);
+                $this->symbol_report($url_params, $run1_data, $symbol_tab[$rep_symbol], $rep_symbol, $run1);
             }
         } else {
             /* flat top-level report of all functions */
@@ -147,6 +146,262 @@ class Report
         }
 
         $this->body = ob_get_clean();
+    }
+
+    public function symbol_report(
+        $url_params,
+        $run_data,
+        $symbol_info,
+        $rep_symbol,
+        $run1,
+        $symbol_info1 = null,
+        $run2 = 0,
+        $symbol_info2 = null
+    ) {
+        global $totals;
+        global $pc_stats;
+        global $sortable_columns;
+        global $metrics;
+        global $diff_mode;
+        global $descriptions;
+        global $format_cbk;
+        global $sort_col;
+        global $display_calls;
+        global $base_path;
+
+        $possible_metrics = uprofiler_get_possible_metrics();
+
+        if ($diff_mode) {
+            $diff_text = '<b>Diff</b>';
+            $regr_impr = "<i style='color:red'>Regression</i>/<i style='color:green'>Improvement</i>";
+        } else {
+            $diff_text = '';
+            $regr_impr = '';
+        }
+
+        if ($diff_mode) {
+            $base_url_params = uprofiler_array_unset(uprofiler_array_unset($url_params, 'run1'), 'run2');
+            $href1           = "$base_path?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run1));
+            $href2           = "$base_path?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run2));
+
+            print( "<h3>$regr_impr summary for $rep_symbol</h3>" );
+            print( '<table class="table table-condensed">' . "\n" );
+            print( '<tr>' );
+            print( "<th>$rep_symbol</th>" );
+            print( "<th><a href=" . $href1 . ">Run #$run1</a></th>" );
+            print( "<th><a href=" . $href2 . ">Run #$run2</a></th>" );
+            print( "<th>Diff</th>" );
+            print( "<th>Diff%</th>" );
+            print( '</tr>' );
+            print( '<tr>' );
+
+            if ($display_calls) {
+                print( '<td>Number of Function Calls</td>' );
+                print_td_num($symbol_info1['ct'], $format_cbk['ct']);
+                print_td_num($symbol_info2['ct'], $format_cbk['ct']);
+                print_td_num($symbol_info2['ct'] - $symbol_info1['ct'], $format_cbk['ct'], true);
+                print_td_pct($symbol_info2['ct'] - $symbol_info1['ct'], $symbol_info1['ct'], true);
+                print( '</tr>' );
+            }
+
+            foreach ($metrics as $metric) {
+                $m = $metric;
+
+                // Inclusive stat for metric
+                print( '<tr>' );
+                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
+                print_td_num($symbol_info1[$m], $format_cbk[$m]);
+                print_td_num($symbol_info2[$m], $format_cbk[$m]);
+                print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m], true);
+                print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m], true);
+                print( '</tr>' );
+
+                // AVG (per call) Inclusive stat for metric
+                print( '<tr>' );
+                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . " per call </td>" );
+                $avg_info1 = 'N/A';
+                $avg_info2 = 'N/A';
+                if ($symbol_info1['ct'] > 0) {
+                    $avg_info1 = ( $symbol_info1[$m] / $symbol_info1['ct'] );
+                }
+                if ($symbol_info2['ct'] > 0) {
+                    $avg_info2 = ( $symbol_info2[$m] / $symbol_info2['ct'] );
+                }
+                print_td_num($avg_info1, $format_cbk[$m]);
+                print_td_num($avg_info2, $format_cbk[$m]);
+                print_td_num($avg_info2 - $avg_info1, $format_cbk[$m], true);
+                print_td_pct($avg_info2 - $avg_info1, $avg_info1, true);
+                print( '</tr>' );
+
+                // Exclusive stat for metric
+                $m = 'excl_' . $metric;
+                print( '<tr>' );
+                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
+                print_td_num($symbol_info1[$m], $format_cbk[$m]);
+                print_td_num($symbol_info2[$m], $format_cbk[$m]);
+                print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m], true);
+                print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m], true);
+                print( '</tr>' );
+            }
+
+            print( '</table>' );
+        }
+
+        print( '<h4>' );
+        print( "Parent/Child $regr_impr report for <b>$rep_symbol</b>" );
+
+        $callgraph_href = "$base_path/callgraph.php?"
+                          . http_build_query(uprofiler_array_set($url_params, 'func', $rep_symbol));
+
+        print( " <a href='$callgraph_href'>[View Callgraph $diff_text]</a>" );
+
+        print( '</h4>' );
+
+        print( '<table class="table table-condensed">' . "\n" );
+        print( '<tr>' );
+
+        foreach ($pc_stats as $stat) {
+            $desc = stat_description($stat);
+            if (array_key_exists($stat, $sortable_columns)) {
+                $href   = "$base_path/?"
+                          . http_build_query(uprofiler_array_set($url_params, 'sort', $stat));
+                $header = uprofiler_render_link($desc, $href);
+            } else {
+                $header = $desc;
+            }
+
+            if ($stat == 'fn') {
+                print( "<th align=left><nobr>$header</th>" );
+            } else {
+                print( "<th>$header</th>" );
+            }
+        }
+        print( '</tr>' );
+
+        print( '<tr><td>' );
+        print( '<b><i>Current Function</i></b>' );
+        print( '</td></tr>' );
+
+        print( '<tr>' );
+        // make this a self-reference to facilitate copy-pasting snippets to e-mails
+        print( "<td><a href=''>$rep_symbol</a>" );
+        print_source_link([ 'fn' => $rep_symbol ]);
+        print( '</td>' );
+
+        if ($display_calls) {
+            // Call Count
+            print_td_num($symbol_info['ct'], $format_cbk['ct']);
+            print_td_pct($symbol_info['ct'], $totals['ct']);
+        }
+
+        // Inclusive Metrics for current function
+        foreach ($metrics as $metric) {
+            print_td_num($symbol_info[$metric], $format_cbk[$metric], ( $sort_col == $metric ));
+            print_td_pct($symbol_info[$metric], $totals[$metric], ( $sort_col == $metric ));
+        }
+        print( '</tr>' );
+
+        print( '<tr>' );
+        print( '<td>' . "Exclusive Metrics $diff_text for Current Function</td>" );
+
+        if ($display_calls) {
+            // Call Count
+            print( '<td></td>' );
+            print( '<td></td>' );
+        }
+
+        // Exclusive Metrics for current function
+        foreach ($metrics as $metric) {
+            print_td_num(
+                $symbol_info['excl_' . $metric],
+                $format_cbk['excl_' . $metric],
+                ( $sort_col == $metric ),
+                get_tooltip_attributes('Child', $metric)
+            );
+            print_td_pct(
+                $symbol_info['excl_' . $metric],
+                $symbol_info[$metric],
+                ( $sort_col == $metric ),
+                get_tooltip_attributes('Child', $metric)
+            );
+        }
+        print( '</tr>' );
+
+        // list of callers/parent functions
+        $results = [ ];
+        if ($display_calls) {
+            $base_ct = $symbol_info['ct'];
+        } else {
+            $base_ct = 0;
+        }
+        foreach ($metrics as $metric) {
+            $base_info[$metric] = $symbol_info[$metric];
+        }
+        foreach ($run_data as $parent_child => $info) {
+            list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
+            if (( $child == $rep_symbol ) && ( $parent )) {
+                $info_tmp       = $info;
+                $info_tmp['fn'] = $parent;
+                $results[]      = $info_tmp;
+            }
+        }
+        usort($results, 'sort_cbk');
+
+        if (count($results) > 0) {
+            print_pc_array($url_params, $results, $base_ct, $base_info, true, $run1, $run2);
+        }
+
+        // list of callees/child functions
+        $results = [ ];
+        $base_ct = 0;
+        foreach ($run_data as $parent_child => $info) {
+            list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
+            if ($parent == $rep_symbol) {
+                $info_tmp       = $info;
+                $info_tmp['fn'] = $child;
+                $results[]      = $info_tmp;
+                if ($display_calls) {
+                    $base_ct += $info['ct'];
+                }
+            }
+        }
+        usort($results, 'sort_cbk');
+
+        if (count($results)) {
+            print_pc_array($url_params, $results, $base_ct, $base_info, false, $run1, $run2);
+        }
+
+        print( '</table>' );
+
+        // These will be used for pop-up tips/help.
+        // Related javascript code is in: uprofiler_report.js
+        print( "\n" );
+        print( '<script language="javascript">' . "\n" );
+        print( "var func_name = '\"" . $rep_symbol . "\"';\n" );
+        print( "var total_child_ct  = $base_ct;\n" );
+        if ($display_calls) {
+            print( "var func_ct   = " . $symbol_info['ct'] . ";\n" );
+        }
+        print( "var func_metrics = new Array();\n" );
+        print( "var metrics_col  = new Array();\n" );
+        print( "var metrics_desc  = new Array();\n" );
+        if ($diff_mode) {
+            print( "var diff_mode = true;\n" );
+        } else {
+            print( "var diff_mode = false;\n" );
+        }
+        $column_index = 3; // First three columns are Func Name, Calls, Calls%
+        foreach ($metrics as $metric) {
+            print( "func_metrics[\"" . $metric . "\"] = " . round($symbol_info[$metric]) . ";\n" );
+            print( "metrics_col[\"" . $metric . "\"] = " . $column_index . ";\n" );
+            print( "metrics_desc[\"" . $metric . "\"] = \"" . $possible_metrics[$metric][2] . "\";\n" );
+
+            // each metric has two columns..
+            $column_index += 2;
+        }
+        print( '</script>' );
+        print( "\n" );
+
     }
 
     public function full_report($url_params, $symbol_tab, $sort, $run1, $run2)
@@ -343,17 +598,17 @@ class Report
 
         print( '<tr>' );
 
-        $href = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'symbol', $info["fn"]));
+        $href = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'symbol', $info['fn']));
 
         print( '<td>' );
-        print( uprofiler_render_link($info["fn"], $href) );
+        print( uprofiler_render_link($info['fn'], $href) );
         print_source_link($info);
         print( "</td>\n" );
 
         if ($display_calls) {
             // Call Count..
-            print_td_num($info["ct"], $format_cbk["ct"], ( $sort_col == "ct" ));
-            print_td_pct($info["ct"], $totals["ct"], ( $sort_col == "ct" ));
+            print_td_num($info['ct'], $format_cbk['ct'], ( $sort_col == 'ct' ));
+            print_td_pct($info['ct'], $totals['ct'], ( $sort_col == 'ct' ));
         }
 
         // Other metrics..
