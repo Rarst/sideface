@@ -31,18 +31,17 @@ class Report
         }
 
         // For C++ profiler runs, walltime attribute isn't present.
-        // In that case, use "samples" as the default sort column.
-        if (! isset( $uprofiler_data["main()"]["wt"] )) {
-
-            if ($sort_col == "wt") {
-                $sort_col = "samples";
+        // In that case, use 'samples' as the default sort column.
+        if (! isset( $uprofiler_data['main()']['wt'] )) {
+            if ($sort_col == 'wt') {
+                $sort_col = 'samples';
             }
 
             // C++ profiler data doesn't have call counts.
-            // ideally we should check to see if "ct" metric
-            // is present for "main()". But currently "ct"
+            // ideally we should check to see if 'ct' metric
+            // is present for 'main()'. But currently 'ct'
             // metric is artificially set to 1. So, relying
-            // on absence of "wt" metric instead.
+            // on absence of 'wt' metric instead.
             $display_calls = false;
         } else {
             $display_calls = true;
@@ -51,32 +50,32 @@ class Report
         // parent/child report doesn't support exclusive times yet.
         // So, change sort hyperlinks to closest fit.
         if (! empty( $rep_symbol )) {
-            $sort_col = str_replace("excl_", "", $sort_col);
+            $sort_col = str_replace('excl_', '', $sort_col);
         }
 
         if ($display_calls) {
-            $stats = [ "fn", "ct", "Calls%" ];
+            $stats = [ 'fn', 'ct', 'Calls%' ];
         } else {
-            $stats = [ "fn" ];
+            $stats = [ 'fn' ];
         }
 
         $pc_stats = $stats;
 
         $possible_metrics = uprofiler_get_possible_metrics($uprofiler_data);
         foreach ($possible_metrics as $metric => $desc) {
-            if (isset( $uprofiler_data["main()"][$metric] )) {
+            if (isset( $uprofiler_data['main()'][$metric] )) {
                 $metrics[] = $metric;
                 // flat (top-level reports): we can compute
                 // exclusive metrics reports as well.
                 $stats[] = $metric;
-                $stats[] = "I" . $desc[0] . "%";
-                $stats[] = "excl_" . $metric;
-                $stats[] = "E" . $desc[0] . "%";
+                $stats[] = 'I' . $desc[0] . '%';
+                $stats[] = 'excl_' . $metric;
+                $stats[] = 'E' . $desc[0] . '%';
 
                 // parent/child report for a function: we can
                 // only breakdown inclusive times correctly.
                 $pc_stats[] = $metric;
-                $pc_stats[] = "I" . $desc[0] . "%";
+                $pc_stats[] = 'I' . $desc[0] . '%';
             }
         }
     }
@@ -152,7 +151,6 @@ class Report
 
     public function full_report($url_params, $symbol_tab, $sort, $run1, $run2)
     {
-        global $vwbar;
         global $totals;
         global $totals_1;
         global $totals_2;
@@ -172,19 +170,18 @@ class Report
             $href2           = "$base_path/?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run2));
 
             print( '<h3>Overall Diff Summary</h3>' );
-            print( '<table border=1 cellpadding=2 cellspacing=1 width="30%" '
-                   . 'rules=rows bordercolor="#bdc7d8" align=center>' . "\n" );
-            print( '<tr bgcolor="#bdc7d8" align=right>' );
+            print( '<table class="table table-condensed">' . "\n" );
+            print( '<tr>' );
             print( '<th></th>' );
-            print( "<th $vwbar>" . uprofiler_render_link("Run #$run1", $href1) . "</th>" );
-            print( "<th $vwbar>" . uprofiler_render_link("Run #$run2", $href2) . "</th>" );
-            print( "<th $vwbar>Diff</th>" );
-            print( "<th $vwbar>Diff%</th>" );
+            print( '<th>' . uprofiler_render_link("Run #$run1", $href1) . '</th>' );
+            print( '<th>' . uprofiler_render_link("Run #$run2", $href2) . '</th>' );
+            print( '<th>Diff</th>' );
+            print( '<th>Diff%</th>' );
             print( '</tr>' );
 
             if ($display_calls) {
                 print( '<tr>' );
-                print( "<td>Number of Function Calls</td>" );
+                print( '<td>Number of Function Calls</td>' );
                 print_td_num($totals_1['ct'], $format_cbk['ct']);
                 print_td_num($totals_2['ct'], $format_cbk['ct']);
                 print_td_num($totals_2['ct'] - $totals_1['ct'], $format_cbk['ct'], true);
@@ -195,7 +192,7 @@ class Report
             foreach ($metrics as $metric) {
                 $m = $metric;
                 print( '<tr>' );
-                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . "</td>" );
+                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
                 print_td_num($totals_1[$m], $format_cbk[$m]);
                 print_td_num($totals_2[$m], $format_cbk[$m]);
                 print_td_num($totals_2[$m] - $totals_1[$m], $format_cbk[$m], true);
@@ -209,25 +206,24 @@ class Report
         } else {
             print( "<p>\n" );
 
-            print( '<table cellpadding=2 cellspacing=1 width="30%" '
-                   . 'bgcolor="#bdc7d8" align=center>' . "\n" );
+            print( '<table class="table table-condensed">' . "\n" );
             echo '<tr>';
-            echo "<th style='text-align:right'>Overall Summary</th>";
+            echo '<th>Overall Summary</th>';
             echo '<th></th>';
             echo '</tr>';
 
             foreach ($metrics as $metric) {
                 echo '<tr>';
-                echo "<td style='text-align:right; font-weight:bold'>Total "
-                     . str_replace("<br>", " ", stat_description($metric)) . ":</td>";
-                echo '<td>' . number_format($totals[$metric]) . " "
-                     . $possible_metrics[$metric][1] . "</td>";
+                echo '<td>Total '
+                     . str_replace('<br>', ' ', stat_description($metric)) . ':</td>';
+                echo '<td>' . number_format($totals[$metric]) . ' '
+                     . $possible_metrics[$metric][1] . '</td>';
                 echo '</tr>';
             }
 
             if ($display_calls) {
                 echo '<tr>';
-                echo "<td style='text-align:right; font-weight:bold'>Number of Function Calls:</td>";
+                echo '<td>Number of Function Calls:</td>';
                 echo '<td>' . number_format($totals['ct']) . '</td>';
                 echo '</tr>';
             }
@@ -284,16 +280,15 @@ class Report
     {
         global $stats;
         global $sortable_columns;
-        global $vwbar;
         global $base_path;
 
         $size = count($flat_data);
         if (! $limit) {
             $limit        = $size;
-            $display_link = "";
+            $display_link = '';
         } else {
             $display_link = uprofiler_render_link(
-                ' [ <b class=bubble>display all </b>]',
+                ' [ <b>display all</b>]',
                 "$base_path/?" .
                 http_build_query(uprofiler_array_set($url_params, 'all', 1))
             );
@@ -301,9 +296,8 @@ class Report
 
         print( "<h3 align=center>$title $display_link</h3><br>" );
 
-        print( '<table border=1 cellpadding=2 cellspacing=1 width="90%" '
-               . 'rules=rows bordercolor="#bdc7d8" align=center>' );
-        print( '<tr bgcolor="#bdc7d8" align=right>' );
+        print( '<table class="table table-condensed">' );
+        print( '<tr>' );
 
         foreach ($stats as $stat) {
             $desc = stat_description($stat);
@@ -315,9 +309,9 @@ class Report
             }
 
             if ($stat == 'fn') {
-                print( "<th align=left>$header</th>" );
+                print( "<th>$header</th>" );
             } else {
-                print( "<th $vwbar>$header</th>" );
+                print( "<th>$header</th>" );
             }
         }
         print( "</tr>\n" );
@@ -338,7 +332,7 @@ class Report
 
         // let's print the display all link at the bottom as well...
         if ($display_link) {
-            echo '<div style="text-align: left; padding: 2em">' . $display_link . '</div>';
+            echo $display_link;
         }
     }
 }
