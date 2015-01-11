@@ -188,16 +188,12 @@ class Report
         }
 
         if ($diff_mode) {
-            $base_url_params = uprofiler_array_unset(uprofiler_array_unset($url_params, 'run1'), 'run2');
-            $href1           = "$base_path?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run1));
-            $href2           = "$base_path?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run2));
-
             print( "<h3>$regr_impr summary for $rep_symbol</h3>" );
             print( '<table class="table table-condensed">' . "\n" );
             print( '<tr>' );
             print( "<th>$rep_symbol</th>" );
-            print( "<th><a href=" . $href1 . ">Run #$run1</a></th>" );
-            print( "<th><a href=" . $href2 . ">Run #$run2</a></th>" );
+            print( "<th><a href=" . "/{$this->source}/{$run1}" . ">Run #$run1</a></th>" );
+            print( "<th><a href=" . "/{$this->source}/{$run2}" . ">Run #$run2</a></th>" );
             print( "<th>Diff</th>" );
             print( "<th>Diff%</th>" );
             print( '</tr>' );
@@ -257,12 +253,7 @@ class Report
 
         print( '<h4>' );
         print( "Parent/Child $regr_impr report for <b>$rep_symbol</b>" );
-
-        $callgraph_href = "$base_path/callgraph.php?"
-                          . http_build_query(uprofiler_array_set($url_params, 'func', $rep_symbol));
-
-        print( " <a href='$callgraph_href'>[View Callgraph $diff_text]</a>" );
-
+        print( " <a href=''>[View Callgraph $diff_text]</a>" ); // TODO callgraph link
         print( '</h4>' );
 
         print( '<table class="table table-condensed">' . "\n" );
@@ -423,21 +414,16 @@ class Report
         global $sort_col;
         global $format_cbk;
         global $display_calls;
-        global $base_path;
 
         $possible_metrics = uprofiler_get_possible_metrics();
 
         if ($diff_mode) {
-            $base_url_params = uprofiler_array_unset(uprofiler_array_unset($url_params, 'run1'), 'run2');
-            $href1           = "$base_path/?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run1));
-            $href2           = "$base_path/?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run2));
-
             print( '<h3>Overall Diff Summary</h3>' );
             print( '<table class="table table-condensed">' . "\n" );
             print( '<tr>' );
             print( '<th></th>' );
-            print( '<th>' . uprofiler_render_link("Run #$run1", $href1) . '</th>' );
-            print( '<th>' . uprofiler_render_link("Run #$run2", $href2) . '</th>' );
+            print( '<th>' . uprofiler_render_link("Run #$run1", "/{$this->source}/{$run1}") . '</th>' );
+            print( '<th>' . uprofiler_render_link("Run #$run2", "/{$this->source}/{$run2}") . '</th>' );
             print( '<th>Diff</th>' );
             print( '<th>Diff%</th>' );
             print( '</tr>' );
@@ -477,8 +463,7 @@ class Report
 
             foreach ($metrics as $metric) {
                 echo '<tr>';
-                echo '<td>Total '
-                     . str_replace('<br>', ' ', stat_description($metric)) . ':</td>';
+                echo '<td>Total ' . str_replace('<br>', ' ', stat_description($metric)) . ':</td>';
                 echo '<td>' . number_format($totals[$metric]) . ' '
                      . $possible_metrics[$metric][1] . '</td>';
                 echo '</tr>';
@@ -498,11 +483,7 @@ class Report
         }
 
         print(
-            '<br><h3>' .
-            uprofiler_render_link(
-                $callgraph_report_title,
-                "$base_path/callgraph.php" . "?" . http_build_query($url_params)
-            ) . '</h3>'
+            '<br><h3>' . uprofiler_render_link($callgraph_report_title, '') . '</h3>' // TODO callgraph link
         );
 
         $flat_data = [ ];
@@ -602,11 +583,10 @@ class Report
         global $metrics;
         global $format_cbk;
         global $display_calls;
-        global $base_path;
 
         print( '<tr>' );
 
-        $href = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'symbol', $info['fn']));
+        $href = "/{$this->source}/{$this->run}/{$info['fn']}";
 
         print( '<td>' );
         print( uprofiler_render_link($info['fn'], $href) );
