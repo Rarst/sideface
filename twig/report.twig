@@ -5,3 +5,12 @@
     <li><a href="{{ url('runs_list', {source:source}) }}">{{ source }}</a></li>
     <li>{{ run }}</li>
 {% endblock %}
+
+{% block body %}
+    <div class="container">
+        {{ block('breadcrumb') }}
+    </div>
+    <div class="container-fluid">
+        {{ body|raw }}
+    </div>
+{% endblock %}

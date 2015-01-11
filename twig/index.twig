@@ -11,8 +11,9 @@
     <link rel="stylesheet" href="/vendor/twbs/bootstrap/dist/css/bootstrap.min.css"/>
 </head>
 <body>
+{% block body %}
 <div class="container">
-    {% block body %}
+    {% block container %}
         {% block breadcrumb %}
             <div class="row">
                 <div class="col-md-12">
@@ -27,6 +28,7 @@
         {{ body|raw }}
     {% endblock %}
 </div>
+{% endblock %}
 <script src='/assets/jquery/jquery-1.2.6.js'></script>
 <script src='/assets/jquery/jquery.tooltip.js'></script>
 <script src='/assets/jquery/jquery.autocomplete.js'></script>
