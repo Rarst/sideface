@@ -347,7 +347,7 @@ class Report
         usort($results, 'sort_cbk');
 
         if (count($results) > 0) {
-            print_pc_array($url_params, $results, $base_ct, $base_info, true, $run1, $run2);
+            $this->print_pc_array($results, $base_ct, $base_info, true);
         }
 
         // list of callees/child functions
@@ -367,7 +367,7 @@ class Report
         usort($results, 'sort_cbk');
 
         if (count($results)) {
-            print_pc_array($url_params, $results, $base_ct, $base_info, false, $run1, $run2);
+            $this->print_pc_array($results, $base_ct, $base_info, false);
         }
 
         print( '</table>' );
@@ -611,5 +611,27 @@ class Report
         }
 
         print( "</tr>\n" );
+    }
+
+    public function print_pc_array($results, $base_ct, $base_info, $parent)
+    {
+        $title = $parent ? 'Parent function' : 'Child function';
+        if (count($results) > 1) {
+            $title .= 's';
+        }
+        print( '<tr><td>' );
+        print( '<b><i>' . $title . '</i></b>' );
+        print( '</td></tr>' );
+
+        foreach ($results as $info) {
+            $href = "/{$this->source}/{$this->run}/{$info['fn']}";
+
+            print( '<tr>' );
+            print( '<td>' . uprofiler_render_link($info['fn'], $href) );
+            print_source_link($info);
+            print( '</td>' );
+            pc_info($info, $base_ct, $base_info, $parent);
+            print( '</tr>' );
+        }
     }
 }

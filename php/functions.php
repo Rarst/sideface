@@ -255,53 +255,6 @@ function pc_info($info, $base_ct, $base_info, $parent)
     }
 }
 
-function print_pc_array(
-    $url_params,
-    $results,
-    $base_ct,
-    $base_info,
-    $parent,
-    $run1,
-    $run2
-) {
-    global $base_path;
-
-    // Construct section title
-    if ($parent) {
-        $title = 'Parent function';
-    } else {
-        $title = 'Child function';
-    }
-    if (count($results) > 1) {
-        $title .= 's';
-    }
-
-    print( "<tr bgcolor='#e0e0ff'><td>" );
-    print( "<b><i><center>" . $title . "</center></i></b>" );
-    print( "</td></tr>" );
-
-    $odd_even = 0;
-    foreach ($results as $info) {
-        $href = "$base_path/?" .
-                http_build_query(uprofiler_array_set($url_params,
-                    'symbol', $info["fn"]));
-
-        $odd_even = 1 - $odd_even;
-
-        if ($odd_even) {
-            print( '<tr>' );
-        } else {
-            print( '<tr bgcolor="#e5e5e5">' );
-        }
-
-        print( "<td>" . uprofiler_render_link($info["fn"], $href) );
-        print_source_link($info);
-        print( "</td>" );
-        pc_info($info, $base_ct, $base_info, $parent);
-        print( "</tr>" );
-    }
-}
-
 function print_source_link($info)
 {
     if (strncmp($info['fn'], 'run_init', 8) && $info['fn'] !== 'main()') {
