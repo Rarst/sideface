@@ -82,6 +82,35 @@ function uprofiler_prune_run($raw_data, $prune_percent)
     return $raw_data;
 }
 
+/**
+ * @param string $content the text/image/innerhtml/whatever for the link
+ * @param string $href
+ *
+ * @return string
+ */
+function uprofiler_render_link($content, $href)
+{
+    if (! $content) {
+        return '';
+    }
+
+    if ($href) {
+        $link = '<a href="' . ( $href ) . '"';
+    } else {
+        $link = '<span';
+    }
+
+    $link .= '>';
+    $link .= $content;
+    if ($href) {
+        $link .= '</a>';
+    } else {
+        $link .= '</span>';
+    }
+
+    return $link;
+}
+
 function print_source_link($info)
 {
     if (strncmp($info['fn'], 'run_init', 8) && $info['fn'] !== 'main()') {

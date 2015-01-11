@@ -262,9 +262,8 @@ class Report
         foreach ($pc_stats as $stat) {
             $desc = stat_description($stat);
             if (array_key_exists($stat, $sortable_columns)) {
-                $href   = "$base_path/?"
-                          . http_build_query(uprofiler_array_set($url_params, 'sort', $stat));
-                $header = uprofiler_render_link($desc, $href);
+                $href   = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'sort', $stat));
+                $header = "<a href='{$href}'>{$desc}</a>";
             } else {
                 $header = $desc;
             }
@@ -421,8 +420,8 @@ class Report
             print( '<table class="table table-condensed">' . "\n" );
             print( '<tr>' );
             print( '<th></th>' );
-            print( '<th>' . uprofiler_render_link("Run #$run1", "/{$this->source}/{$run1}") . '</th>' );
-            print( '<th>' . uprofiler_render_link("Run #$run2", "/{$this->source}/{$run2}") . '</th>' );
+            print( '<th>' . "<a href='/{$this->source}/{$run1}'>Run #{$run1}</a>" . '</th>' );
+            print( '<th>' . "<a href='/{$this->source}/{$run2}'>Run #{$run2}</a>" . '</th>' );
             print( '<th>Diff</th>' );
             print( '<th>Diff%</th>' );
             print( '</tr>' );
@@ -482,7 +481,7 @@ class Report
         }
 
         print(
-            '<br><h3>' . uprofiler_render_link($callgraph_report_title, '') . '</h3>' // TODO callgraph link
+            '<br><h3>' . "<a href=''>{$callgraph_report_title}</a>" . '</h3>' // TODO callgraph link
         );
 
         $flat_data = [ ];
@@ -530,11 +529,8 @@ class Report
             $limit        = $size;
             $display_link = '';
         } else {
-            $display_link = uprofiler_render_link(
-                ' [ <b>display all</b>]',
-                "$base_path/?" .
-                http_build_query(uprofiler_array_set($url_params, 'all', 1))
-            );
+            $href         = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'all', 1));
+            $display_link = "<a href='{$href}'>[<b>display all</b>]</a>";
         }
 
         print( "<h3 align=center>$title $display_link</h3><br>" );
@@ -546,7 +542,7 @@ class Report
             $desc = stat_description($stat);
             if (array_key_exists($stat, $sortable_columns)) {
                 $href   = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'sort', $stat));
-                $header = uprofiler_render_link($desc, $href);
+                $header = "<a href='$href'>$desc</a>";
             } else {
                 $header = $desc;
             }
@@ -588,7 +584,7 @@ class Report
         $href = "/{$this->source}/{$this->run}/{$info['fn']}";
 
         print( '<td>' );
-        print( uprofiler_render_link($info['fn'], $href) );
+        print( "<a href='$href'>{$info['fn']}</a>" );
         print( "</td>\n" );
 
         if ($display_calls) {
@@ -623,7 +619,7 @@ class Report
 
         foreach ($results as $info) {
             print( '<tr>' );
-            print( '<td>' . uprofiler_render_link($info['fn'], "/{$this->source}/{$this->run}/{$info['fn']}") );
+            print( '<td>' . "<a href='/{$this->source}/{$this->run}/{$info['fn']}'>{$info['fn']}</a>" );
             print( '</td>' );
             $this->pc_info($info, $base_ct, $base_info, $parent);
             print( '</tr>' );

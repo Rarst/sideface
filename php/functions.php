@@ -41,36 +41,6 @@ function uprofiler_percent_format($s, $precision = 1)
 }
 
 /**
- * @param string $content the text/image/innerhtml/whatever for the link
- * @param string $href
- *
- * @return string
- */
-function uprofiler_render_link($content, $href)
-{
-    if (! $content) {
-        return '';
-    }
-
-    if ($href) {
-        $link = '<a href="' . ( $href ) . '"';
-    } else {
-        $link = '<span';
-    }
-
-    $link .= '>';
-    $link .= $content;
-    if ($href) {
-        $link .= '</a>';
-    } else {
-        $link .= '</span>';
-    }
-
-    return $link;
-}
-
-
-/**
  * Callback comparison operator (passed to usort() for sorting array of
  * tuples) that compares array elements based on the sort column
  * specified in $sort_col (global parameter).
