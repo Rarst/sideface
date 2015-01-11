@@ -625,8 +625,41 @@ class Report
             print( '<tr>' );
             print( '<td>' . uprofiler_render_link($info['fn'], "/{$this->source}/{$this->run}/{$info['fn']}") );
             print( '</td>' );
-            pc_info($info, $base_ct, $base_info, $parent);
+            $this->pc_info($info, $base_ct, $base_info, $parent);
             print( '</tr>' );
+        }
+    }
+
+    public function pc_info($info, $base_ct, $base_info, $parent)
+    {
+        global $sort_col;
+        global $metrics;
+        global $format_cbk;
+        global $display_calls;
+
+        $type = $parent ? 'Parent' : 'Child';
+
+        if ($display_calls) {
+            $mouseoverct = get_tooltip_attributes($type, 'ct');
+            /* call count */
+            print_td_num($info['ct'], $format_cbk['ct'], ( $sort_col == 'ct' ), $mouseoverct);
+            print_td_pct($info['ct'], $base_ct, ( $sort_col == 'ct' ), $mouseoverct);
+        }
+
+        /* Inclusive metric values  */
+        foreach ($metrics as $metric) {
+            print_td_num(
+                $info[$metric],
+                $format_cbk[$metric],
+                ( $sort_col == $metric ),
+                get_tooltip_attributes($type, $metric)
+            );
+            print_td_pct(
+                $info[$metric],
+                $base_info[$metric],
+                ( $sort_col == $metric ),
+                get_tooltip_attributes($type, $metric)
+            );
         }
     }
 }

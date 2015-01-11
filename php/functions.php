@@ -219,42 +219,6 @@ function get_tooltip_attributes($type, $metric)
     return "type='$type' metric='$metric'";
 }
 
-/**
- * Print info for a parent or child function in the
- * parent & children report.
- *
- * @author Kannan
- */
-function pc_info($info, $base_ct, $base_info, $parent)
-{
-    global $sort_col;
-    global $metrics;
-    global $format_cbk;
-    global $display_calls;
-
-    if ($parent) {
-        $type = "Parent";
-    } else {
-        $type = "Child";
-    }
-
-    if ($display_calls) {
-        $mouseoverct = get_tooltip_attributes($type, "ct");
-        /* call count */
-        print_td_num($info["ct"], $format_cbk["ct"], ( $sort_col == "ct" ), $mouseoverct);
-        print_td_pct($info["ct"], $base_ct, ( $sort_col == "ct" ), $mouseoverct);
-    }
-
-    /* Inclusive metric values  */
-    foreach ($metrics as $metric) {
-        print_td_num($info[$metric], $format_cbk[$metric],
-            ( $sort_col == $metric ),
-            get_tooltip_attributes($type, $metric));
-        print_td_pct($info[$metric], $base_info[$metric], ( $sort_col == $metric ),
-            get_tooltip_attributes($type, $metric));
-    }
-}
-
 function print_symbol_summary($symbol_info, $stat, $base)
 {
 
