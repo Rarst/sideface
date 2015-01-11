@@ -43,34 +43,11 @@ function uprofiler_percent_format($s, $precision = 1)
 /**
  * @param string $content the text/image/innerhtml/whatever for the link
  * @param string $href
- * @param string $class
- * @param string $id
- * @param string $title
- * @param string $target
- * @param string $onclick
- * @param string $style
- * @param string $access
- * @param string $onmouseover
- * @param string $onmouseout
- * @param string $onmousedown
  *
  * @return string
  */
-function uprofiler_render_link(
-    $content,
-    $href,
-    $class = '',
-    $id = '',
-    $title = '',
-    $target = '',
-    $onclick = '',
-    $style = '',
-    $access = '',
-    $onmouseover = '',
-    $onmouseout = '',
-    $onmousedown = ''
-) {
-
+function uprofiler_render_link($content, $href)
+{
     if (! $content) {
         return '';
     }
@@ -79,37 +56,6 @@ function uprofiler_render_link(
         $link = '<a href="' . ( $href ) . '"';
     } else {
         $link = '<span';
-    }
-
-    if ($class) {
-        $link .= ' class="' . ( $class ) . '"';
-    }
-    if ($id) {
-        $link .= ' id="' . ( $id ) . '"';
-    }
-    if ($title) {
-        $link .= ' title="' . ( $title ) . '"';
-    }
-    if ($target) {
-        $link .= ' target="' . ( $target ) . '"';
-    }
-    if ($onclick && $href) {
-        $link .= ' onclick="' . ( $onclick ) . '"';
-    }
-    if ($style && $href) {
-        $link .= ' style="' . ( $style ) . '"';
-    }
-    if ($access && $href) {
-        $link .= ' accesskey="' . ( $access ) . '"';
-    }
-    if ($onmouseover) {
-        $link .= ' onmouseover="' . ( $onmouseover ) . '"';
-    }
-    if ($onmouseout) {
-        $link .= ' onmouseout="' . ( $onmouseout ) . '"';
-    }
-    if ($onmousedown) {
-        $link .= ' onmousedown="' . ( $onmousedown ) . '"';
     }
 
     $link .= '>';
