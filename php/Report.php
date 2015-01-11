@@ -515,10 +515,10 @@ class Report
         } else {
             $title = $all ? "Sorted by $desc" : "Displaying top $limit functions: Sorted by $desc";
         }
-        $this->print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $limit);
+        $this->print_flat_data($url_params, $title, $flat_data, $limit);
     }
 
-    public function print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $limit)
+    public function print_flat_data($url_params, $title, $flat_data, $limit)
     {
         global $stats;
         global $sortable_columns;
