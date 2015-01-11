@@ -249,9 +249,9 @@ $app->get('/{source}', function (Application $app, $source) {
     ->value('source', false)
     ->bind('runs_list');
 
-$app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1, $run2) {
+$app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $source, $run1, $run2, $symbol) {
 
-    global $params, $symbol, $sort;
+    global $params, $sort;
 
     $params['run1'] = $run1;
     $params['run2'] = $run2;
@@ -267,14 +267,16 @@ $app->get('/{source}/{run1}-{run2}', function (Application $app, $source, $run1,
     return $twig->render('report.twig', [
             'source' => $source,
             'run'    => $run1,
+            'symbol' => $symbol,
             'body'   => $report->getBody(),
         ]);
 })
+    ->value('symbol', false)
     ->bind('diff_runs');
 
-$app->get('/{source}/{run}', function (Application $app, $source, $run) {
+$app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run, $symbol) {
 
-    global $params, $wts, $symbol, $sort;
+    global $params, $wts, $sort;
 
     $runsHandler = new RunsHandler();
 
@@ -312,9 +314,11 @@ $app->get('/{source}/{run}', function (Application $app, $source, $run) {
     return $twig->render('report.twig', [
         'source' => $source,
         'run'    => $run,
+        'symbol' => $symbol,
         'body'   => $report->getBody(),
     ]);
 })
+    ->value('symbol', false)
     ->bind('single_run');
 
 $app->run();
