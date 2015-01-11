@@ -144,9 +144,139 @@ class Report
             }
         } else {
             /* flat top-level report of all functions */
-            full_report($url_params, $symbol_tab, $sort, $run1, $run2);
+            $this->full_report($url_params, $symbol_tab, $sort, $run1, $run2);
         }
 
         $this->body = ob_get_clean();
+    }
+
+    public function full_report($url_params, $symbol_tab, $sort, $run1, $run2)
+    {
+        global $vwbar;
+        global $totals;
+        global $totals_1;
+        global $totals_2;
+        global $metrics;
+        global $diff_mode;
+        global $descriptions;
+        global $sort_col;
+        global $format_cbk;
+        global $display_calls;
+        global $base_path;
+
+        $possible_metrics = uprofiler_get_possible_metrics();
+
+        if ($diff_mode) {
+            $base_url_params = uprofiler_array_unset(uprofiler_array_unset($url_params, 'run1'), 'run2');
+            $href1           = "$base_path/?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run1));
+            $href2           = "$base_path/?" . http_build_query(uprofiler_array_set($base_url_params, 'run', $run2));
+
+            print( '<h3>Overall Diff Summary</h3>' );
+            print( '<table border=1 cellpadding=2 cellspacing=1 width="30%" '
+                   . 'rules=rows bordercolor="#bdc7d8" align=center>' . "\n" );
+            print( '<tr bgcolor="#bdc7d8" align=right>' );
+            print( '<th></th>' );
+            print( "<th $vwbar>" . uprofiler_render_link("Run #$run1", $href1) . "</th>" );
+            print( "<th $vwbar>" . uprofiler_render_link("Run #$run2", $href2) . "</th>" );
+            print( "<th $vwbar>Diff</th>" );
+            print( "<th $vwbar>Diff%</th>" );
+            print( '</tr>' );
+
+            if ($display_calls) {
+                print( '<tr>' );
+                print( "<td>Number of Function Calls</td>" );
+                print_td_num($totals_1['ct'], $format_cbk['ct']);
+                print_td_num($totals_2['ct'], $format_cbk['ct']);
+                print_td_num($totals_2['ct'] - $totals_1['ct'], $format_cbk['ct'], true);
+                print_td_pct($totals_2['ct'] - $totals_1['ct'], $totals_1['ct'], true);
+                print( '</tr>' );
+            }
+
+            foreach ($metrics as $metric) {
+                $m = $metric;
+                print( '<tr>' );
+                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . "</td>" );
+                print_td_num($totals_1[$m], $format_cbk[$m]);
+                print_td_num($totals_2[$m], $format_cbk[$m]);
+                print_td_num($totals_2[$m] - $totals_1[$m], $format_cbk[$m], true);
+                print_td_pct($totals_2[$m] - $totals_1[$m], $totals_1[$m], true);
+                print( '<tr>' );
+            }
+            print( '</table>' );
+
+            $callgraph_report_title = '[View Regressions/Improvements using Callgraph Diff]';
+
+        } else {
+            print( "<p>\n" );
+
+            print( '<table cellpadding=2 cellspacing=1 width="30%" '
+                   . 'bgcolor="#bdc7d8" align=center>' . "\n" );
+            echo '<tr>';
+            echo "<th style='text-align:right'>Overall Summary</th>";
+            echo '<th></th>';
+            echo '</tr>';
+
+            foreach ($metrics as $metric) {
+                echo '<tr>';
+                echo "<td style='text-align:right; font-weight:bold'>Total "
+                     . str_replace("<br>", " ", stat_description($metric)) . ":</td>";
+                echo '<td>' . number_format($totals[$metric]) . " "
+                     . $possible_metrics[$metric][1] . "</td>";
+                echo '</tr>';
+            }
+
+            if ($display_calls) {
+                echo '<tr>';
+                echo "<td style='text-align:right; font-weight:bold'>Number of Function Calls:</td>";
+                echo '<td>' . number_format($totals['ct']) . '</td>';
+                echo '</tr>';
+            }
+
+            echo "</table>";
+            print( "</p>\n" );
+
+            $callgraph_report_title = '[View Full Callgraph]';
+        }
+
+        print(
+            '<br><h3>' .
+            uprofiler_render_link(
+                $callgraph_report_title,
+                "$base_path/callgraph.php" . "?" . http_build_query($url_params)
+            ) . '</h3>'
+        );
+
+        $flat_data = [ ];
+        foreach ($symbol_tab as $symbol => $info) {
+            $tmp         = $info;
+            $tmp['fn']   = $symbol;
+            $flat_data[] = $tmp;
+        }
+        usort($flat_data, 'sort_cbk');
+
+        print( '<br>' );
+
+        if (! empty( $url_params['all'] )) {
+            $all   = true;
+            $limit = 0;    // display all rows
+        } else {
+            $all   = false;
+            $limit = 100;  // display only limited number of rows
+        }
+
+        $desc = str_replace('<br>', ' ', $descriptions[$sort_col]);
+
+        if ($diff_mode) {
+            if ($all) {
+                $title = "Total Diff Report: Sorted by absolute value of regression/improvement in $desc";
+            } else {
+                $title = "Top 100 <i style='color:red'>Regressions</i>/"
+                         . "<i style='color:green'>Improvements</i>: "
+                         . "Sorted by $desc Diff";
+            }
+        } else {
+            $title = $all ? "Sorted by $desc" : "Displaying top $limit functions: Sorted by $desc";
+        }
+        print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $limit);
     }
 }
