@@ -255,19 +255,6 @@ function pc_info($info, $base_ct, $base_info, $parent)
     }
 }
 
-function print_source_link($info)
-{
-    if (strncmp($info['fn'], 'run_init', 8) && $info['fn'] !== 'main()') {
-        if (defined('UPROFILER_SYMBOL_LOOKUP_URL')) {
-            $link = uprofiler_render_link(
-                'source',
-                UPROFILER_SYMBOL_LOOKUP_URL . '?symbol=' . rawurlencode($info["fn"]));
-            print( ' (' . $link . ')' );
-        }
-    }
-}
-
-
 function print_symbol_summary($symbol_info, $stat, $base)
 {
 

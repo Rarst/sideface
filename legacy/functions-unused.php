@@ -81,3 +81,16 @@ function uprofiler_prune_run($raw_data, $prune_percent)
 
     return $raw_data;
 }
+
+function print_source_link($info)
+{
+    if (strncmp($info['fn'], 'run_init', 8) && $info['fn'] !== 'main()') {
+        if (defined('UPROFILER_SYMBOL_LOOKUP_URL')) {
+            $link = uprofiler_render_link(
+                'source',
+                UPROFILER_SYMBOL_LOOKUP_URL . '?symbol=' . rawurlencode($info['fn'])
+            );
+            print( ' (' . $link . ')' );
+        }
+    }
+}

@@ -284,7 +284,6 @@ class Report
         print( '<tr>' );
         // make this a self-reference to facilitate copy-pasting snippets to e-mails
         print( "<td><a href=''>$rep_symbol</a>" );
-        print_source_link([ 'fn' => $rep_symbol ]);
         print( '</td>' );
 
         if ($display_calls) {
@@ -590,7 +589,6 @@ class Report
 
         print( '<td>' );
         print( uprofiler_render_link($info['fn'], $href) );
-        print_source_link($info);
         print( "</td>\n" );
 
         if ($display_calls) {
@@ -624,11 +622,8 @@ class Report
         print( '</td></tr>' );
 
         foreach ($results as $info) {
-            $href = "/{$this->source}/{$this->run}/{$info['fn']}";
-
             print( '<tr>' );
-            print( '<td>' . uprofiler_render_link($info['fn'], $href) );
-            print_source_link($info);
+            print( '<td>' . uprofiler_render_link($info['fn'], "/{$this->source}/{$this->run}/{$info['fn']}") );
             print( '</td>' );
             pc_info($info, $base_ct, $base_info, $parent);
             print( '</tr>' );
