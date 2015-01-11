@@ -4,6 +4,14 @@ namespace Rarst\Sideface;
 class Report
 {
     protected $body = '';
+    protected $source = '';
+    protected $run = '';
+
+    public function __construct($args)
+    {
+        $this->source = $args['source'];
+        $this->run    = $args['run'];
+    }
 
     public function getBody()
     {

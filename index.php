@@ -255,21 +255,22 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
 
     $params['run1'] = $run1;
     $params['run2'] = $run2;
+    $run            = $run1 . '-' . $run2;
     $runsHandler    = new RunsHandler();
     $data1          = $runsHandler->getRun($run1, $source);
     $data2          = $runsHandler->getRun($run2, $source);
-    $report         = new Report();
+    $report         = new Report([ 'source' => $source, 'run' => $run ]);
     $report->init_metrics($data2, $symbol, $sort, true);
     $report->profiler_report($params, $symbol, $sort, $run1, $data1, $run2, $data2);
 
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
     return $twig->render('report.twig', [
-            'source' => $source,
-            'run'    => $run1,
-            'symbol' => $symbol,
-            'body'   => $report->getBody(),
-        ]);
+        'source' => $source,
+        'run'    => $run,
+        'symbol' => $symbol,
+        'body'   => $report->getBody(),
+    ]);
 })
     ->value('symbol', false)
     ->bind('diff_runs');
@@ -305,7 +306,7 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run,
         $uprofiler_data = $data['raw'];
     }
 
-    $report = new Report();
+    $report = new Report([ 'source' => $source, 'run' => $run ]);
     $report->init_metrics($uprofiler_data, $symbol, $sort, false);
     $report->profiler_report($params, $symbol, $sort, $run, $uprofiler_data);
 
