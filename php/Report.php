@@ -559,13 +559,13 @@ class Report
         if ($limit >= 0) {
             $limit = min($size, $limit);
             for ($i = 0; $i < $limit; $i ++) {
-                $this->print_function_info($url_params, $flat_data[$i], $sort, $run1, $run2);
+                $this->print_function_info($flat_data[$i]);
             }
         } else {
             // if $limit is negative, print abs($limit) items starting from the end
             $limit = min($size, abs($limit));
             for ($i = 0; $i < $limit; $i ++) {
-                $this->print_function_info($url_params, $flat_data[$size - $i - 1]);
+                $this->print_function_info($flat_data[$size - $i - 1]);
             }
         }
         print( '</table>' );
@@ -576,7 +576,7 @@ class Report
         }
     }
 
-    public function print_function_info($url_params, $info)
+    public function print_function_info($info)
     {
         global $totals;
         global $sort_col;
