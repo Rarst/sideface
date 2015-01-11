@@ -266,66 +266,6 @@ function print_td_pct($number, $denom, $bold = false, $attributes = null)
 }
 
 /**
- * Print "flat" data corresponding to one function.
- *
- * @author Kannan
- */
-function print_function_info($url_params, $info, $sort, $run1, $run2)
-{
-    static $odd_even = 0;
-
-    global $totals;
-    global $sort_col;
-    global $metrics;
-    global $format_cbk;
-    global $display_calls;
-    global $base_path;
-
-    // Toggle $odd_or_even
-    $odd_even = 1 - $odd_even;
-
-    if ($odd_even) {
-        print( "<tr>" );
-    } else {
-        print( '<tr bgcolor="#e5e5e5">' );
-    }
-
-    $href = "$base_path/?" .
-            http_build_query(uprofiler_array_set($url_params,
-                'symbol', $info["fn"]));
-
-    print( '<td>' );
-    print( uprofiler_render_link($info["fn"], $href) );
-    print_source_link($info);
-    print( "</td>\n" );
-
-    if ($display_calls) {
-        // Call Count..
-        print_td_num($info["ct"], $format_cbk["ct"], ( $sort_col == "ct" ));
-        print_td_pct($info["ct"], $totals["ct"], ( $sort_col == "ct" ));
-    }
-
-    // Other metrics..
-    foreach ($metrics as $metric) {
-        // Inclusive metric
-        print_td_num($info[$metric], $format_cbk[$metric],
-            ( $sort_col == $metric ));
-        print_td_pct($info[$metric], $totals[$metric],
-            ( $sort_col == $metric ));
-
-        // Exclusive Metric
-        print_td_num($info["excl_" . $metric],
-            $format_cbk["excl_" . $metric],
-            ( $sort_col == "excl_" . $metric ));
-        print_td_pct($info["excl_" . $metric],
-            $totals[$metric],
-            ( $sort_col == "excl_" . $metric ));
-    }
-
-    print( "</tr>\n" );
-}
-
-/**
  * Return attribute names and values to be used by javascript tooltip.
  */
 function get_tooltip_attributes($type, $metric)

@@ -276,7 +276,7 @@ class Report
         $this->print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $limit);
     }
 
-    function print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $limit)
+    public function print_flat_data($url_params, $title, $flat_data, $sort, $run1, $run2, $limit)
     {
         global $stats;
         global $sortable_columns;
@@ -308,24 +308,20 @@ class Report
                 $header = $desc;
             }
 
-            if ($stat == 'fn') {
-                print( "<th>$header</th>" );
-            } else {
-                print( "<th>$header</th>" );
-            }
+            print( "<th>$header</th>" );
         }
         print( "</tr>\n" );
 
         if ($limit >= 0) {
             $limit = min($size, $limit);
             for ($i = 0; $i < $limit; $i ++) {
-                print_function_info($url_params, $flat_data[$i], $sort, $run1, $run2);
+                $this->print_function_info($url_params, $flat_data[$i], $sort, $run1, $run2);
             }
         } else {
             // if $limit is negative, print abs($limit) items starting from the end
             $limit = min($size, abs($limit));
             for ($i = 0; $i < $limit; $i ++) {
-                print_function_info($url_params, $flat_data[$size - $i - 1], $sort, $run1, $run2);
+                $this->print_function_info($url_params, $flat_data[$size - $i - 1]);
             }
         }
         print( '</table>' );
@@ -334,5 +330,43 @@ class Report
         if ($display_link) {
             echo $display_link;
         }
+    }
+
+    public function print_function_info($url_params, $info)
+    {
+        global $totals;
+        global $sort_col;
+        global $metrics;
+        global $format_cbk;
+        global $display_calls;
+        global $base_path;
+
+        print( '<tr>' );
+
+        $href = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'symbol', $info["fn"]));
+
+        print( '<td>' );
+        print( uprofiler_render_link($info["fn"], $href) );
+        print_source_link($info);
+        print( "</td>\n" );
+
+        if ($display_calls) {
+            // Call Count..
+            print_td_num($info["ct"], $format_cbk["ct"], ( $sort_col == "ct" ));
+            print_td_pct($info["ct"], $totals["ct"], ( $sort_col == "ct" ));
+        }
+
+        // Other metrics..
+        foreach ($metrics as $metric) {
+            // Inclusive metric
+            print_td_num($info[$metric], $format_cbk[$metric], ( $sort_col == $metric ));
+            print_td_pct($info[$metric], $totals[$metric], ( $sort_col == $metric ));
+
+            // Exclusive Metric
+            print_td_num($info['excl_' . $metric], $format_cbk['excl_' . $metric], ( $sort_col == 'excl_' . $metric ));
+            print_td_pct($info['excl_' . $metric], $totals[$metric], ( $sort_col == 'excl_' . $metric ));
+        }
+
+        print( "</tr>\n" );
     }
 }
