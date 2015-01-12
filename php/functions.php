@@ -115,38 +115,6 @@ function pct($a, $b)
 }
 
 /**
- * Given a number, returns the td class to use for display.
- *
- * For instance, negative numbers in diff reports comparing two runs (run1 & run2)
- * represent improvement from run1 to run2. We use green to display those deltas,
- * and red for regression deltas.
- */
-function get_print_class($num, $bold)
-{
-    global $vbar;
-    global $vbbar;
-    global $vrbar;
-    global $vgbar;
-    global $diff_mode;
-
-    if ($bold) {
-        if ($diff_mode) {
-            if ($num <= 0) {
-                $class = $vgbar; // green (improvement)
-            } else {
-                $class = $vrbar; // red (regression)
-            }
-        } else {
-            $class = $vbbar; // blue
-        }
-    } else {
-        $class = $vbar;  // default (black)
-    }
-
-    return $class;
-}
-
-/**
  * Return attribute names and values to be used by javascript tooltip.
  */
 function get_tooltip_attributes($type, $metric)
