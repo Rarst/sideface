@@ -150,7 +150,7 @@ class Report
             }
         } else {
             /* flat top-level report of all functions */
-            $this->full_report($url_params, $symbol_tab, $sort, $run1, $run2);
+            $this->full_report($url_params, $symbol_tab, $run1, $run2);
         }
 
         $this->body = ob_get_clean();
@@ -401,7 +401,7 @@ class Report
 
     }
 
-    public function full_report($url_params, $symbol_tab, $sort, $run1, $run2)
+    public function full_report($url_params, $symbol_tab, $run1, $run2)
     {
         global $totals;
         global $totals_1;
