@@ -114,14 +114,6 @@ function pct($a, $b)
     }
 }
 
-/**
- * Return attribute names and values to be used by javascript tooltip.
- */
-function get_tooltip_attributes($type, $metric)
-{
-    return "type='$type' metric='$metric'";
-}
-
 /*
  * The list of possible metrics collected as part of uprofiler that
  * require inclusive/exclusive handling while reporting.

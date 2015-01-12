@@ -293,12 +293,12 @@ class Report
             $this->print_td_num(
                 $symbol_info['excl_' . $metric],
                 $format_cbk['excl_' . $metric],
-                get_tooltip_attributes('Child', $metric)
+                "type='Child' metric='{$metric}'"
             );
             $this->print_td_pct(
                 $symbol_info['excl_' . $metric],
                 $symbol_info[$metric],
-                get_tooltip_attributes('Child', $metric)
+                "type='Child' metric='{$metric}'"
             );
         }
         print( '</tr>' );
@@ -610,7 +610,7 @@ class Report
         $type = $parent ? 'Parent' : 'Child';
 
         if ($display_calls) {
-            $mouseoverct = get_tooltip_attributes($type, 'ct');
+            $mouseoverct = "type='{$type}' metric='ct'";
             /* call count */
             $this->print_td_num($info['ct'], $format_cbk['ct'], $mouseoverct);
             $this->print_td_pct($info['ct'], $base_ct, $mouseoverct);
@@ -618,8 +618,8 @@ class Report
 
         /* Inclusive metric values  */
         foreach ($metrics as $metric) {
-            $this->print_td_num($info[$metric], $format_cbk[$metric], get_tooltip_attributes($type, $metric));
-            $this->print_td_pct($info[$metric], $base_info[$metric], get_tooltip_attributes($type, $metric));
+            $this->print_td_num($info[$metric], $format_cbk[$metric], "type='{$type}' metric='{$metric}'");
+            $this->print_td_pct($info[$metric], $base_info[$metric], "type='{$type}' metric='{$metric}'");
         }
     }
 
