@@ -261,7 +261,7 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
     $data2          = $runsHandler->getRun($run2, $source);
     $report         = new Report([ 'source' => $source, 'run' => $run ]);
     $report->init_metrics($data2, $symbol, $sort, true);
-    $report->profiler_report($params, $symbol, $run1, $data1, $run2, $data2);
+    $report->profiler_report($symbol, $run1, $data1, $run2, $data2);
 
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];
@@ -277,7 +277,7 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
 
 $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run, $symbol) {
 
-    global $params, $wts, $sort;
+    global $wts, $sort;
 
     $runsHandler = new RunsHandler();
 
@@ -308,7 +308,7 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run,
 
     $report = new Report([ 'source' => $source, 'run' => $run ]);
     $report->init_metrics($uprofiler_data, $symbol, $sort, false);
-    $report->profiler_report($params, $symbol, $run, $uprofiler_data);
+    $report->profiler_report($symbol, $run, $uprofiler_data);
 
     /** @var Twig_Environment $twig */
     $twig = $app['twig'];

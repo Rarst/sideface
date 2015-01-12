@@ -89,7 +89,6 @@ class Report
     }
 
     public function profiler_report(
-        $url_params,
         $rep_symbol,
         $run1,
         $run1_data,
@@ -134,29 +133,19 @@ class Report
             if ($diff_mode) {
                 $info1 = isset( $symbol_tab1[$rep_symbol] ) ? $symbol_tab1[$rep_symbol] : null;
                 $info2 = isset( $symbol_tab2[$rep_symbol] ) ? $symbol_tab2[$rep_symbol] : null;
-                $this->symbol_report(
-                    $url_params,
-                    $run_delta,
-                    $symbol_tab[$rep_symbol],
-                    $rep_symbol,
-                    $run1,
-                    $info1,
-                    $run2,
-                    $info2
-                );
+                $this->symbol_report($run_delta, $symbol_tab[$rep_symbol], $rep_symbol, $run1, $info1, $run2, $info2);
             } else {
-                $this->symbol_report($url_params, $run1_data, $symbol_tab[$rep_symbol], $rep_symbol, $run1);
+                $this->symbol_report($run1_data, $symbol_tab[$rep_symbol], $rep_symbol, $run1);
             }
         } else {
             /* flat top-level report of all functions */
-            $this->full_report($url_params, $symbol_tab, $run1, $run2);
+            $this->full_report($symbol_tab, $run1, $run2);
         }
 
         $this->body = ob_get_clean();
     }
 
     public function symbol_report(
-        $url_params,
         $run_data,
         $symbol_info,
         $rep_symbol,
@@ -173,7 +162,6 @@ class Report
         global $descriptions;
         global $format_cbk;
         global $display_calls;
-        global $base_path;
 
         $possible_metrics = uprofiler_get_possible_metrics();
 
@@ -260,17 +248,12 @@ class Report
         foreach ($pc_stats as $stat) {
             $desc = stat_description($stat);
             if (array_key_exists($stat, $sortable_columns)) {
-                $href   = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'sort', $stat));
-                $header = "<a href='{$href}'>{$desc}</a>";
+                $header = "<a href=''>{$desc}</a>"; // TODO sort link
             } else {
                 $header = $desc;
             }
 
-            if ($stat == 'fn') {
-                print( "<th align=left><nobr>$header</th>" );
-            } else {
-                print( "<th>$header</th>" );
-            }
+            print( "<th>$header</th>" );
         }
         print( '</tr>' );
 
@@ -397,7 +380,7 @@ class Report
 
     }
 
-    public function full_report($url_params, $symbol_tab, $run1, $run2)
+    public function full_report($symbol_tab, $run1, $run2)
     {
         global $totals;
         global $totals_1;
@@ -490,7 +473,7 @@ class Report
 
         print( '<br>' );
 
-        if (! empty( $url_params['all'] )) {
+        if (! empty( $_GET['all'] )) {
             $all   = true;
             $limit = 0;    // display all rows
         } else {
@@ -511,22 +494,20 @@ class Report
         } else {
             $title = $all ? "Sorted by $desc" : "Displaying top $limit functions: Sorted by $desc";
         }
-        $this->print_flat_data($url_params, $title, $flat_data, $limit);
+        $this->print_flat_data($title, $flat_data, $limit);
     }
 
-    public function print_flat_data($url_params, $title, $flat_data, $limit)
+    public function print_flat_data($title, $flat_data, $limit)
     {
         global $stats;
         global $sortable_columns;
-        global $base_path;
 
         $size = count($flat_data);
         if (! $limit) {
             $limit        = $size;
             $display_link = '';
         } else {
-            $href         = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'all', 1));
-            $display_link = "<a href='{$href}'>[<b>display all</b>]</a>";
+            $display_link = "<a href=''>[<b>display all</b>]</a>"; // TODO display all link
         }
 
         print( "<h3 align=center>$title $display_link</h3><br>" );
@@ -537,8 +518,7 @@ class Report
         foreach ($stats as $stat) {
             $desc = stat_description($stat);
             if (array_key_exists($stat, $sortable_columns)) {
-                $href   = "$base_path/?" . http_build_query(uprofiler_array_set($url_params, 'sort', $stat));
-                $header = "<a href='$href'>$desc</a>";
+                $header = "<a href=''>$desc</a>"; // TODO sort link
             } else {
                 $header = $desc;
             }
@@ -623,7 +603,6 @@ class Report
 
     public function pc_info($info, $base_ct, $base_info, $parent)
     {
-        global $sort_col;
         global $metrics;
         global $format_cbk;
         global $display_calls;
