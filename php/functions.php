@@ -677,17 +677,6 @@ function uprofiler_array_set($arr, $k, $v)
 }
 
 /**
- * Removes/unsets one key in an array and return the array
- *
- * @author Kannan
- */
-function uprofiler_array_unset($arr, $k)
-{
-    unset( $arr[$k] );
-    return $arr;
-}
-
-/**
  * Internal helper function used by various
  * uprofiler_get_param* flavors for various
  * types of parameters.
