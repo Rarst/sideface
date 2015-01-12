@@ -91,7 +91,6 @@ class Report
     public function profiler_report(
         $url_params,
         $rep_symbol,
-        $sort,
         $run1,
         $run1_data,
         $run2 = 0,
