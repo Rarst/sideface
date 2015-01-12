@@ -147,41 +147,6 @@ function get_print_class($num, $bold)
 }
 
 /**
- * Prints a <td> element with a numeric value.
- */
-function print_td_num($num, $fmt_func, $bold = false, $attributes = null)
-{
-
-    $class = get_print_class($num, $bold);
-
-    if (! empty( $fmt_func ) && is_numeric($num)) {
-        $num = call_user_func($fmt_func, $num);
-    }
-
-    print( "<td $attributes $class>$num</td>\n" );
-}
-
-/**
- * Prints a <td> element with a percentage.
- */
-function print_td_pct($number, $denom, $bold = false, $attributes = null)
-{
-    global $vbar;
-    global $vbbar;
-    global $diff_mode;
-
-    $class = get_print_class($number, $bold);
-
-    if ($denom == 0) {
-        $pct = "N/A%";
-    } else {
-        $pct = uprofiler_percent_format($number / abs($denom));
-    }
-
-    print( "<td $attributes $class>$pct</td>\n" );
-}
-
-/**
  * Return attribute names and values to be used by javascript tooltip.
  */
 function get_tooltip_attributes($type, $metric)

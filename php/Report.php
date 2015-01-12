@@ -173,7 +173,6 @@ class Report
         global $diff_mode;
         global $descriptions;
         global $format_cbk;
-        global $sort_col;
         global $display_calls;
         global $base_path;
 
@@ -201,10 +200,10 @@ class Report
 
             if ($display_calls) {
                 print( '<td>Number of Function Calls</td>' );
-                print_td_num($symbol_info1['ct'], $format_cbk['ct']);
-                print_td_num($symbol_info2['ct'], $format_cbk['ct']);
-                print_td_num($symbol_info2['ct'] - $symbol_info1['ct'], $format_cbk['ct'], true);
-                print_td_pct($symbol_info2['ct'] - $symbol_info1['ct'], $symbol_info1['ct'], true);
+                $this->print_td_num($symbol_info1['ct'], $format_cbk['ct']);
+                $this->print_td_num($symbol_info2['ct'], $format_cbk['ct']);
+                $this->print_td_num($symbol_info2['ct'] - $symbol_info1['ct'], $format_cbk['ct']);
+                $this->print_td_pct($symbol_info2['ct'] - $symbol_info1['ct'], $symbol_info1['ct']);
                 print( '</tr>' );
             }
 
@@ -214,10 +213,10 @@ class Report
                 // Inclusive stat for metric
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
-                print_td_num($symbol_info1[$m], $format_cbk[$m]);
-                print_td_num($symbol_info2[$m], $format_cbk[$m]);
-                print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m], true);
-                print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m], true);
+                $this->print_td_num($symbol_info1[$m], $format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m], $format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m]);
+                $this->print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m]);
                 print( '</tr>' );
 
                 // AVG (per call) Inclusive stat for metric
@@ -231,20 +230,20 @@ class Report
                 if ($symbol_info2['ct'] > 0) {
                     $avg_info2 = ( $symbol_info2[$m] / $symbol_info2['ct'] );
                 }
-                print_td_num($avg_info1, $format_cbk[$m]);
-                print_td_num($avg_info2, $format_cbk[$m]);
-                print_td_num($avg_info2 - $avg_info1, $format_cbk[$m], true);
-                print_td_pct($avg_info2 - $avg_info1, $avg_info1, true);
+                $this->print_td_num($avg_info1, $format_cbk[$m]);
+                $this->print_td_num($avg_info2, $format_cbk[$m]);
+                $this->print_td_num($avg_info2 - $avg_info1, $format_cbk[$m]);
+                $this->print_td_pct($avg_info2 - $avg_info1, $avg_info1);
                 print( '</tr>' );
 
                 // Exclusive stat for metric
                 $m = 'excl_' . $metric;
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
-                print_td_num($symbol_info1[$m], $format_cbk[$m]);
-                print_td_num($symbol_info2[$m], $format_cbk[$m]);
-                print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m], true);
-                print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m], true);
+                $this->print_td_num($symbol_info1[$m], $format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m], $format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m]);
+                $this->print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m]);
                 print( '</tr>' );
             }
 
@@ -287,14 +286,14 @@ class Report
 
         if ($display_calls) {
             // Call Count
-            print_td_num($symbol_info['ct'], $format_cbk['ct']);
-            print_td_pct($symbol_info['ct'], $totals['ct']);
+            $this->print_td_num($symbol_info['ct'], $format_cbk['ct']);
+            $this->print_td_pct($symbol_info['ct'], $totals['ct']);
         }
 
         // Inclusive Metrics for current function
         foreach ($metrics as $metric) {
-            print_td_num($symbol_info[$metric], $format_cbk[$metric], ( $sort_col == $metric ));
-            print_td_pct($symbol_info[$metric], $totals[$metric], ( $sort_col == $metric ));
+            $this->print_td_num($symbol_info[$metric], $format_cbk[$metric]);
+            $this->print_td_pct($symbol_info[$metric], $totals[$metric]);
         }
         print( '</tr>' );
 
@@ -309,16 +308,14 @@ class Report
 
         // Exclusive Metrics for current function
         foreach ($metrics as $metric) {
-            print_td_num(
+            $this->print_td_num(
                 $symbol_info['excl_' . $metric],
                 $format_cbk['excl_' . $metric],
-                ( $sort_col == $metric ),
                 get_tooltip_attributes('Child', $metric)
             );
-            print_td_pct(
+            $this->print_td_pct(
                 $symbol_info['excl_' . $metric],
                 $symbol_info[$metric],
-                ( $sort_col == $metric ),
                 get_tooltip_attributes('Child', $metric)
             );
         }
@@ -429,10 +426,10 @@ class Report
             if ($display_calls) {
                 print( '<tr>' );
                 print( '<td>Number of Function Calls</td>' );
-                print_td_num($totals_1['ct'], $format_cbk['ct']);
-                print_td_num($totals_2['ct'], $format_cbk['ct']);
-                print_td_num($totals_2['ct'] - $totals_1['ct'], $format_cbk['ct'], true);
-                print_td_pct($totals_2['ct'] - $totals_1['ct'], $totals_1['ct'], true);
+                $this->print_td_num($totals_1['ct'], $format_cbk['ct']);
+                $this->print_td_num($totals_2['ct'], $format_cbk['ct']);
+                $this->print_td_num($totals_2['ct'] - $totals_1['ct'], $format_cbk['ct']);
+                $this->print_td_pct($totals_2['ct'] - $totals_1['ct'], $totals_1['ct']);
                 print( '</tr>' );
             }
 
@@ -440,10 +437,10 @@ class Report
                 $m = $metric;
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
-                print_td_num($totals_1[$m], $format_cbk[$m]);
-                print_td_num($totals_2[$m], $format_cbk[$m]);
-                print_td_num($totals_2[$m] - $totals_1[$m], $format_cbk[$m], true);
-                print_td_pct($totals_2[$m] - $totals_1[$m], $totals_1[$m], true);
+                $this->print_td_num($totals_1[$m], $format_cbk[$m]);
+                $this->print_td_num($totals_2[$m], $format_cbk[$m]);
+                $this->print_td_num($totals_2[$m] - $totals_1[$m], $format_cbk[$m]);
+                $this->print_td_pct($totals_2[$m] - $totals_1[$m], $totals_1[$m]);
                 print( '<tr>' );
             }
             print( '</table>' );
@@ -574,7 +571,6 @@ class Report
     public function print_function_info($info)
     {
         global $totals;
-        global $sort_col;
         global $metrics;
         global $format_cbk;
         global $display_calls;
@@ -589,19 +585,19 @@ class Report
 
         if ($display_calls) {
             // Call Count..
-            print_td_num($info['ct'], $format_cbk['ct'], ( $sort_col == 'ct' ));
-            print_td_pct($info['ct'], $totals['ct'], ( $sort_col == 'ct' ));
+            $this->print_td_num($info['ct'], $format_cbk['ct']);
+            $this->print_td_pct($info['ct'], $totals['ct']);
         }
 
         // Other metrics..
         foreach ($metrics as $metric) {
             // Inclusive metric
-            print_td_num($info[$metric], $format_cbk[$metric], ( $sort_col == $metric ));
-            print_td_pct($info[$metric], $totals[$metric], ( $sort_col == $metric ));
+            $this->print_td_num($info[$metric], $format_cbk[$metric]);
+            $this->print_td_pct($info[$metric], $totals[$metric]);
 
             // Exclusive Metric
-            print_td_num($info['excl_' . $metric], $format_cbk['excl_' . $metric], ( $sort_col == 'excl_' . $metric ));
-            print_td_pct($info['excl_' . $metric], $totals[$metric], ( $sort_col == 'excl_' . $metric ));
+            $this->print_td_num($info['excl_' . $metric], $format_cbk['excl_' . $metric]);
+            $this->print_td_pct($info['excl_' . $metric], $totals[$metric]);
         }
 
         print( "</tr>\n" );
@@ -638,24 +634,30 @@ class Report
         if ($display_calls) {
             $mouseoverct = get_tooltip_attributes($type, 'ct');
             /* call count */
-            print_td_num($info['ct'], $format_cbk['ct'], ( $sort_col == 'ct' ), $mouseoverct);
-            print_td_pct($info['ct'], $base_ct, ( $sort_col == 'ct' ), $mouseoverct);
+            $this->print_td_num($info['ct'], $format_cbk['ct'], $mouseoverct);
+            $this->print_td_pct($info['ct'], $base_ct, $mouseoverct);
         }
 
         /* Inclusive metric values  */
         foreach ($metrics as $metric) {
-            print_td_num(
-                $info[$metric],
-                $format_cbk[$metric],
-                ( $sort_col == $metric ),
-                get_tooltip_attributes($type, $metric)
-            );
-            print_td_pct(
-                $info[$metric],
-                $base_info[$metric],
-                ( $sort_col == $metric ),
-                get_tooltip_attributes($type, $metric)
-            );
+            $this->print_td_num($info[$metric], $format_cbk[$metric], get_tooltip_attributes($type, $metric));
+            $this->print_td_pct($info[$metric], $base_info[$metric], get_tooltip_attributes($type, $metric));
         }
+    }
+
+    public function print_td_num($num, $fmt_func, $attributes = null)
+    {
+        if (! empty( $fmt_func ) && is_numeric($num)) {
+            $num = call_user_func($fmt_func, $num);
+        }
+
+        print( "<td $attributes>$num</td>\n" );
+    }
+
+    public function print_td_pct($number, $denom, $attributes = null)
+    {
+        $pct = ( 0 == $denom ) ? 'N/A%' : uprofiler_percent_format($number / abs($denom));
+
+        print( "<td $attributes>$pct</td>\n" );
     }
 }
