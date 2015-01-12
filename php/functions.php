@@ -100,20 +100,6 @@ function stat_description($stat)
     }
 }
 
-/**
- * Computes percentage for a pair of values, and returns it
- * in string format.
- */
-function pct($a, $b)
-{
-    if ($b == 0) {
-        return "N/A";
-    } else {
-        $res = ( round(( $a * 1000 / $b )) / 10 );
-        return $res;
-    }
-}
-
 /*
  * The list of possible metrics collected as part of uprofiler that
  * require inclusive/exclusive handling while reporting.

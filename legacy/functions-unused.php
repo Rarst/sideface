@@ -139,3 +139,17 @@ function print_symbol_summary($symbol_info, $stat, $base)
     }
     print( "<br>" );
 }
+
+/**
+ * Computes percentage for a pair of values, and returns it
+ * in string format.
+ */
+function pct($a, $b)
+{
+    if ($b == 0) {
+        return "N/A";
+    } else {
+        $res = ( round(( $a * 1000 / $b )) / 10 );
+        return $res;
+    }
+}
