@@ -123,3 +123,19 @@ function print_source_link($info)
         }
     }
 }
+
+function print_symbol_summary($symbol_info, $stat, $base)
+{
+
+    $val  = $symbol_info[$stat];
+    $desc = str_replace("<br>", " ", stat_description($stat));
+
+    print( "$desc: </td>" );
+    print( number_format($val) );
+    print( " (" . pct($val, $base) . "% of overall)" );
+    if (substr($stat, 0, 4) == "excl") {
+        $func_base = $symbol_info[str_replace("excl_", "", $stat)];
+        print( " (" . pct($val, $func_base) . "% of this function)" );
+    }
+    print( "<br>" );
+}
