@@ -24,7 +24,7 @@ function uprofiler_prune_run($raw_data, $prune_percent)
 
     $main_info = $raw_data["main()"];
     if (empty( $main_info )) {
-        uprofiler_error("uprofiler: main() missing in raw data");
+        error_log("uprofiler: main() missing in raw data");
         return false;
     }
 
@@ -34,7 +34,7 @@ function uprofiler_prune_run($raw_data, $prune_percent)
     } elseif (isset( $main_info["samples"] )) {
         $prune_metric = "samples";
     } else {
-        uprofiler_error("uprofiler: for main() we must have either wt or samples attribute set");
+        error_log("uprofiler: for main() we must have either wt or samples attribute set");
         return false;
     }
 

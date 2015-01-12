@@ -122,11 +122,6 @@ function get_tooltip_attributes($type, $metric)
     return "type='$type' metric='$metric'";
 }
 
-function uprofiler_error($message)
-{
-    error_log($message);
-}
-
 /*
  * The list of possible metrics collected as part of uprofiler that
  * require inclusive/exclusive handling while reporting.
@@ -222,7 +217,7 @@ function uprofiler_valid_run($run_id, $raw_data)
 
     $main_info = $raw_data["main()"];
     if (empty( $main_info )) {
-        uprofiler_error("uprofiler: main() missing in raw data for Run ID: $run_id");
+        error_log("uprofiler: main() missing in raw data for Run ID: $run_id");
         return false;
     }
 
@@ -232,7 +227,7 @@ function uprofiler_valid_run($run_id, $raw_data)
     } else if (isset( $main_info["samples"] )) {
         $metric = "samples";
     } else {
-        uprofiler_error("uprofiler: Wall Time information missing from Run ID: $run_id");
+        error_log("uprofiler: Wall Time information missing from Run ID: $run_id");
         return false;
     }
 
@@ -241,12 +236,12 @@ function uprofiler_valid_run($run_id, $raw_data)
 
         // basic sanity checks...
         if ($val < 0) {
-            uprofiler_error("uprofiler: $metric should not be negative: Run ID $run_id"
+            error_log("uprofiler: $metric should not be negative: Run ID $run_id"
                             . serialize($info));
             return false;
         }
         if ($val > ( 86400000000 )) {
-            uprofiler_error("uprofiler: $metric > 1 day found in Run ID: $run_id "
+            error_log("uprofiler: $metric > 1 day found in Run ID: $run_id "
                             . serialize($info));
             return false;
         }
@@ -311,7 +306,7 @@ function uprofiler_normalize_metrics($raw_data, $num_runs)
     $raw_data_total = [ ];
 
     if (isset( $raw_data["==>main()"] ) && isset( $raw_data["main()"] )) {
-        uprofiler_error("uprofiler Error: both ==>main() and main() set in raw data...");
+        error_log("uprofiler Error: both ==>main() and main() set in raw data...");
     }
 
     foreach ($raw_data as $parent_child => $info) {
@@ -635,7 +630,7 @@ function uprofiler_compute_inclusive_times($raw_data)
              * Recursion is handled in the uprofiler PHP extension by giving nested
              * calls a unique recursion-depth appended name (for example, foo@1).
              */
-            uprofiler_error("Error in Raw Data: parent & child are both: $parent");
+            error_log("Error in Raw Data: parent & child are both: $parent");
             return;
         }
 
@@ -740,7 +735,7 @@ function uprofiler_get_uint_param($param, $default = 0)
         return $val;
     }
 
-    uprofiler_error("$param is $val. It must be an unsigned integer.");
+    error_log("$param is $val. It must be an unsigned integer.");
     return null;
 }
 
@@ -772,7 +767,7 @@ function uprofiler_get_float_param($param, $default = 0)
         return (float) $val;
     }
 
-    uprofiler_error("$param is $val. It must be a float.");
+    error_log("$param is $val. It must be a float.");
     return null;
 }
 
@@ -813,7 +808,7 @@ function uprofiler_get_bool_param($param, $default = false)
             $val = false;
             break;
         default:
-            uprofiler_error("$param is $val. It must be a valid boolean string.");
+            error_log("$param is $val. It must be a valid boolean string.");
             return null;
     }
 
@@ -859,7 +854,7 @@ function uprofiler_param_init($params)
                 $p = uprofiler_get_bool_param($k, $v[1]);
                 break;
             default:
-                uprofiler_error("Invalid param type passed to uprofiler_param_init: "
+                error_log("Invalid param type passed to uprofiler_param_init: "
                                 . $v[0]);
                 exit();
         }
@@ -919,12 +914,12 @@ function uprofiler_http_header($name, $value)
 {
 
     if (! $name) {
-        uprofiler_error('http_header usage');
+        error_log('http_header usage');
         return null;
     }
 
     if (! is_string($value)) {
-        uprofiler_error('http_header value not a string');
+        error_log('http_header value not a string');
     }
 
     header($name . ': ' . $value, true);
@@ -1349,7 +1344,7 @@ function uprofiler_get_content_by_run(
 
     $raw_data = $uprofiler_runs_impl->get_run($run_id, $source, $description);
     if (! $raw_data) {
-        uprofiler_error("Raw data is empty");
+        error_log("Raw data is empty");
         return "";
     }
 

@@ -57,7 +57,7 @@ if (!empty($run)) {
   $functions = array_unique(array_merge($functions1, $functions2));
   asort($functions);
 } else {
-  uprofiler_error("no valid runs specified to typeahead endpoint");
+  error_log("no valid runs specified to typeahead endpoint");
   $functions = array();
 }
 

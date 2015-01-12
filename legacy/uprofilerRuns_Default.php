@@ -45,7 +45,7 @@ class uprofilerRuns_Default implements iUprofilerRuns
                 // some default that at least works on unix...
                 $dir = "/tmp";
 
-                uprofiler_error("Warning: Must specify directory location for uprofiler runs. " .
+                error_log("Warning: Must specify directory location for uprofiler runs. " .
                                 "Trying {$dir} as default. You can either pass the " .
                                 "directory location as an argument to the constructor " .
                                 "for UprofilerRuns_Default() or set uprofiler.output_dir " .
@@ -60,7 +60,7 @@ class uprofilerRuns_Default implements iUprofilerRuns
         $file_name = $this->file_name($run_id, $type);
 
         if (! file_exists($file_name)) {
-            uprofiler_error("Could not find file $file_name");
+            error_log("Could not find file $file_name");
             $run_desc = "Invalid Run Id = $run_id";
             return null;
         }
@@ -88,7 +88,7 @@ class uprofilerRuns_Default implements iUprofilerRuns
             fwrite($file, $uprofiler_data);
             fclose($file);
         } else {
-            uprofiler_error("Could not open $file_name\n");
+            error_log("Could not open $file_name\n");
         }
 
         // echo "Saved run in {$file_name}.\nRun id = {$run_id}.\n";
