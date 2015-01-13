@@ -670,65 +670,6 @@ function uprofiler_get_matching_functions($q, $uprofiler_data)
     return ( $res );
 }
 
-
-/**
- * Send an HTTP header with the response. You MUST use this function instead
- * of header() so that we can debug header issues because they're virtually
- * impossible to debug otherwise. If you try to commit header(), SVN will
- * reject your commit.
- *
- * @param string  HTTP header name, like 'Location'
- * @param string  HTTP header value, like 'http://www.example.com/'
- *
- */
-function uprofiler_http_header($name, $value)
-{
-
-    if (! $name) {
-        error_log('http_header usage');
-        return null;
-    }
-
-    if (! is_string($value)) {
-        error_log('http_header value not a string');
-    }
-
-    header($name . ': ' . $value, true);
-}
-
-/**
- * Generate and send MIME header for the output image to client browser.
- *
- * @author cjiang
- */
-function uprofiler_generate_mime_header($type, $length)
-{
-    switch ($type) {
-        case 'jpg':
-            $mime = 'image/jpeg';
-            break;
-        case 'gif':
-            $mime = 'image/gif';
-            break;
-        case 'png':
-            $mime = 'image/png';
-            break;
-        case 'svg':
-            $mime = 'image/svg+xml'; // content type for scalable vector graphic
-            break;
-        case 'ps':
-            $mime = 'application/postscript';
-            break;
-        default:
-            $mime = false;
-    }
-
-    if ($mime) {
-        uprofiler_http_header('Content-type', $mime);
-        uprofiler_http_header('Content-length', (string) $length);
-    }
-}
-
 /*
  * Get the children list of all nodes.
  */

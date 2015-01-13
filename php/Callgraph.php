@@ -32,7 +32,7 @@ class Callgraph
             exit();
         }
 
-        uprofiler_generate_mime_header($type, strlen($content));
+        $this->generate_mime_header($type, strlen($content));
         echo $content;
     }
 
@@ -67,7 +67,7 @@ class Callgraph
         );
         $content     = $this->generate_image_by_dot($script, $type);
 
-        uprofiler_generate_mime_header($type, strlen($content));
+        $this->generate_mime_header($type, strlen($content));
         echo $content;
     }
 
@@ -366,5 +366,33 @@ class Callgraph
         }
         print "failed to execute cmd \"$cmd\"";
         exit();
+    }
+
+    public function generate_mime_header($type, $length)
+    {
+        switch ($type) {
+            case 'jpg':
+                $mime = 'image/jpeg';
+                break;
+            case 'gif':
+                $mime = 'image/gif';
+                break;
+            case 'png':
+                $mime = 'image/png';
+                break;
+            case 'svg':
+                $mime = 'image/svg+xml';
+                break;
+            case 'ps':
+                $mime = 'application/postscript';
+                break;
+            default:
+                $mime = false;
+        }
+
+        if ($mime) {
+            header("Content-type:$mime", true);
+            header("Content-length:$length", true);
+        }
     }
 }
