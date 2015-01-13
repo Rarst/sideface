@@ -639,7 +639,6 @@ function uprofiler_param_init($params)
     }
 }
 
-
 /**
  * Given a partial query string $q return matching function names in
  * specified uprofiler run. This is used for the type ahead function
@@ -649,7 +648,6 @@ function uprofiler_param_init($params)
  */
 function uprofiler_get_matching_functions($q, $uprofiler_data)
 {
-
     $matches = [ ];
 
     foreach ($uprofiler_data as $parent_child => $info) {
@@ -668,21 +666,4 @@ function uprofiler_get_matching_functions($q, $uprofiler_data)
     asort($res);
 
     return ( $res );
-}
-
-/*
- * Get the children list of all nodes.
- */
-function uprofiler_get_children_table($raw_data)
-{
-    $children_table = [ ];
-    foreach ($raw_data as $parent_child => $info) {
-        list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
-        if (! isset( $children_table[$parent] )) {
-            $children_table[$parent] = [ $child ];
-        } else {
-            $children_table[$parent][] = $child;
-        }
-    }
-    return $children_table;
 }

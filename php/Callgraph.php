@@ -128,7 +128,7 @@ class Callgraph
         $sym_table = uprofiler_compute_flat_info($raw_data, $totals);
 
         if ($critical_path) {
-            $children_table = uprofiler_get_children_table($raw_data);
+            $children_table = $this->get_children_table($raw_data);
             $node           = 'main()';
             $path           = [ ];
             $path_edges     = [ ];
@@ -394,5 +394,19 @@ class Callgraph
             header("Content-type:$mime", true);
             header("Content-length:$length", true);
         }
+    }
+
+    public function get_children_table($raw_data)
+    {
+        $children_table = [ ];
+        foreach ($raw_data as $parent_child => $info) {
+            list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
+            if (! isset( $children_table[$parent] )) {
+                $children_table[$parent] = [ $child ];
+            } else {
+                $children_table[$parent][] = $child;
+            }
+        }
+        return $children_table;
     }
 }
