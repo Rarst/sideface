@@ -287,6 +287,7 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run,
     // aggregated in that ratio.
     //
     $runs_array = explode(",", $run);
+    $report     = new Report([ 'source' => $source, 'run' => $run ]);
 
     if (count($runs_array) == 1) {
         $uprofiler_data = $runsHandler->getRun($runs_array[0], $source);
@@ -296,17 +297,10 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run,
         } else {
             $wts_array = null;
         }
-        $data           = uprofiler_aggregate_runs(
-            $runsHandler,
-            $runs_array,
-            $wts_array,
-            $source,
-            false
-        );
+        $data           = $report->aggregate_runs($runsHandler, $runs_array, $wts_array, $source, false);
         $uprofiler_data = $data['raw'];
     }
 
-    $report = new Report([ 'source' => $source, 'run' => $run ]);
     $report->init_metrics($uprofiler_data, $symbol, $sort, false);
     $report->profiler_report($symbol, $run, $uprofiler_data);
 

@@ -1,6 +1,8 @@
 <?php
 namespace Rarst\Sideface;
 
+use iUprofilerRuns;
+
 class Report
 {
     protected $body = '';
@@ -86,6 +88,134 @@ class Report
                 $pc_stats[] = 'I' . $desc[0] . '%';
             }
         }
+    }
+
+    /**
+     * @param iUprofilerRuns $uprofiler_runs_impl An object that implements the iUprofilerRuns interface
+     * @param  array         $runs                run ids of the uprofiler runs..
+     * @param  array         $wts                 integral (ideally) weights for $runs
+     * @param  string        $source              source to fetch raw data for run from
+     * @param  bool          $use_script_name     If true, a fake edge from main() to
+     *                                            to __script::<scriptname> is introduced
+     *                                            in the raw data so that after aggregations
+     *                                            the script name is still preserved.
+     *
+     * @return array Return aggregated raw data
+     */
+    public function aggregate_runs(
+        iUprofilerRuns $uprofiler_runs_impl,
+        $runs,
+        $wts,
+        $source = 'phprof',
+        $use_script_name = false
+    ) {
+        $raw_data_total = null;
+        $raw_data       = null;
+        $metrics        = [ ];
+
+        $run_count = count($runs);
+        $wts_count = count($wts);
+
+        if (( $run_count == 0 ) ||
+            ( ( $wts_count > 0 ) && ( $run_count != $wts_count ) )
+        ) {
+            return [
+                'description' => 'Invalid input..',
+                'raw'         => null
+            ];
+        }
+
+        $bad_runs = [ ];
+        foreach ($runs as $idx => $run_id) {
+            $raw_data = $uprofiler_runs_impl->get_run($run_id, $source, $description);
+
+            // use the first run to derive what metrics to aggregate on.
+            if ($idx == 0) {
+                foreach ($raw_data['main()'] as $metric => $val) {
+                    if ($metric != "pmu") {
+                        // for now, just to keep data size small, skip "peak" memory usage
+                        // data while aggregating.
+                        // The "regular" memory usage data will still be tracked.
+                        if (isset( $val )) {
+                            $metrics[] = $metric;
+                        }
+                    }
+                }
+            }
+
+            if (! uprofiler_valid_run($run_id, $raw_data)) {
+                $bad_runs[] = $run_id;
+                continue;
+            }
+
+            if ($use_script_name) {
+                $page = $description;
+
+                // create a fake function '__script::$page', and have and edge from
+                // main() to '__script::$page'. We will also need edges to transfer
+                // all edges originating from main() to now originate from
+                // '__script::$page' to all function called from main().
+                //
+                // We also weight main() ever so slightly higher so that
+                // it shows up above the new entry in reports sorted by
+                // inclusive metrics or call counts.
+                if ($page) {
+                    foreach ($raw_data["main()"] as $metric => $val) {
+                        $fake_edge[$metric] = $val;
+                        $new_main[$metric]  = $val + 0.00001;
+                    }
+                    $raw_data["main()"]                                                      = $new_main;
+                    $raw_data[uprofiler_build_parent_child_key('main()', "__script::$page")] = $fake_edge;
+                } else {
+                    $use_script_name = false;
+                }
+            }
+
+            // if no weights specified, use 1 as the default weightage..
+            $wt = ( $wts_count == 0 ) ? 1 : $wts[$idx];
+
+            // aggregate $raw_data into $raw_data_total with appropriate weight ($wt)
+            foreach ($raw_data as $parent_child => $info) {
+                if ($use_script_name) {
+                    // if this is an old edge originating from main(), it now
+                    // needs to be from '__script::$page'
+                    if (substr($parent_child, 0, 9) == 'main()==>') {
+                        $child = substr($parent_child, 9);
+                        // ignore the newly added edge from main()
+                        if (substr($child, 0, 10) != '__script::') {
+                            $parent_child = uprofiler_build_parent_child_key("__script::$page", $child);
+                        }
+                    }
+                }
+
+                if (! isset( $raw_data_total[$parent_child] )) {
+                    foreach ($metrics as $metric) {
+                        $raw_data_total[$parent_child][$metric] = ( $wt * $info[$metric] );
+                    }
+                } else {
+                    foreach ($metrics as $metric) {
+                        $raw_data_total[$parent_child][$metric] += ( $wt * $info[$metric] );
+                    }
+                }
+            }
+        }
+
+        $runs_string = implode(",", $runs);
+
+        if (isset( $wts )) {
+            $wts_string          = "in the ratio (" . implode(":", $wts) . ")";
+            $normalization_count = array_sum($wts);
+        } else {
+            $wts_string          = "";
+            $normalization_count = $run_count;
+        }
+
+        $run_count           = $run_count - count($bad_runs);
+        $data['description'] = "Aggregated Report for $run_count runs:  {$runs_string} {$wts_string}\n";
+        $data['raw']         = uprofiler_normalize_metrics($raw_data_total, $normalization_count);
+        $data['bad_runs']    = $bad_runs;
+
+        return $data;
     }
 
     public function profiler_report(
