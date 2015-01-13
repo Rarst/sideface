@@ -188,14 +188,19 @@ $metrics = null;
 
 // param name, its type, and default value
 $params = [
-    'run'    => [ UPROFILER_STRING_PARAM, '' ],
-    'wts'    => [ UPROFILER_STRING_PARAM, '' ],
-    'symbol' => [ UPROFILER_STRING_PARAM, '' ],
-    'sort'   => [ UPROFILER_STRING_PARAM, 'wt' ], // wall time
-    'run1'   => [ UPROFILER_STRING_PARAM, '' ],
-    'run2'   => [ UPROFILER_STRING_PARAM, '' ],
-    'source' => [ UPROFILER_STRING_PARAM, 'uprofiler' ],
-    'all'    => [ UPROFILER_UINT_PARAM, 0 ],
+    'run'       => [ UPROFILER_STRING_PARAM, '' ],
+    'wts'       => [ UPROFILER_STRING_PARAM, '' ],
+    'symbol'    => [ UPROFILER_STRING_PARAM, '' ],
+    'sort'      => [ UPROFILER_STRING_PARAM, 'wt' ], // wall time
+    'run1'      => [ UPROFILER_STRING_PARAM, '' ],
+    'run2'      => [ UPROFILER_STRING_PARAM, '' ],
+    'source'    => [ UPROFILER_STRING_PARAM, 'uprofiler' ],
+    'all'       => [ UPROFILER_UINT_PARAM, 0 ],
+    // callgraph
+    'func'      => [ UPROFILER_STRING_PARAM, '' ],
+    'type'      => [ UPROFILER_STRING_PARAM, 'png' ],
+    'threshold' => [ UPROFILER_FLOAT_PARAM, 0.01 ],
+    'critical'  => [ UPROFILER_BOOL_PARAM, true ],
 ];
 
 // pull values of these params, and create named globals for each param
@@ -274,6 +279,36 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
 })
     ->value('symbol', false)
     ->bind('diff_runs');
+
+$app->get('/{source}/{run}/callgraph.{callgraph_type}', function (Application $app, $source, $run) {
+
+    global $params, $threshold, $type, $uprofiler_legal_image_types, $func, $run1, $run2, $critical;
+
+    ini_set('max_execution_time', 100);
+
+    // if invalid value specified for threshold, then use the default
+    if ($threshold < 0 || $threshold > 1) {
+        $threshold = $params['threshold'][1];
+    }
+
+    // if invalid value specified for type, use the default
+    if (! array_key_exists($type, $uprofiler_legal_image_types)) {
+        $type = $params['type'][1]; // default image type.
+    }
+
+    $uprofiler_runs_impl = new UprofilerRuns_Default();
+
+//    ob_start();
+
+    if (!empty($run)) {
+        uprofiler_render_image($uprofiler_runs_impl, $run, $type, $threshold, $func, $source, $critical);
+    } else {
+        uprofiler_render_diff_image($uprofiler_runs_impl, $run1, $run2, $type, $threshold, $source);
+    }
+    return ''; // TODO wrapper, headers
+//    return ob_get_clean();
+})
+    ->bind('single_callgraph');
 
 $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run, $symbol) {
 
