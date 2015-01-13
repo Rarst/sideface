@@ -187,11 +187,6 @@ $params = [
     'run2'      => [ UPROFILER_STRING_PARAM, '' ],
     'source'    => [ UPROFILER_STRING_PARAM, 'uprofiler' ],
     'all'       => [ UPROFILER_UINT_PARAM, 0 ],
-    // callgraph
-    'func'      => [ UPROFILER_STRING_PARAM, '' ],
-    'type'      => [ UPROFILER_STRING_PARAM, 'png' ],
-    'threshold' => [ UPROFILER_FLOAT_PARAM, 0.01 ],
-    'critical'  => [ UPROFILER_BOOL_PARAM, true ],
 ];
 
 // pull values of these params, and create named globals for each param
@@ -266,28 +261,21 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
 
 $app->get('/{source}/{run}/callgraph.{callgraphType}', function (Application $app, $source, $run, $callgraphType) {
 
-    global $params, $threshold, $func, $run1, $run2, $critical;
+    global $run1, $run2;
 
     ini_set('max_execution_time', 100);
 
-    // if invalid value specified for threshold, then use the default
-    if ($threshold < 0 || $threshold > 1) {
-        $threshold = $params['threshold'][1];
-    }
-
-    $callgraph = new Callgraph();
-
-    if (! in_array($callgraphType, $callgraph->legal_image_types)) {
-        $callgraphType = $params['type'][1]; // default image type.
-    }
+    $callgraph = new Callgraph([
+        'type' => $callgraphType,
+    ]);
 
     $uprofiler_runs_impl = new UprofilerRuns_Default();
 
 //    ob_start();
     if (! empty( $run )) {
-        $callgraph->render_image($uprofiler_runs_impl, $run, $callgraphType, $threshold, $func, $source, $critical);
+        $callgraph->render_image($uprofiler_runs_impl, $run, $source);
     } else {
-        $callgraph->render_diff_image($uprofiler_runs_impl, $run1, $run2, $callgraphType, $threshold, $source);
+        $callgraph->render_diff_image($uprofiler_runs_impl, $run1, $run2, $source);
     }
     return ''; // TODO wrapper, headers
 //    return ob_get_clean();

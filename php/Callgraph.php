@@ -5,36 +5,53 @@ use iUprofilerRuns;
 
 class Callgraph
 {
-    public $legal_image_types = [ 'jpg', 'gif', 'png', 'svg', 'ps' ];
+    protected $legal_image_types = [ 'jpg', 'gif', 'png', 'svg', 'ps' ];
+
+    /** @var float */
+    protected $threshold;
+
+    /** @var string */
+    protected $type;
+
+    /** @var bool */
+    protected $critical;
+
+    /** @var string */
+    protected $func;
+
+    public function __construct(array $args = [ ])
+    {
+        if (empty( $args['threshold'] ) || $args['threshold'] < 0 || $args['threshold'] > 1) {
+            $this->threshold = '0.01';
+        } else {
+            $this->threshold = $args['threshold'];
+        }
+
+        if (empty( $args['type'] ) || ! in_array($args['type'], $this->legal_image_types)) {
+            $this->type = 'svg';
+        } else {
+            $this->type = $args['type'];
+        }
+
+        $this->critical = isset( $args['critical'] ) ? (bool) $args['critical'] : true;
+        $this->func     = empty( $args['func'] ) ? '' : $args['func'];
+    }
 
     public function render_image(
         iUprofilerRuns $uprofiler_runs_impl,
         $run_id,
-        $type,
-        $threshold,
-        $func,
-        $source,
-        $critical_path
+        $source
     ) {
-
-        $content = $this->get_content_by_run(
-            $uprofiler_runs_impl,
-            $run_id,
-            $type,
-            $threshold,
-            $func,
-            $source,
-            $critical_path
-        );
+        $content = $this->get_content_by_run($uprofiler_runs_impl, $run_id, $source);
 
         if (! $content) {
             print "Error: either we can not find profile data for run_id " . $run_id
-                  . " or the threshold " . $threshold . " is too small or you do not"
+                  . " or the threshold " . $this->threshold . " is too small or you do not"
                   . " have 'dot' image generation utility installed.";
             exit();
         }
 
-        $this->generate_mime_header($type, strlen($content));
+        $this->generate_mime_header(strlen($content));
         echo $content;
     }
 
@@ -42,8 +59,6 @@ class Callgraph
         iUprofilerRuns $uprofiler_runs_impl,
         $run1,
         $run2,
-        $type,
-        $threshold,
         $source
     ) {
         global $total1;
@@ -57,30 +72,17 @@ class Callgraph
         $symbol_tab1 = uprofiler_compute_flat_info($raw_data1, $total1);
         $symbol_tab2 = uprofiler_compute_flat_info($raw_data2, $total2);
         $run_delta   = uprofiler_compute_diff($raw_data1, $raw_data2);
-        $script      = $this->generate_dot_script(
-            $run_delta,
-            $threshold,
-            $source,
-            null,
-            null,
-            true,
-            $symbol_tab1,
-            $symbol_tab2
-        );
-        $content     = $this->generate_image_by_dot($script, $type);
+        $script      = $this->generate_dot_script($run_delta, $source, null, $symbol_tab1, $symbol_tab2);
+        $content     = $this->generate_image_by_dot($script);
 
-        $this->generate_mime_header($type, strlen($content));
+        $this->generate_mime_header(strlen($content));
         echo $content;
     }
 
     public function get_content_by_run(
         iUprofilerRuns $uprofiler_runs_impl,
         $run_id,
-        $type,
-        $threshold,
-        $func,
-        $source,
-        $critical_path
+        $source
     ) {
         if (! $run_id) {
             return "";
@@ -89,47 +91,35 @@ class Callgraph
         $raw_data = $uprofiler_runs_impl->get_run($run_id, $source, $description);
 
         if (! $raw_data) {
-            error_log("Raw data is empty");
-            return "";
+            error_log('Raw data is empty');
+            return '';
         }
 
-        $script = $this->generate_dot_script(
-            $raw_data,
-            $threshold,
-            $source,
-            $description,
-            $func,
-            $critical_path
-        );
+        $script  = $this->generate_dot_script($raw_data, $source, $description);
+        $content = $this->generate_image_by_dot($script);
 
-        $content = $this->generate_image_by_dot($script, $type);
         return $content;
     }
 
     public function generate_dot_script(
         $raw_data,
-        $threshold,
         $source,
         $page,
-        $func,
-        $critical_path,
         $right = null,
         $left = null
     ) {
-
         $max_width        = 5;
         $max_height       = 3.5;
         $max_fontsize     = 35;
         $max_sizing_ratio = 20;
-
-        $totals = [ ];
+        $totals           = [ ];
 
         if ($left === null) {
             // init_metrics($raw_data, null, null);
         }
         $sym_table = uprofiler_compute_flat_info($raw_data, $totals);
 
-        if ($critical_path) {
+        if ($this->critical) {
             $children_table = $this->get_children_table($raw_data);
             $node           = 'main()';
             $path           = [ ];
@@ -181,11 +171,11 @@ class Callgraph
         }
 
         // use the function to filter out irrelevant functions.
-        if (! empty( $func )) {
+        if (! empty( $this->func )) {
             $interested_funcs = [ ];
             foreach ($raw_data as $parent_child => $info) {
                 list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
-                if ($parent == $func || $child == $func) {
+                if ($parent == $this->func || $child == $this->func) {
                     $interested_funcs[$parent] = 1;
                     $interested_funcs[$child]  = 1;
                 }
@@ -206,7 +196,7 @@ class Callgraph
         $cur_id = 0;
         $max_wt = 0;
         foreach ($sym_table as $symbol => $info) {
-            if (empty( $func ) && abs($info['wt'] / $totals['wt']) < $threshold) {
+            if (empty( $this->func ) && abs($info['wt'] / $totals['wt']) < $this->threshold) {
                 unset( $sym_table[$symbol] );
                 continue;
             }
@@ -229,7 +219,7 @@ class Callgraph
             }
             $fillcolor = ( ( $sizing_factor < 1.5 ) ? ', style=filled, fillcolor=red' : '' );
 
-            if ($critical_path) {
+            if ($this->critical) {
                 // highlight nodes along critical path.
                 if (! $fillcolor && array_key_exists($symbol, $path)) {
                     $fillcolor = ', style=filled, fillcolor=yellow';
@@ -300,7 +290,10 @@ class Callgraph
 
             if (isset( $sym_table[$parent] )
                 && isset( $sym_table[$child] )
-                && ( empty( $func ) || ( ! empty( $func ) && ( $parent == $func || $child == $func ) ) )
+                && (
+                    empty( $this->func )
+                    || ( ! empty( $this->func ) && ( $parent == $this->func || $child == $this->func ) )
+                )
             ) {
                 $label = $info['ct'] == 1 ? $info['ct'] . " call" : $info['ct'] . " calls";
 
@@ -318,7 +311,7 @@ class Callgraph
                 $linewidth  = 1;
                 $arrow_size = 1;
 
-                if ($critical_path && isset( $path_edges[uprofiler_build_parent_child_key($parent, $child)] )) {
+                if ($this->critical && isset( $path_edges[uprofiler_build_parent_child_key($parent, $child)] )) {
                     $linewidth  = 10;
                     $arrow_size = 2;
                 }
@@ -337,7 +330,7 @@ class Callgraph
         return $result;
     }
 
-    public function generate_image_by_dot($dot_script, $type)
+    public function generate_image_by_dot($dot_script)
     {
         $descriptorspec = [
             0 => [ 'pipe', 'r' ],
@@ -345,7 +338,7 @@ class Callgraph
             2 => [ 'pipe', 'w' ]
         ];
 
-        $cmd     = ' dot -T' . $type;
+        $cmd     = ' dot -T' . $this->type;
         $process = proc_open($cmd, $descriptorspec, $pipes, sys_get_temp_dir(), [ 'PATH' => getenv('PATH') ]);
 
         if (is_resource($process)) {
@@ -370,9 +363,9 @@ class Callgraph
         exit();
     }
 
-    public function generate_mime_header($type, $length)
+    public function generate_mime_header($length)
     {
-        switch ($type) {
+        switch ($this->type) {
             case 'jpg':
                 $mime = 'image/jpeg';
                 break;
