@@ -153,3 +153,33 @@ function pct($a, $b)
         return $res;
     }
 }
+
+
+/**
+ * Given a partial query string $q return matching function names in
+ * specified uprofiler run. This is used for the type ahead function
+ * selector.
+ *
+ * @author Kannan
+ */
+function uprofiler_get_matching_functions($q, $uprofiler_data)
+{
+    $matches = [ ];
+
+    foreach ($uprofiler_data as $parent_child => $info) {
+        list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
+        if (stripos($parent, $q) !== false) {
+            $matches[$parent] = 1;
+        }
+        if (stripos($child, $q) !== false) {
+            $matches[$child] = 1;
+        }
+    }
+
+    $res = array_keys($matches);
+
+    // sort it so the answers are in some reliable order...
+    asort($res);
+
+    return ( $res );
+}
