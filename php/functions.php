@@ -177,57 +177,6 @@ function uprofiler_build_parent_child_key($parent, $child)
     }
 }
 
-
-/**
- * Checks if uprofiler raw data appears to be valid and not corrupted.
- *
- * @param   int   $run_id          Run id of run to be pruned.
- *                                 [Used only for reporting errors.]
- * @param   array $raw_data        uprofiler raw data to be pruned
- *                                 & validated.
- *
- * @return  bool   true on success, false on failure
- *
- * @author Kannan
- */
-function uprofiler_valid_run($run_id, $raw_data)
-{
-
-    $main_info = $raw_data["main()"];
-    if (empty( $main_info )) {
-        error_log("uprofiler: main() missing in raw data for Run ID: $run_id");
-        return false;
-    }
-
-    // raw data should contain either wall time or samples information...
-    if (isset( $main_info["wt"] )) {
-        $metric = "wt";
-    } else if (isset( $main_info["samples"] )) {
-        $metric = "samples";
-    } else {
-        error_log("uprofiler: Wall Time information missing from Run ID: $run_id");
-        return false;
-    }
-
-    foreach ($raw_data as $info) {
-        $val = $info[$metric];
-
-        // basic sanity checks...
-        if ($val < 0) {
-            error_log("uprofiler: $metric should not be negative: Run ID $run_id"
-                            . serialize($info));
-            return false;
-        }
-        if ($val > ( 86400000000 )) {
-            error_log("uprofiler: $metric > 1 day found in Run ID: $run_id "
-                            . serialize($info));
-            return false;
-        }
-    }
-    return true;
-}
-
-
 /**
  * Return a trimmed version of the uprofiler raw data. Note that the raw
  * data contains one entry for each unique parent/child function

@@ -143,7 +143,7 @@ class Report
                 }
             }
 
-            if (! uprofiler_valid_run($run_id, $raw_data)) {
+            if (! $this->is_valid_run($run_id, $raw_data)) {
                 $bad_runs[] = $run_id;
                 continue;
             }
@@ -216,6 +216,46 @@ class Report
         $data['bad_runs']    = $bad_runs;
 
         return $data;
+    }
+
+    /**
+     * @param   int   $run_id   Run id of run to be pruned.[Used only for reporting errors.]
+     * @param   array $raw_data uprofiler raw data to be pruned & validated.
+     *
+     * @return bool
+     */
+    public function is_valid_run($run_id, $raw_data)
+    {
+        $main_info = $raw_data["main()"];
+        if (empty( $main_info )) {
+            error_log("uprofiler: main() missing in raw data for Run ID: $run_id");
+            return false;
+        }
+
+        // raw data should contain either wall time or samples information...
+        if (isset( $main_info['wt'] )) {
+            $metric = 'wt';
+        } elseif (isset( $main_info['samples'] )) {
+            $metric = 'samples';
+        } else {
+            error_log("uprofiler: Wall Time information missing from Run ID: $run_id");
+            return false;
+        }
+
+        foreach ($raw_data as $info) {
+            $val = $info[$metric];
+
+            // basic sanity checks...
+            if ($val < 0) {
+                error_log("uprofiler: $metric should not be negative: Run ID $run_id" . serialize($info));
+                return false;
+            }
+            if ($val > ( 86400000000 )) {
+                error_log("uprofiler: $metric > 1 day found in Run ID: $run_id " . serialize($info));
+                return false;
+            }
+        }
+        return true;
     }
 
     public function profiler_report(
