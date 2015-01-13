@@ -13,21 +13,12 @@ require __DIR__ . '/vendor/autoload.php';
 /**
  * Type definitions for URL params
  */
-define('UPROFILER_STRING_PARAM', 1);
-define('UPROFILER_UINT_PARAM', 2);
-define('UPROFILER_FLOAT_PARAM', 3);
-define('UPROFILER_BOOL_PARAM', 4);
+define( 'UPROFILER_STRING_PARAM', 1 );
+define( 'UPROFILER_UINT_PARAM', 2 );
+define( 'UPROFILER_FLOAT_PARAM', 3 );
+define( 'UPROFILER_BOOL_PARAM', 4 );
 
 $GLOBALS['UPROFILER_LIB_ROOT'] = __DIR__ . '/uprofiler_lib';
-
-// Supported output format
-$uprofiler_legal_image_types = [
-    "jpg" => 1,
-    "gif" => 1,
-    "png" => 1,
-    "svg" => 1, // support scalable vector graphic
-    "ps"  => 1,
-];
 
 /**
  * Our coding convention disallows relative paths in hrefs.
@@ -275,7 +266,7 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
 
 $app->get('/{source}/{run}/callgraph.{callgraphType}', function (Application $app, $source, $run, $callgraphType) {
 
-    global $params, $threshold, $uprofiler_legal_image_types, $func, $run1, $run2, $critical;
+    global $params, $threshold, $func, $run1, $run2, $critical;
 
     ini_set('max_execution_time', 100);
 
@@ -284,16 +275,16 @@ $app->get('/{source}/{run}/callgraph.{callgraphType}', function (Application $ap
         $threshold = $params['threshold'][1];
     }
 
-    // if invalid value specified for type, use the default
-    if (! array_key_exists($callgraphType, $uprofiler_legal_image_types)) {
+    $callgraph = new Callgraph();
+
+    if (! in_array($callgraphType, $callgraph->legal_image_types)) {
         $callgraphType = $params['type'][1]; // default image type.
     }
 
     $uprofiler_runs_impl = new UprofilerRuns_Default();
-    $callgraph           = new Callgraph();
 
 //    ob_start();
-    if (!empty($run)) {
+    if (! empty( $run )) {
         $callgraph->render_image($uprofiler_runs_impl, $run, $callgraphType, $threshold, $func, $source, $critical);
     } else {
         $callgraph->render_diff_image($uprofiler_runs_impl, $run1, $run2, $callgraphType, $threshold, $source);

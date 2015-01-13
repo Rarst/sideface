@@ -5,6 +5,8 @@ use iUprofilerRuns;
 
 class Callgraph
 {
+    public $legal_image_types = [ 'jpg', 'gif', 'png', 'svg', 'ps' ];
+
     public function render_image(
         iUprofilerRuns $uprofiler_runs_impl,
         $run_id,
