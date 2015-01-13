@@ -297,13 +297,13 @@ $app->get('/{source}/{run}/callgraph.{callgraphType}', function (Application $ap
     }
 
     $uprofiler_runs_impl = new UprofilerRuns_Default();
+    $callgraph           = new Callgraph();
 
 //    ob_start();
-
     if (!empty($run)) {
-        uprofiler_render_image($uprofiler_runs_impl, $run, $callgraphType, $threshold, $func, $source, $critical);
+        $callgraph->render_image($uprofiler_runs_impl, $run, $callgraphType, $threshold, $func, $source, $critical);
     } else {
-        uprofiler_render_diff_image($uprofiler_runs_impl, $run1, $run2, $callgraphType, $threshold, $source);
+        $callgraph->render_diff_image($uprofiler_runs_impl, $run1, $run2, $callgraphType, $threshold, $source);
     }
     return ''; // TODO wrapper, headers
 //    return ob_get_clean();
