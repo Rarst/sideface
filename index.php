@@ -219,13 +219,6 @@ foreach ($params as $k => $v) {
     }
 }
 
-$vbar   = ' class="vbar"';
-$vwbar  = ' class="vwbar"';
-$vwlbar = ' class="vwlbar"';
-$vbbar  = ' class="vbbar"';
-$vrbar  = ' class="vrbar"';
-$vgbar  = ' class="vgbar"';
-
 $app = new Application([
     'debug' => true,
 ]);
