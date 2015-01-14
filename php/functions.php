@@ -430,14 +430,3 @@ function uprofiler_compute_inclusive_times($raw_data)
 
     return $symbol_tab;
 }
-
-/**
- * Set one key in an array and return the array
- *
- * @author Kannan
- */
-function uprofiler_array_set($arr, $k, $v)
-{
-    $arr[$k] = $v;
-    return $arr;
-}
