@@ -10,24 +10,10 @@ use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
 
-/**
- * Type definitions for URL params
- */
-define( 'UPROFILER_STRING_PARAM', 1 );
-define( 'UPROFILER_UINT_PARAM', 2 );
-define( 'UPROFILER_FLOAT_PARAM', 3 );
-define( 'UPROFILER_BOOL_PARAM', 4 );
-
 $GLOBALS['UPROFILER_LIB_ROOT'] = __DIR__ . '/uprofiler_lib';
 
-/**
- * Our coding convention disallows relative paths in hrefs.
- * Get the base URL path from the SCRIPT_NAME.
- */
-$base_path = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-
 // default column to sort on -- wall time
-$sort_col = "wt";
+$sort_col = 'wt';
 
 // default is "single run" report
 $diff_mode = false;
@@ -176,34 +162,6 @@ $totals_2 = 0;
  * The subset of $possible_metrics that is present in the raw profile data.
  */
 $metrics = null;
-
-// param name, its type, and default value
-$params = [
-    'run'       => [ UPROFILER_STRING_PARAM, '' ],
-    'wts'       => [ UPROFILER_STRING_PARAM, '' ],
-    'symbol'    => [ UPROFILER_STRING_PARAM, '' ],
-    'sort'      => [ UPROFILER_STRING_PARAM, 'wt' ], // wall time
-    'run1'      => [ UPROFILER_STRING_PARAM, '' ],
-    'run2'      => [ UPROFILER_STRING_PARAM, '' ],
-    'source'    => [ UPROFILER_STRING_PARAM, 'uprofiler' ],
-    'all'       => [ UPROFILER_UINT_PARAM, 0 ],
-];
-
-// pull values of these params, and create named globals for each param
-uprofiler_param_init($params);
-
-/* reset params to be a array of variable names to values
-   by the end of this page, param should only contain values that need
-   to be preserved for the next page. unset all unwanted keys in $params.
- */
-foreach ($params as $k => $v) {
-    $params[$k] = $$k;
-    // unset key from params that are using default values. So URLs aren't
-    // ridiculously long.
-    if ($params[$k] == $v[1]) {
-        unset( $params[$k] );
-    }
-}
 
 $app = new Application([
     'debug' => true,
