@@ -9,6 +9,74 @@ class Report
     protected $source = '';
     protected $run = '';
 
+    protected $descriptions = [
+        'fn'           => 'Function Name',
+        'ct'           => 'Calls',
+        'Calls%'       => 'Calls%',
+        'wt'           => 'Incl. Wall Time (microsec)',
+        'IWall%'       => 'IWall%',
+        'excl_wt'      => 'Excl. Wall Time (microsec)',
+        'EWall%'       => 'EWall%',
+        'ut'           => 'Incl. User (microsecs)',
+        'IUser%'       => 'IUser%',
+        'excl_ut'      => 'Excl. User (microsec)',
+        'EUser%'       => 'EUser%',
+        'st'           => 'Incl. Sys  (microsec)',
+        'ISys%'        => 'ISys%',
+        'excl_st'      => 'Excl. Sys  (microsec)',
+        'ESys%'        => 'ESys%',
+        'cpu'          => 'Incl. CPU (microsecs)',
+        'ICpu%'        => 'ICpu%',
+        'excl_cpu'     => 'Excl. CPU (microsec)',
+        'ECpu%'        => 'ECPU%',
+        'mu'           => 'Incl. MemUse (bytes)',
+        'IMUse%'       => 'IMemUse%',
+        'excl_mu'      => 'Excl. MemUse (bytes)',
+        'EMUse%'       => 'EMemUse%',
+        'pmu'          => 'Incl.  PeakMemUse (bytes)',
+        'IPMUse%'      => 'IPeakMemUse%',
+        'excl_pmu'     => 'Excl. PeakMemUse (bytes)',
+        'EPMUse%'      => 'EPeakMemUse%',
+        'samples'      => 'Incl. Samples',
+        'ISamples%'    => 'ISamples%',
+        'excl_samples' => 'Excl. Samples',
+        'ESamples%'    => 'ESamples%',
+    ];
+
+    protected $diff_descriptions = [
+        'fn'           => 'Function Name',
+        'ct'           => 'Calls Diff',
+        'Calls%'       => 'Calls Diff%',
+        'wt'           => 'Incl. Wall Diff (microsec)',
+        'IWall%'       => 'IWall  Diff%',
+        'excl_wt'      => 'Excl. Wall Diff (microsec)',
+        'EWall%'       => 'EWall Diff%',
+        'ut'           => 'Incl. User Diff (microsec)',
+        'IUser%'       => 'IUser Diff%',
+        'excl_ut'      => 'Excl. User Diff (microsec)',
+        'EUser%'       => 'EUser Diff%',
+        'cpu'          => 'Incl. CPU Diff (microsec)',
+        'ICpu%'        => 'ICpu Diff%',
+        'excl_cpu'     => 'Excl. CPU Diff (microsec)',
+        'ECpu%'        => 'ECpu Diff%',
+        'st'           => 'Incl. Sys Diff (microsec)',
+        'ISys%'        => 'ISys Diff%',
+        'excl_st'      => 'Excl. Sys Diff (microsec)',
+        'ESys%'        => 'ESys Diff%',
+        'mu'           => 'Incl. MemUse Diff (bytes)',
+        'IMUse%'       => 'IMemUse Diff%',
+        'excl_mu'      => 'Excl. MemUse Diff (bytes)',
+        'EMUse%'       => 'EMemUse Diff%',
+        'pmu'          => 'Incl.  PeakMemUse Diff (bytes)',
+        'IPMUse%'      => 'IPeakMemUse Diff%',
+        'excl_pmu'     => 'Excl. PeakMemUse Diff (bytes)',
+        'EPMUse%'      => 'EPeakMemUse Diff%',
+        'samples'      => 'Incl. Samples Diff',
+        'ISamples%'    => 'ISamples Diff%',
+        'excl_samples' => 'Excl. Samples Diff',
+        'ESamples%'    => 'ESamples Diff%',
+    ];
+
     public function __construct($args)
     {
         $this->source = $args['source'];
@@ -329,7 +397,6 @@ class Report
         global $sortable_columns;
         global $metrics;
         global $diff_mode;
-        global $descriptions;
         global $format_cbk;
         global $display_calls;
 
@@ -369,7 +436,7 @@ class Report
 
                 // Inclusive stat for metric
                 print( '<tr>' );
-                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
+                print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
                 $this->print_td_num($symbol_info1[$m], $format_cbk[$m]);
                 $this->print_td_num($symbol_info2[$m], $format_cbk[$m]);
                 $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m]);
@@ -378,7 +445,7 @@ class Report
 
                 // AVG (per call) Inclusive stat for metric
                 print( '<tr>' );
-                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . " per call </td>" );
+                print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . " per call </td>" );
                 $avg_info1 = 'N/A';
                 $avg_info2 = 'N/A';
                 if ($symbol_info1['ct'] > 0) {
@@ -396,7 +463,7 @@ class Report
                 // Exclusive stat for metric
                 $m = 'excl_' . $metric;
                 print( '<tr>' );
-                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
+                print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
                 $this->print_td_num($symbol_info1[$m], $format_cbk[$m]);
                 $this->print_td_num($symbol_info2[$m], $format_cbk[$m]);
                 $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m]);
@@ -416,7 +483,7 @@ class Report
         print( '<tr>' );
 
         foreach ($pc_stats as $stat) {
-            $desc = stat_description($stat);
+            $desc = $this->stat_description($stat);
             if (array_key_exists($stat, $sortable_columns)) {
                 $header = "<a href=''>{$desc}</a>"; // TODO sort link
             } else {
@@ -557,7 +624,6 @@ class Report
         global $totals_2;
         global $metrics;
         global $diff_mode;
-        global $descriptions;
         global $sort_col;
         global $format_cbk;
         global $display_calls;
@@ -588,7 +654,7 @@ class Report
             foreach ($metrics as $metric) {
                 $m = $metric;
                 print( '<tr>' );
-                print( '<td>' . str_replace('<br>', ' ', $descriptions[$m]) . '</td>' );
+                print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
                 $this->print_td_num($totals_1[$m], $format_cbk[$m]);
                 $this->print_td_num($totals_2[$m], $format_cbk[$m]);
                 $this->print_td_num($totals_2[$m] - $totals_1[$m], $format_cbk[$m]);
@@ -610,7 +676,7 @@ class Report
 
             foreach ($metrics as $metric) {
                 echo '<tr>';
-                echo '<td>Total ' . str_replace('<br>', ' ', stat_description($metric)) . ':</td>';
+                echo '<td>Total ' . str_replace('<br>', ' ', $this->stat_description($metric)) . ':</td>';
                 echo '<td>' . number_format($totals[$metric]) . ' '
                      . $possible_metrics[$metric][1] . '</td>';
                 echo '</tr>';
@@ -651,7 +717,7 @@ class Report
             $limit = 100;  // display only limited number of rows
         }
 
-        $desc = str_replace('<br>', ' ', $descriptions[$sort_col]);
+        $desc = str_replace('<br>', ' ', $this->descriptions[$sort_col]);
 
         if ($diff_mode) {
             if ($all) {
@@ -686,7 +752,7 @@ class Report
         print( '<tr>' );
 
         foreach ($stats as $stat) {
-            $desc = stat_description($stat);
+            $desc = $this->stat_description($stat);
             if (array_key_exists($stat, $sortable_columns)) {
                 $header = "<a href=''>$desc</a>"; // TODO sort link
             } else {
@@ -807,5 +873,12 @@ class Report
         $pct = ( 0 == $denom ) ? 'N/A%' : uprofiler_percent_format($number / abs($denom));
 
         print( "<td $attributes>$pct</td>\n" );
+    }
+
+    public function stat_description($stat)
+    {
+        global $diff_mode;
+
+        return $diff_mode ? $this->diff_descriptions[$stat] : $this->descriptions[$stat];
     }
 }

@@ -80,26 +80,6 @@ function sort_cbk($a, $b)
     }
 }
 
-/**
- * Get the appropriate description for a statistic
- * (depending upon whether we are in diff report mode
- * or single run report mode).
- *
- * @author Kannan
- */
-function stat_description($stat)
-{
-    global $descriptions;
-    global $diff_descriptions;
-    global $diff_mode;
-
-    if ($diff_mode) {
-        return $diff_descriptions[$stat];
-    } else {
-        return $descriptions[$stat];
-    }
-}
-
 /*
  * The list of possible metrics collected as part of uprofiler that
  * require inclusive/exclusive handling while reporting.
