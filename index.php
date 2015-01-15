@@ -13,9 +13,9 @@ $diff_mode        = false;
 $display_calls    = true;
 $stats            = [ ];
 $pc_stats         = [ ];
-$totals           = 0;
-$totals_1         = 0;
-$totals_2         = 0;
+$totals           = [ ];
+$totals_1         = [ ];
+$totals_2         = [ ];
 $metrics          = null;
 $sortable_columns = [
     'fn'           => 1,
@@ -106,7 +106,7 @@ $app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $s
     $run2           = $runsHandler->getRun($runId2, $source);
     $report         = new Report([ 'source' => $source, 'run' => $run ]);
     $report->init_metrics($run2->getData(), $symbol, 'wt', true);
-    $report->profiler_report($symbol, $runId1, $run1->getData(), $runId2, $run2->getData());
+    $report->profilerReport($symbol, $run1, $run2);
 
     return $app->render('report.twig', [
         'source' => $source,
@@ -164,7 +164,7 @@ $app->get('/{source}/{runId}/{symbol}', function (Application $app, $source, $ru
     }
 
     $report->init_metrics($runData, $symbol, 'wt', false);
-    $report->profiler_report($symbol, $runId, $runData);
+    $report->profilerReport($symbol, $run);
 
     return $app->render('report.twig', [
         'source' => $source,

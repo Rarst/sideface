@@ -326,13 +326,13 @@ class Report
         return true;
     }
 
-    public function profiler_report(
-        $rep_symbol,
-        $run1,
-        $run1_data,
-        $run2 = 0,
-        $run2_data = [ ]
-    ) {
+    /**
+     * @param string       $symbol
+     * @param RunInterface $run1
+     * @param RunInterface $run2
+     */
+    public function profilerReport($symbol, RunInterface $run1, RunInterface $run2 = null)
+    {
         ob_start();
 
         global $totals;
@@ -340,14 +340,15 @@ class Report
         global $totals_2;
         global $diff_mode;
 
-        // if we are reporting on a specific function, we can trim down
-        // the report(s) to just stuff that is relevant to this function.
-        // That way compute_flat_info()/compute_diff() etc. do not have
-        // to needlessly work hard on churning irrelevant data.
-        if (! empty( $rep_symbol )) {
-            $run1_data = uprofiler_trim_run($run1_data, [ $rep_symbol ]);
+        if (empty( $symbol )) {
+            $run1_data = $run1->getData();
             if ($diff_mode) {
-                $run2_data = uprofiler_trim_run($run2_data, [ $rep_symbol ]);
+                $run2_data = $run2->getData();
+            }
+        } else {
+            $run1_data = uprofiler_trim_run($run1->getData(), [ $symbol ]);
+            if ($diff_mode) {
+                $run2_data = uprofiler_trim_run($run2->getData(), [ $symbol ]);
             }
         }
 
@@ -361,23 +362,32 @@ class Report
         }
 
         // data tables
-        if (! empty( $rep_symbol )) {
-            if (! isset( $symbol_tab[$rep_symbol] )) {
-                echo "<hr>Symbol <b>$rep_symbol</b> not found in uprofiler run</b><hr>";
+        if (! empty( $symbol )) {
+            if (! isset( $symbol_tab[$symbol] )) {
+                echo "<hr>Symbol <b>$symbol</b> not found in uprofiler run</b><hr>";
                 return;
             }
 
             /* single function report with parent/child information */
             if ($diff_mode) {
-                $info1 = isset( $symbol_tab1[$rep_symbol] ) ? $symbol_tab1[$rep_symbol] : null;
-                $info2 = isset( $symbol_tab2[$rep_symbol] ) ? $symbol_tab2[$rep_symbol] : null;
-                $this->symbol_report($run_delta, $symbol_tab[$rep_symbol], $rep_symbol, $run1, $info1, $run2, $info2);
+                $info1 = isset( $symbol_tab1[$symbol] ) ? $symbol_tab1[$symbol] : null;
+                $info2 = isset( $symbol_tab2[$symbol] ) ? $symbol_tab2[$symbol] : null;
+                $this->symbol_report(
+                    $run_delta,
+                    $symbol_tab[$symbol],
+                    $symbol,
+                    $run1->getId(),
+                    $info1,
+                    $run2->getId(),
+                    $info2
+                );
             } else {
-                $this->symbol_report($run1_data, $symbol_tab[$rep_symbol], $rep_symbol, $run1);
+                $this->symbol_report($run1_data, $symbol_tab[$symbol], $symbol, $run1->getId());
             }
         } else {
             /* flat top-level report of all functions */
-            $this->full_report($symbol_tab, $run1, $run2);
+            $runId2 = $run2 instanceof RunInterface ? $run2->getId() : null;
+            $this->full_report($symbol_tab, $run1->getId(), $runId2);
         }
 
         $this->body = ob_get_clean();
