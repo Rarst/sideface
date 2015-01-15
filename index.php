@@ -102,7 +102,6 @@ $app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $s
     $run1        = $runsHandler->getRun($runId1, $source);
     $run2        = $runsHandler->getRun($runId2, $source);
     $report      = new Report([ 'source' => $source, 'run' => $run ]);
-    $report->init_metrics($run2->getData(), $symbol, 'wt', true);
     $report->profilerDiffReport($run1, $run2, $symbol);
 
     return $app->render('report.twig', [
@@ -160,7 +159,6 @@ $app->get('/{source}/{runId}/{symbol}', function (Application $app, $source, $ru
 //        $runData = $data['raw'];
 //    }
 
-    $report->init_metrics($run->getData(), $symbol, 'wt', false);
     $report->profilerReport($run, $symbol);
 
     return $app->render('report.twig', [

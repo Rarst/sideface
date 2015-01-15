@@ -58,7 +58,7 @@ class Report
         return $this->body;
     }
 
-    public function init_metrics($uprofiler_data, $rep_symbol, $sort, $diff_report = false)
+    public function initMetrics($data, $symbol, $sort, $diff_report = false)
     {
         global $stats;
         global $pc_stats;
@@ -80,7 +80,7 @@ class Report
 
         // For C++ profiler runs, walltime attribute isn't present.
         // In that case, use 'samples' as the default sort column.
-        if (! isset( $uprofiler_data['main()']['wt'] )) {
+        if (! isset( $data['main()']['wt'] )) {
             if ($sort_col == 'wt') {
                 $sort_col = 'samples';
             }
@@ -97,21 +97,16 @@ class Report
 
         // parent/child report doesn't support exclusive times yet.
         // So, change sort hyperlinks to closest fit.
-        if (! empty( $rep_symbol )) {
+        if (! empty( $symbol )) {
             $sort_col = str_replace('excl_', '', $sort_col);
         }
 
-        if ($display_calls) {
-            $stats = [ 'fn', 'ct', 'Calls%' ];
-        } else {
-            $stats = [ 'fn' ];
-        }
+        $stats            = $display_calls ? [ 'fn', 'ct', 'Calls%' ] : [ 'fn' ];
+        $pc_stats         = $stats;
+        $possible_metrics = uprofiler_get_possible_metrics($data);
 
-        $pc_stats = $stats;
-
-        $possible_metrics = uprofiler_get_possible_metrics($uprofiler_data);
         foreach ($possible_metrics as $metric => $desc) {
-            if (isset( $uprofiler_data['main()'][$metric] )) {
+            if (isset( $data['main()'][$metric] )) {
                 $metrics[] = $metric;
                 // flat (top-level reports): we can compute
                 // exclusive metrics reports as well.
@@ -305,6 +300,7 @@ class Report
     {
         ob_start();
         $runData = $run->getData();
+        $this->initMetrics($runData, $symbol, 'wt', false);
 
         if (! empty( $symbol )) {
             $runData = uprofiler_trim_run($runData, [ $symbol ]);
@@ -337,6 +333,7 @@ class Report
 
         $run1_data = $run1->getData();
         $run2_data = $run2->getData();
+        $this->initMetrics($run2_data, $symbol, 'wt', true);
 
         if (! empty( $symbol )) {
             $run1_data = uprofiler_trim_run($run1_data, [ $symbol ]);
