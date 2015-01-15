@@ -2,10 +2,8 @@
 
 namespace Rarst\Sideface;
 
-use Silex\Application;
 use Silex\Provider\TwigServiceProvider;
 use Silex\Provider\UrlGeneratorServiceProvider;
-use Twig_Environment;
 use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -83,8 +81,6 @@ $app->register(new UrlGeneratorServiceProvider());
 
 $app->get('/{source}', function (Application $app, $source) {
 
-    /** @var Twig_Environment $twig */
-    $twig        = $app['twig'];
     $runsHandler = new RunsHandler();
     $runsList    = $runsHandler->getRunsList();
 
@@ -94,7 +90,7 @@ $app->get('/{source}', function (Application $app, $source) {
         });
     }
 
-    return $twig->render('runs-list.twig', [ 'runs' => $runsList, 'source' => $source ]);
+    return $app->render('runs-list.twig', [ 'runs' => $runsList, 'source' => $source ]);
 })
     ->value('source', false)
     ->bind('runs_list');
@@ -113,9 +109,7 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
     $report->init_metrics($data2, $symbol, $sort, true);
     $report->profiler_report($symbol, $run1, $data1, $run2, $data2);
 
-    /** @var Twig_Environment $twig */
-    $twig = $app['twig'];
-    return $twig->render('report.twig', [
+    return $app->render('report.twig', [
         'source' => $source,
         'run'    => $run,
         'symbol' => $symbol,
@@ -177,9 +171,7 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run,
     $report->init_metrics($uprofiler_data, $symbol, $sort, false);
     $report->profiler_report($symbol, $run, $uprofiler_data);
 
-    /** @var Twig_Environment $twig */
-    $twig = $app['twig'];
-    return $twig->render('report.twig', [
+    return $app->render('report.twig', [
         'source' => $source,
         'run'    => $run,
         'symbol' => $symbol,
