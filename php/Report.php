@@ -263,10 +263,37 @@ class Report
 
         $run_count           = $run_count - count($bad_runs);
         $data['description'] = "Aggregated Report for $run_count runs:  {$runs_string} {$wts_string}\n";
-        $data['raw']         = uprofiler_normalize_metrics($raw_data_total, $normalization_count);
+        $data['raw']         = $this->normalizeMetrics($raw_data_total, $normalization_count);
         $data['bad_runs']    = $bad_runs;
 
         return $data;
+    }
+
+    /**
+     * @param array   $data
+     * @param integer $runs
+     *
+     * @return array
+     */
+    public function normalizeMetrics($data, $runs)
+    {
+        if (empty( $data ) || ( $runs == 0 )) {
+            return $data;
+        }
+
+        $normalized = [ ];
+
+        if (isset( $data['==>main()'] ) && isset( $data['main()'] )) {
+            error_log('Error: both ==>main() and main() set in raw data.');
+        }
+
+        foreach ($data as $parent_child => $info) {
+            foreach ($info as $metric => $value) {
+                $normalized[$parent_child][$metric] = ( $value / $runs );
+            }
+        }
+
+        return $normalized;
     }
 
     /**

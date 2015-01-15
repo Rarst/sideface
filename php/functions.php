@@ -158,35 +158,6 @@ function uprofiler_build_parent_child_key($parent, $child)
 }
 
 /**
- * Takes raw uprofiler data that was aggregated over "$num_runs" number
- * of runs averages/normalizes the data. Essentially the various metrics
- * collected are divided by $num_runs.
- *
- * @author Kannan
- */
-function uprofiler_normalize_metrics($raw_data, $num_runs)
-{
-
-    if (empty( $raw_data ) || ( $num_runs == 0 )) {
-        return $raw_data;
-    }
-
-    $raw_data_total = [ ];
-
-    if (isset( $raw_data["==>main()"] ) && isset( $raw_data["main()"] )) {
-        error_log("uprofiler Error: both ==>main() and main() set in raw data...");
-    }
-
-    foreach ($raw_data as $parent_child => $info) {
-        foreach ($info as $metric => $value) {
-            $raw_data_total[$parent_child][$metric] = ( $value / $num_runs );
-        }
-    }
-
-    return $raw_data_total;
-}
-
-/**
  * Analyze hierarchical raw data, and compute per-function (flat)
  * inclusive and exclusive metrics.
  *
