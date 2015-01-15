@@ -10,87 +10,66 @@ use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
 
-$GLOBALS['UPROFILER_LIB_ROOT'] = __DIR__ . '/uprofiler_lib';
-
-// default column to sort on -- wall time
-$sort_col = 'wt';
-
-// default is "single run" report
-$diff_mode = false;
-
-// call count data present?
-$display_calls = true;
-
-// The following column headers are sortable
+$sort_col         = 'wt';
+$diff_mode        = false;
+$display_calls    = true;
+$stats            = [ ];
+$pc_stats         = [ ];
+$totals           = 0;
+$totals_1         = 0;
+$totals_2         = 0;
+$metrics          = null;
 $sortable_columns = [
-    "fn"           => 1,
-    "ct"           => 1,
-    "wt"           => 1,
-    "excl_wt"      => 1,
-    "ut"           => 1,
-    "excl_ut"      => 1,
-    "st"           => 1,
-    "excl_st"      => 1,
-    "mu"           => 1,
-    "excl_mu"      => 1,
-    "pmu"          => 1,
-    "excl_pmu"     => 1,
-    "cpu"          => 1,
-    "excl_cpu"     => 1,
-    "samples"      => 1,
-    "excl_samples" => 1
+    'fn'           => 1,
+    'ct'           => 1,
+    'wt'           => 1,
+    'excl_wt'      => 1,
+    'ut'           => 1,
+    'excl_ut'      => 1,
+    'st'           => 1,
+    'excl_st'      => 1,
+    'mu'           => 1,
+    'excl_mu'      => 1,
+    'pmu'          => 1,
+    'excl_pmu'     => 1,
+    'cpu'          => 1,
+    'excl_cpu'     => 1,
+    'samples'      => 1,
+    'excl_samples' => 1
 ];
-
-// Formatting Callback Functions...
-$format_cbk = [
-    "fn"           => "",
-    "ct"           => "uprofiler_count_format",
-    "Calls%"       => "uprofiler_percent_format",
-    "wt"           => "number_format",
-    "IWall%"       => "uprofiler_percent_format",
-    "excl_wt"      => "number_format",
-    "EWall%"       => "uprofiler_percent_format",
-    "ut"           => "number_format",
-    "IUser%"       => "uprofiler_percent_format",
-    "excl_ut"      => "number_format",
-    "EUser%"       => "uprofiler_percent_format",
-    "st"           => "number_format",
-    "ISys%"        => "uprofiler_percent_format",
-    "excl_st"      => "number_format",
-    "ESys%"        => "uprofiler_percent_format",
-    "cpu"          => "number_format",
-    "ICpu%"        => "uprofiler_percent_format",
-    "excl_cpu"     => "number_format",
-    "ECpu%"        => "uprofiler_percent_format",
-    "mu"           => "number_format",
-    "IMUse%"       => "uprofiler_percent_format",
-    "excl_mu"      => "number_format",
-    "EMUse%"       => "uprofiler_percent_format",
-    "pmu"          => "number_format",
-    "IPMUse%"      => "uprofiler_percent_format",
-    "excl_pmu"     => "number_format",
-    "EPMUse%"      => "uprofiler_percent_format",
-    "samples"      => "number_format",
-    "ISamples%"    => "uprofiler_percent_format",
-    "excl_samples" => "number_format",
-    "ESamples%"    => "uprofiler_percent_format",
+$format_cbk       = [
+    'fn'           => '',
+    'ct'           => 'uprofiler_count_format',
+    'Calls%'       => 'uprofiler_percent_format',
+    'wt'           => 'number_format',
+    'IWall%'       => 'uprofiler_percent_format',
+    'excl_wt'      => 'number_format',
+    'EWall%'       => 'uprofiler_percent_format',
+    'ut'           => 'number_format',
+    'IUser%'       => 'uprofiler_percent_format',
+    'excl_ut'      => 'number_format',
+    'EUser%'       => 'uprofiler_percent_format',
+    'st'           => 'number_format',
+    'ISys%'        => 'uprofiler_percent_format',
+    'excl_st'      => 'number_format',
+    'ESys%'        => 'uprofiler_percent_format',
+    'cpu'          => 'number_format',
+    'ICpu%'        => 'uprofiler_percent_format',
+    'excl_cpu'     => 'number_format',
+    'ECpu%'        => 'uprofiler_percent_format',
+    'mu'           => 'number_format',
+    'IMUse%'       => 'uprofiler_percent_format',
+    'excl_mu'      => 'number_format',
+    'EMUse%'       => 'uprofiler_percent_format',
+    'pmu'          => 'number_format',
+    'IPMUse%'      => 'uprofiler_percent_format',
+    'excl_pmu'     => 'number_format',
+    'EPMUse%'      => 'uprofiler_percent_format',
+    'samples'      => 'number_format',
+    'ISamples%'    => 'uprofiler_percent_format',
+    'excl_samples' => 'number_format',
+    'ESamples%'    => 'uprofiler_percent_format',
 ];
-
-// columns that'll be displayed in a top-level report
-$stats = [ ];
-
-// columns that'll be displayed in a function's parent/child report
-$pc_stats = [ ];
-
-// Various total counts
-$totals   = 0;
-$totals_1 = 0;
-$totals_2 = 0;
-
-/*
- * The subset of $possible_metrics that is present in the raw profile data.
- */
-$metrics = null;
 
 $app = new Application([
     'debug' => true,
