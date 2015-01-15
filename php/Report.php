@@ -47,6 +47,25 @@ class Report
         'ESamples%'    => '○ Samples, %',
     ];
 
+    protected $sortable_columns = [
+        'fn',
+        'ct',
+        'wt',
+        'excl_wt',
+        'ut',
+        'excl_ut',
+        'st',
+        'excl_st',
+        'mu',
+        'excl_mu',
+        'pmu',
+        'excl_pmu',
+        'cpu',
+        'excl_cpu',
+        'samples',
+        'excl_samples',
+    ];
+
     public function __construct($args)
     {
         $this->source = $args['source'];
@@ -64,14 +83,13 @@ class Report
         global $pc_stats;
         global $metrics;
         global $diff_mode;
-        global $sortable_columns;
         global $sort_col;
         global $display_calls;
 
         $diff_mode = $diff_report;
 
         if (! empty( $sort )) {
-            if (array_key_exists($sort, $sortable_columns)) {
+            if (in_array($sort, $this->sortable_columns)) {
                 $sort_col = $sort;
             } else {
                 print( "Invalid Sort Key $sort specified in URL" );
@@ -380,7 +398,6 @@ class Report
         $symbol_info2 = null
     ) {
         global $pc_stats;
-        global $sortable_columns;
         global $metrics;
         global $diff_mode;
         global $format_cbk;
@@ -470,7 +487,7 @@ class Report
 
         foreach ($pc_stats as $stat) {
             $desc = $this->stat_description($stat);
-            if (array_key_exists($stat, $sortable_columns)) {
+            if (in_array($stat, $this->sortable_columns)) {
                 $header = "<a href=''>{$desc}</a>"; // TODO sort link
             } else {
                 $header = $desc;
@@ -719,7 +736,6 @@ class Report
     public function print_flat_data($title, $flat_data, $limit)
     {
         global $stats;
-        global $sortable_columns;
 
         $size = count($flat_data);
         if (! $limit) {
@@ -736,7 +752,7 @@ class Report
 
         foreach ($stats as $stat) {
             $desc = $this->stat_description($stat);
-            if (array_key_exists($stat, $sortable_columns)) {
+            if (in_array($stat, $this->sortable_columns)) {
                 $header = "<a href=''>$desc</a>"; // TODO sort link
             } else {
                 $header = $desc;
