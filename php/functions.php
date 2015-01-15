@@ -158,45 +158,6 @@ function uprofiler_build_parent_child_key($parent, $child)
 }
 
 /**
- * Return a trimmed version of the uprofiler raw data. Note that the raw
- * data contains one entry for each unique parent/child function
- * combination.The trimmed version of raw data will only contain
- * entries where either the parent or child function is in the list
- * of $functions_to_keep.
- *
- * Note: Function main() is also always kept so that overall totals
- * can still be obtained from the trimmed version.
- *
- * @param  array  uprofiler raw data
- * @param  array  array of function names
- *
- * @return array  Trimmed uprofiler Report
- *
- * @author Kannan
- */
-function uprofiler_trim_run($raw_data, $functions_to_keep)
-{
-
-    // convert list of functions to a hash with function as the key
-    $function_map = array_fill_keys($functions_to_keep, 1);
-
-    // always keep main() as well so that overall totals can still
-    // be computed if need be.
-    $function_map['main()'] = 1;
-
-    $new_raw_data = [ ];
-    foreach ($raw_data as $parent_child => $info) {
-        list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
-
-        if (isset( $function_map[$parent] ) || isset( $function_map[$child] )) {
-            $new_raw_data[$parent_child] = $info;
-        }
-    }
-
-    return $new_raw_data;
-}
-
-/**
  * Takes raw uprofiler data that was aggregated over "$num_runs" number
  * of runs averages/normalizes the data. Essentially the various metrics
  * collected are divided by $num_runs.

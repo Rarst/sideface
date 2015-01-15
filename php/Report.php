@@ -321,7 +321,7 @@ class Report
         $this->initMetrics($runData, $symbol, 'wt', false);
 
         if (! empty( $symbol )) {
-            $runData = uprofiler_trim_run($runData, [ $symbol ]);
+            $runData = $this->trimRun($runData, [ $symbol ]);
         }
 
         $symbol_tab = uprofiler_compute_flat_info($runData, $this->totals);
@@ -354,8 +354,8 @@ class Report
         $this->initMetrics($run2_data, $symbol, 'wt', true);
 
         if (! empty( $symbol )) {
-            $run1_data = uprofiler_trim_run($run1_data, [ $symbol ]);
-            $run2_data = uprofiler_trim_run($run2_data, [ $symbol ]);
+            $run1_data = $this->trimRun($run1_data, [ $symbol ]);
+            $run2_data = $this->trimRun($run2_data, [ $symbol ]);
         }
 
         $run_delta  = uprofiler_compute_diff($run1_data, $run2_data);
@@ -386,6 +386,28 @@ class Report
         }
 
         $this->body = ob_get_clean();
+    }
+
+    /**
+     * @param array $data
+     * @param array $keep
+     *
+     * @return array
+     */
+    public function trimRun($data, $keep)
+    {
+        $keep[]  = 'main()';
+        $trimmed = [ ];
+
+        foreach ($data as $parent_child => $info) {
+            list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
+
+            if (in_array($parent, $keep) || in_array($child, $keep)) {
+                $trimmed[$parent_child] = $info;
+            }
+        }
+
+        return $trimmed;
     }
 
     public function symbol_report(
