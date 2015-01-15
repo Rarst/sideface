@@ -9,6 +9,10 @@ class Report
     protected $source = '';
     protected $run = '';
 
+    protected $totals = [ ];
+    protected $totals_1 = [ ];
+    protected $totals_2 = [ ];
+
     protected $descriptions = [
         'fn'           => 'Function Name',
         'ct'           => 'Calls',
@@ -326,68 +330,78 @@ class Report
         return true;
     }
 
+
     /**
+     * @param RunInterface $run
      * @param string       $symbol
+     */
+    public function profilerReport(RunInterface $run, $symbol = '')
+    {
+        ob_start();
+        $runData = $run->getData();
+
+        if (! empty( $symbol )) {
+            $runData = uprofiler_trim_run($runData, [ $symbol ]);
+        }
+
+        $symbol_tab = uprofiler_compute_flat_info($runData, $this->totals);
+
+        if (! empty( $symbol ) && ! isset( $symbol_tab[$symbol] )) {
+            echo "Symbol {$symbol} not found in uprofiler run";
+            return;
+        }
+
+        if (empty( $symbol )) {
+            $this->full_report($symbol_tab, $runData, null);
+        } else {
+            $this->symbol_report($runData, $symbol_tab[$symbol], $symbol, $run->getId());
+        }
+
+        $this->body = ob_get_clean();
+    }
+
+    /**
      * @param RunInterface $run1
      * @param RunInterface $run2
+     * @param string       $symbol
      */
-    public function profilerReport($symbol, RunInterface $run1, RunInterface $run2 = null)
+    public function profilerDiffReport(RunInterface $run1, RunInterface $run2, $symbol = '')
     {
         ob_start();
 
-        global $totals;
-        global $totals_1;
-        global $totals_2;
-        global $diff_mode;
+        $run1_data = $run1->getData();
+        $run2_data = $run2->getData();
+
+        if (! empty( $symbol )) {
+            $run1_data = uprofiler_trim_run($run1_data, [ $symbol ]);
+            $run2_data = uprofiler_trim_run($run2_data, [ $symbol ]);
+        }
+
+        $run_delta  = uprofiler_compute_diff($run1_data, $run2_data);
+        $symbol_tab = uprofiler_compute_flat_info($run_delta, $this->totals);
+
+        if (! empty( $symbol ) && ! isset( $symbol_tab[$symbol] )) {
+            echo "Symbol {$symbol} not found in uprofiler run";
+            return;
+        }
+
+        $symbol_tab1 = uprofiler_compute_flat_info($run1_data, $this->totals_1);
+        $symbol_tab2 = uprofiler_compute_flat_info($run2_data, $this->totals_2);
 
         if (empty( $symbol )) {
-            $run1_data = $run1->getData();
-            if ($diff_mode) {
-                $run2_data = $run2->getData();
-            }
+            $this->full_report($symbol_tab, $run1->getId(), $run2->getId());
         } else {
-            $run1_data = uprofiler_trim_run($run1->getData(), [ $symbol ]);
-            if ($diff_mode) {
-                $run2_data = uprofiler_trim_run($run2->getData(), [ $symbol ]);
-            }
-        }
-
-        if ($diff_mode) {
-            $run_delta   = uprofiler_compute_diff($run1_data, $run2_data);
-            $symbol_tab  = uprofiler_compute_flat_info($run_delta, $totals);
-            $symbol_tab1 = uprofiler_compute_flat_info($run1_data, $totals_1);
-            $symbol_tab2 = uprofiler_compute_flat_info($run2_data, $totals_2);
-        } else {
-            $symbol_tab = uprofiler_compute_flat_info($run1_data, $totals);
-        }
-
-        // data tables
-        if (! empty( $symbol )) {
-            if (! isset( $symbol_tab[$symbol] )) {
-                echo "<hr>Symbol <b>$symbol</b> not found in uprofiler run</b><hr>";
-                return;
-            }
-
-            /* single function report with parent/child information */
-            if ($diff_mode) {
-                $info1 = isset( $symbol_tab1[$symbol] ) ? $symbol_tab1[$symbol] : null;
-                $info2 = isset( $symbol_tab2[$symbol] ) ? $symbol_tab2[$symbol] : null;
-                $this->symbol_report(
-                    $run_delta,
-                    $symbol_tab[$symbol],
-                    $symbol,
-                    $run1->getId(),
-                    $info1,
-                    $run2->getId(),
-                    $info2
-                );
-            } else {
-                $this->symbol_report($run1_data, $symbol_tab[$symbol], $symbol, $run1->getId());
-            }
-        } else {
-            /* flat top-level report of all functions */
-            $runId2 = $run2 instanceof RunInterface ? $run2->getId() : null;
-            $this->full_report($symbol_tab, $run1->getId(), $runId2);
+            $info1 = isset( $symbol_tab1[$symbol] ) ? $symbol_tab1[$symbol] : null;
+            $info2 = isset( $symbol_tab2[$symbol] ) ? $symbol_tab2[$symbol] : null;
+            $this->symbol_report(
+                $run_delta,
+                $symbol_tab[$symbol],
+                $symbol,
+                $run1->getId(),
+                $info1,
+                $run2->getId(),
+                $info2
+            );
         }
 
         $this->body = ob_get_clean();
@@ -402,7 +416,6 @@ class Report
         $run2 = 0,
         $symbol_info2 = null
     ) {
-        global $totals;
         global $pc_stats;
         global $sortable_columns;
         global $metrics;
@@ -516,13 +529,13 @@ class Report
         if ($display_calls) {
             // Call Count
             $this->print_td_num($symbol_info['ct'], $format_cbk['ct']);
-            $this->print_td_pct($symbol_info['ct'], $totals['ct']);
+            $this->print_td_pct($symbol_info['ct'], $this->totals['ct']);
         }
 
         // Inclusive Metrics for current function
         foreach ($metrics as $metric) {
             $this->print_td_num($symbol_info[$metric], $format_cbk[$metric]);
-            $this->print_td_pct($symbol_info[$metric], $totals[$metric]);
+            $this->print_td_pct($symbol_info[$metric], $this->totals[$metric]);
         }
         print( '</tr>' );
 
@@ -629,9 +642,6 @@ class Report
 
     public function full_report($symbol_tab, $run1, $run2)
     {
-        global $totals;
-        global $totals_1;
-        global $totals_2;
         global $metrics;
         global $diff_mode;
         global $sort_col;
@@ -654,10 +664,10 @@ class Report
             if ($display_calls) {
                 print( '<tr>' );
                 print( '<td>Number of Function Calls</td>' );
-                $this->print_td_num($totals_1['ct'], $format_cbk['ct']);
-                $this->print_td_num($totals_2['ct'], $format_cbk['ct']);
-                $this->print_td_num($totals_2['ct'] - $totals_1['ct'], $format_cbk['ct']);
-                $this->print_td_pct($totals_2['ct'] - $totals_1['ct'], $totals_1['ct']);
+                $this->print_td_num($this->totals_1['ct'], $format_cbk['ct']);
+                $this->print_td_num($this->totals_2['ct'], $format_cbk['ct']);
+                $this->print_td_num($this->totals_2['ct'] - $this->totals_1['ct'], $format_cbk['ct']);
+                $this->print_td_pct($this->totals_2['ct'] - $this->totals_1['ct'], $this->totals_1['ct']);
                 print( '</tr>' );
             }
 
@@ -665,10 +675,10 @@ class Report
                 $m = $metric;
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
-                $this->print_td_num($totals_1[$m], $format_cbk[$m]);
-                $this->print_td_num($totals_2[$m], $format_cbk[$m]);
-                $this->print_td_num($totals_2[$m] - $totals_1[$m], $format_cbk[$m]);
-                $this->print_td_pct($totals_2[$m] - $totals_1[$m], $totals_1[$m]);
+                $this->print_td_num($this->totals_1[$m], $format_cbk[$m]);
+                $this->print_td_num($this->totals_2[$m], $format_cbk[$m]);
+                $this->print_td_num($this->totals_2[$m] - $this->totals_1[$m], $format_cbk[$m]);
+                $this->print_td_pct($this->totals_2[$m] - $this->totals_1[$m], $this->totals_1[$m]);
                 print( '<tr>' );
             }
             print( '</table>' );
@@ -687,7 +697,7 @@ class Report
             foreach ($metrics as $metric) {
                 echo '<tr>';
                 echo '<td>Total ' . str_replace('<br>', ' ', $this->stat_description($metric)) . ':</td>';
-                echo '<td>' . number_format($totals[$metric]) . ' '
+                echo '<td>' . number_format($this->totals[$metric]) . ' '
                      . $possible_metrics[$metric][1] . '</td>';
                 echo '</tr>';
             }
@@ -695,7 +705,7 @@ class Report
             if ($display_calls) {
                 echo '<tr>';
                 echo '<td>Number of Function Calls:</td>';
-                echo '<td>' . number_format($totals['ct']) . '</td>';
+                echo '<td>' . number_format($this->totals['ct']) . '</td>';
                 echo '</tr>';
             }
 
@@ -795,7 +805,6 @@ class Report
 
     public function print_function_info($info)
     {
-        global $totals;
         global $metrics;
         global $format_cbk;
         global $display_calls;
@@ -811,18 +820,18 @@ class Report
         if ($display_calls) {
             // Call Count..
             $this->print_td_num($info['ct'], $format_cbk['ct']);
-            $this->print_td_pct($info['ct'], $totals['ct']);
+            $this->print_td_pct($info['ct'], $this->totals['ct']);
         }
 
         // Other metrics..
         foreach ($metrics as $metric) {
             // Inclusive metric
             $this->print_td_num($info[$metric], $format_cbk[$metric]);
-            $this->print_td_pct($info[$metric], $totals[$metric]);
+            $this->print_td_pct($info[$metric], $this->totals[$metric]);
 
             // Exclusive Metric
             $this->print_td_num($info['excl_' . $metric], $format_cbk['excl_' . $metric]);
-            $this->print_td_pct($info['excl_' . $metric], $totals[$metric]);
+            $this->print_td_pct($info['excl_' . $metric], $this->totals[$metric]);
         }
 
         print( "</tr>\n" );

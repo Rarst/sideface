@@ -13,9 +13,6 @@ $diff_mode        = false;
 $display_calls    = true;
 $stats            = [ ];
 $pc_stats         = [ ];
-$totals           = [ ];
-$totals_1         = [ ];
-$totals_2         = [ ];
 $metrics          = null;
 $sortable_columns = [
     'fn'           => 1,
@@ -100,13 +97,13 @@ $app->get('/{source}', function (Application $app, $source) {
 
 $app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $source, $runId1, $runId2, $symbol) {
 
-    $run            = $runId1 . '-' . $runId2;
-    $runsHandler    = new RunsHandler();
-    $run1           = $runsHandler->getRun($runId1, $source);
-    $run2           = $runsHandler->getRun($runId2, $source);
-    $report         = new Report([ 'source' => $source, 'run' => $run ]);
+    $run         = $runId1 . '-' . $runId2;
+    $runsHandler = new RunsHandler();
+    $run1        = $runsHandler->getRun($runId1, $source);
+    $run2        = $runsHandler->getRun($runId2, $source);
+    $report      = new Report([ 'source' => $source, 'run' => $run ]);
     $report->init_metrics($run2->getData(), $symbol, 'wt', true);
-    $report->profilerReport($symbol, $run1, $run2);
+    $report->profilerDiffReport($run1, $run2, $symbol);
 
     return $app->render('report.twig', [
         'source' => $source,
@@ -138,33 +135,33 @@ $app->get('/{source}/{runId}/callgraph.{callgraphType}', function (Application $
 
 $app->get('/{source}/{runId}/{symbol}', function (Application $app, $source, $runId, $symbol) {
 
-    global $wts;
+//    global $wts;
 
     $runsHandler = new RunsHandler();
+    $report      = new Report([ 'source' => $source, 'run' => $runId ]);
+    $run         = $runsHandler->getRun($runId, $source);
 
+    // TODO aggregate runs stuff
     // run may be a single run or a comma separate list of runs
     // that'll be aggregated. If "wts" (a comma separated list
     // of integral weights is specified), the runs will be
     // aggregated in that ratio.
     //
-    $runs_array = explode(',', $runId);
-    $report     = new Report([ 'source' => $source, 'run' => $runId ]);
+//    $runs_array = explode(',', $runId);
+//    if (count($runs_array) == 1) {
+//        $runData = $run->getData();
+//    } else {
+//        if (! empty( $wts )) {
+//            $wts_array = explode(",", $wts);
+//        } else {
+//            $wts_array = null;
+//        }
+//        $data    = $report->aggregate_runs($runsHandler, $runs_array, $wts_array, $source, false);
+//        $runData = $data['raw'];
+//    }
 
-    if (count($runs_array) == 1) {
-        $run     = $runsHandler->getRun($runs_array[0], $source);
-        $runData = $run->getData();
-    } else {
-        if (! empty( $wts )) {
-            $wts_array = explode(",", $wts);
-        } else {
-            $wts_array = null;
-        }
-        $data    = $report->aggregate_runs($runsHandler, $runs_array, $wts_array, $source, false);
-        $runData = $data['raw'];
-    }
-
-    $report->init_metrics($runData, $symbol, 'wt', false);
-    $report->profilerReport($symbol, $run);
+    $report->init_metrics($run->getData(), $symbol, 'wt', false);
+    $report->profilerReport($run, $symbol);
 
     return $app->render('report.twig', [
         'source' => $source,
