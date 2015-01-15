@@ -11,9 +11,6 @@ require __DIR__ . '/vendor/autoload.php';
 $sort_col         = 'wt';
 $diff_mode        = false;
 $display_calls    = true;
-$stats            = [ ];
-$pc_stats         = [ ];
-$metrics          = null;
 $format_cbk       = [
     'fn'           => '',
     'ct'           => 'uprofiler_count_format',

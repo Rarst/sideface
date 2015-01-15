@@ -9,9 +9,12 @@ class Report
     protected $source = '';
     protected $run = '';
 
+    protected $stats = [ ];
+    protected $pc_stats = [ ];
     protected $totals = [ ];
     protected $totals_1 = [ ];
     protected $totals_2 = [ ];
+    protected $metrics = [];
 
     protected $descriptions = [
         'fn'           => 'Function Name',
@@ -79,9 +82,6 @@ class Report
 
     public function initMetrics($data, $symbol, $sort, $diff_report = false)
     {
-        global $stats;
-        global $pc_stats;
-        global $metrics;
         global $diff_mode;
         global $sort_col;
         global $display_calls;
@@ -119,24 +119,24 @@ class Report
             $sort_col = str_replace('excl_', '', $sort_col);
         }
 
-        $stats            = $display_calls ? [ 'fn', 'ct', 'Calls%' ] : [ 'fn' ];
-        $pc_stats         = $stats;
+        $this->stats            = $display_calls ? [ 'fn', 'ct', 'Calls%' ] : [ 'fn' ];
+        $this->pc_stats         = $this->stats;
         $possible_metrics = uprofiler_get_possible_metrics($data);
 
         foreach ($possible_metrics as $metric => $desc) {
             if (isset( $data['main()'][$metric] )) {
-                $metrics[] = $metric;
+                $this->metrics[] = $metric;
                 // flat (top-level reports): we can compute
                 // exclusive metrics reports as well.
-                $stats[] = $metric;
-                $stats[] = 'I' . $desc[0] . '%';
-                $stats[] = 'excl_' . $metric;
-                $stats[] = 'E' . $desc[0] . '%';
+                $this->stats[] = $metric;
+                $this->stats[] = 'I' . $desc[0] . '%';
+                $this->stats[] = 'excl_' . $metric;
+                $this->stats[] = 'E' . $desc[0] . '%';
 
                 // parent/child report for a function: we can
                 // only breakdown inclusive times correctly.
-                $pc_stats[] = $metric;
-                $pc_stats[] = 'I' . $desc[0] . '%';
+                $this->pc_stats[] = $metric;
+                $this->pc_stats[] = 'I' . $desc[0] . '%';
             }
         }
     }
@@ -446,8 +446,6 @@ class Report
         $run2 = 0,
         $symbol_info2 = null
     ) {
-        global $pc_stats;
-        global $metrics;
         global $diff_mode;
         global $format_cbk;
         global $display_calls;
@@ -483,7 +481,7 @@ class Report
                 print( '</tr>' );
             }
 
-            foreach ($metrics as $metric) {
+            foreach ($this->metrics as $metric) {
                 $m = $metric;
 
                 // Inclusive stat for metric
@@ -534,7 +532,7 @@ class Report
         print( '<table class="table table-condensed">' . "\n" );
         print( '<tr>' );
 
-        foreach ($pc_stats as $stat) {
+        foreach ($this->pc_stats as $stat) {
             $desc = $this->stat_description($stat);
             if (in_array($stat, $this->sortable_columns)) {
                 $header = "<a href=''>{$desc}</a>"; // TODO sort link
@@ -562,7 +560,7 @@ class Report
         }
 
         // Inclusive Metrics for current function
-        foreach ($metrics as $metric) {
+        foreach ($this->metrics as $metric) {
             $this->print_td_num($symbol_info[$metric], $format_cbk[$metric]);
             $this->print_td_pct($symbol_info[$metric], $this->totals[$metric]);
         }
@@ -578,7 +576,7 @@ class Report
         }
 
         // Exclusive Metrics for current function
-        foreach ($metrics as $metric) {
+        foreach ($this->metrics as $metric) {
             $this->print_td_num(
                 $symbol_info['excl_' . $metric],
                 $format_cbk['excl_' . $metric],
@@ -599,7 +597,7 @@ class Report
         } else {
             $base_ct = 0;
         }
-        foreach ($metrics as $metric) {
+        foreach ($this->metrics as $metric) {
             $base_info[$metric] = $symbol_info[$metric];
         }
         foreach ($run_data as $parent_child => $info) {
@@ -671,7 +669,6 @@ class Report
 
     public function full_report($symbol_tab, $run1, $run2)
     {
-        global $metrics;
         global $diff_mode;
         global $sort_col;
         global $format_cbk;
@@ -700,7 +697,7 @@ class Report
                 print( '</tr>' );
             }
 
-            foreach ($metrics as $metric) {
+            foreach ($this->metrics as $metric) {
                 $m = $metric;
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
@@ -784,8 +781,6 @@ class Report
 
     public function print_flat_data($title, $flat_data, $limit)
     {
-        global $stats;
-
         $size = count($flat_data);
         if (! $limit) {
             $limit        = $size;
@@ -799,7 +794,7 @@ class Report
         print( '<table class="table table-condensed">' );
         print( '<tr>' );
 
-        foreach ($stats as $stat) {
+        foreach ($this->stats as $stat) {
             $desc = $this->stat_description($stat);
             if (in_array($stat, $this->sortable_columns)) {
                 $header = "<a href=''>$desc</a>"; // TODO sort link
@@ -833,7 +828,6 @@ class Report
 
     public function print_function_info($info)
     {
-        global $metrics;
         global $format_cbk;
         global $display_calls;
 
@@ -852,7 +846,7 @@ class Report
         }
 
         // Other metrics..
-        foreach ($metrics as $metric) {
+        foreach ($this->metrics as $metric) {
             // Inclusive metric
             $this->print_td_num($info[$metric], $format_cbk[$metric]);
             $this->print_td_pct($info[$metric], $this->totals[$metric]);
@@ -886,7 +880,6 @@ class Report
 
     public function pc_info($info, $base_ct, $base_info, $parent)
     {
-        global $metrics;
         global $format_cbk;
         global $display_calls;
 
@@ -900,7 +893,7 @@ class Report
         }
 
         /* Inclusive metric values  */
-        foreach ($metrics as $metric) {
+        foreach ($this->metrics as $metric) {
             $this->print_td_num($info[$metric], $format_cbk[$metric], "type='{$type}' metric='{$metric}'");
             $this->print_td_pct($info[$metric], $base_info[$metric], "type='{$type}' metric='{$metric}'");
         }
