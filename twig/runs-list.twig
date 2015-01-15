@@ -32,7 +32,7 @@
                     <label class="radio-inline"><input type="radio" name="from" value="{{ run.id }}"/> from</label>
                     <label class="radio-inline"><input type="radio" name="to" value="{{ run.id }}"/> to</label>
                 </td>
-                <td><a href="{{ url('single_run', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
+                <td><a href="{{ url('single_run', {source:run.source,runId:run.id}) }}">{{ run.id }}</a></td>
                 {% if not source %}
                     <td><a href="{{ url('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
                 {% endif %}

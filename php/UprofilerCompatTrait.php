@@ -7,6 +7,12 @@ namespace Rarst\Sideface;
  */
 trait UprofilerCompatTrait
 {
+    /**
+     * @param string $runId
+     * @param string $source
+     *
+     * @return RunInterface
+     */
     abstract public function getRun($runId, $source);
 
     /**
@@ -26,7 +32,7 @@ trait UprofilerCompatTrait
             return null;
         }
         $run_desc = "uprofiler Run (Namespace=$type)";
-        return $run;
+        return $run->getData();
     }
 
     abstract public function saveRun($data, $source, $runId = null);

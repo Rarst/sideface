@@ -45,7 +45,7 @@ class RunsHandler implements iUprofilerRuns
      * @param string $runId
      * @param string $source
      *
-     * @return array|bool
+     * @return RunInterface|bool
      */
     public function getRun($runId, $source)
     {
@@ -54,7 +54,7 @@ class RunsHandler implements iUprofilerRuns
             return false;
         }
         $contents = file_get_contents($fileName);
-        return unserialize($contents);
+        return new Run($runId, $source, unserialize($contents));
     }
 
     /**

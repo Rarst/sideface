@@ -95,19 +95,17 @@ $app->get('/{source}', function (Application $app, $source) {
     ->value('source', false)
     ->bind('runs_list');
 
-$app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $source, $run1, $run2, $symbol) {
+// TODO diff callgraph
 
-    global $params, $sort;
+$app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $source, $runId1, $runId2, $symbol) {
 
-    $params['run1'] = $run1;
-    $params['run2'] = $run2;
-    $run            = $run1 . '-' . $run2;
+    $run            = $runId1 . '-' . $runId2;
     $runsHandler    = new RunsHandler();
-    $data1          = $runsHandler->getRun($run1, $source);
-    $data2          = $runsHandler->getRun($run2, $source);
+    $run1           = $runsHandler->getRun($runId1, $source);
+    $run2           = $runsHandler->getRun($runId2, $source);
     $report         = new Report([ 'source' => $source, 'run' => $run ]);
-    $report->init_metrics($data2, $symbol, $sort, true);
-    $report->profiler_report($symbol, $run1, $data1, $run2, $data2);
+    $report->init_metrics($run2->getData(), $symbol, 'wt', true);
+    $report->profiler_report($symbol, $runId1, $run1->getData(), $runId2, $run2->getData());
 
     return $app->render('report.twig', [
         'source' => $source,
@@ -119,9 +117,7 @@ $app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $sourc
     ->value('symbol', false)
     ->bind('diff_runs');
 
-$app->get('/{source}/{run}/callgraph.{callgraphType}', function (Application $app, $source, $run, $callgraphType) {
-
-    global $run1, $run2;
+$app->get('/{source}/{runId}/callgraph.{callgraphType}', function (Application $app, $source, $runId, $callgraphType) {
 
     ini_set('max_execution_time', 100);
 
@@ -132,19 +128,16 @@ $app->get('/{source}/{run}/callgraph.{callgraphType}', function (Application $ap
     $uprofiler_runs_impl = new UprofilerRuns_Default();
 
 //    ob_start();
-    if (! empty( $run )) {
-        $callgraph->render_image($uprofiler_runs_impl, $run, $source);
-    } else {
-        $callgraph->render_diff_image($uprofiler_runs_impl, $run1, $run2, $source);
-    }
+    $callgraph->render_image($uprofiler_runs_impl, $runId, $source);
+
     return ''; // TODO wrapper, headers
 //    return ob_get_clean();
 })
     ->bind('single_callgraph');
 
-$app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run, $symbol) {
+$app->get('/{source}/{runId}/{symbol}', function (Application $app, $source, $runId, $symbol) {
 
-    global $wts, $sort;
+    global $wts;
 
     $runsHandler = new RunsHandler();
 
@@ -153,27 +146,28 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, $run,
     // of integral weights is specified), the runs will be
     // aggregated in that ratio.
     //
-    $runs_array = explode(",", $run);
-    $report     = new Report([ 'source' => $source, 'run' => $run ]);
+    $runs_array = explode(',', $runId);
+    $report     = new Report([ 'source' => $source, 'run' => $runId ]);
 
     if (count($runs_array) == 1) {
-        $uprofiler_data = $runsHandler->getRun($runs_array[0], $source);
+        $run     = $runsHandler->getRun($runs_array[0], $source);
+        $runData = $run->getData();
     } else {
         if (! empty( $wts )) {
             $wts_array = explode(",", $wts);
         } else {
             $wts_array = null;
         }
-        $data           = $report->aggregate_runs($runsHandler, $runs_array, $wts_array, $source, false);
-        $uprofiler_data = $data['raw'];
+        $data    = $report->aggregate_runs($runsHandler, $runs_array, $wts_array, $source, false);
+        $runData = $data['raw'];
     }
 
-    $report->init_metrics($uprofiler_data, $symbol, $sort, false);
-    $report->profiler_report($symbol, $run, $uprofiler_data);
+    $report->init_metrics($runData, $symbol, 'wt', false);
+    $report->profiler_report($symbol, $runId, $runData);
 
     return $app->render('report.twig', [
         'source' => $source,
-        'run'    => $run,
+        'run'    => $runId,
         'symbol' => $symbol,
         'body'   => $report->getBody(),
     ]);
