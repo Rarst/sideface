@@ -119,8 +119,8 @@ class Report
             $sort_col = str_replace('excl_', '', $sort_col);
         }
 
-        $this->stats            = $display_calls ? [ 'fn', 'ct', 'Calls%' ] : [ 'fn' ];
-        $this->pc_stats         = $this->stats;
+        $this->stats      = $display_calls ? [ 'fn', 'ct', 'Calls%' ] : [ 'fn' ];
+        $this->pc_stats   = $this->stats;
         $possible_metrics = uprofiler_get_possible_metrics($data);
 
         foreach ($possible_metrics as $metric => $desc) {
@@ -351,7 +351,9 @@ class Report
             $runData = $this->trimRun($runData, [ $symbol ]);
         }
 
-        $symbol_tab = uprofiler_compute_flat_info($runData, $this->totals);
+        $runDataObject = new RunData($runData);
+        $symbol_tab    = $runDataObject->getFlat();
+        $this->totals  = $runDataObject->getTotals();
 
         if (! empty( $symbol ) && ! isset( $symbol_tab[$symbol] )) {
             echo "Symbol {$symbol} not found in uprofiler run";
@@ -385,16 +387,22 @@ class Report
             $run2_data = $this->trimRun($run2_data, [ $symbol ]);
         }
 
-        $run_delta  = uprofiler_compute_diff($run1_data, $run2_data);
-        $symbol_tab = uprofiler_compute_flat_info($run_delta, $this->totals);
+        $run_delta     = uprofiler_compute_diff($run1_data, $run2_data);
+        $runDataObject = new RunData($run_delta);
+        $symbol_tab    = $runDataObject->getFlat();
+        $this->totals  = $runDataObject->getTotals();
 
         if (! empty( $symbol ) && ! isset( $symbol_tab[$symbol] )) {
             echo "Symbol {$symbol} not found in uprofiler run";
             return;
         }
 
-        $symbol_tab1 = uprofiler_compute_flat_info($run1_data, $this->totals_1);
-        $symbol_tab2 = uprofiler_compute_flat_info($run2_data, $this->totals_2);
+        $runDataObject  = new RunData($run1_data);
+        $symbol_tab1    = $runDataObject->getFlat();
+        $this->totals_1 = $runDataObject->getTotals();
+        $runDataObject  = new RunData($run2_data);
+        $symbol_tab2    = $runDataObject->getFlat();
+        $this->totals_2 = $runDataObject->getTotals();
 
         if (empty( $symbol )) {
             $this->full_report($symbol_tab, $run1->getId(), $run2->getId());

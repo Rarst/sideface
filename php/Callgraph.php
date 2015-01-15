@@ -61,16 +61,15 @@ class Callgraph
         $run2,
         $source
     ) {
-        $raw_data1 = $uprofiler_runs_impl->get_run($run1, $source, $desc_unused);
-        $raw_data2 = $uprofiler_runs_impl->get_run($run2, $source, $desc_unused);
-        // init_metrics($raw_data1, null, null);
-        //$children_table1 = uprofiler_get_children_table($raw_data1);
-        //$children_table2 = uprofiler_get_children_table($raw_data2);
-        $symbol_tab1 = uprofiler_compute_flat_info($raw_data1, $total1);
-        $symbol_tab2 = uprofiler_compute_flat_info($raw_data2, $total2);
-        $run_delta   = uprofiler_compute_diff($raw_data1, $raw_data2);
-        $script      = $this->generate_dot_script($run_delta, $source, null, $symbol_tab1, $symbol_tab2);
-        $content     = $this->generate_image_by_dot($script);
+        $raw_data1     = $uprofiler_runs_impl->get_run($run1, $source, $desc_unused);
+        $raw_data2     = $uprofiler_runs_impl->get_run($run2, $source, $desc_unused);
+        $runDataObject = new RunData($raw_data1);
+        $symbol_tab1   = $runDataObject->getFlat();
+        $runDataObject = new RunData($raw_data2);
+        $symbol_tab2   = $runDataObject->getFlat();
+        $run_delta     = uprofiler_compute_diff($raw_data1, $raw_data2);
+        $script        = $this->generate_dot_script($run_delta, $source, null, $symbol_tab1, $symbol_tab2);
+        $content       = $this->generate_image_by_dot($script);
 
         $this->generate_mime_header(strlen($content));
         echo $content;
@@ -109,12 +108,13 @@ class Callgraph
         $max_height       = 3.5;
         $max_fontsize     = 35;
         $max_sizing_ratio = 20;
-        $totals           = [ ];
 
         if ($left === null) {
             // init_metrics($raw_data, null, null);
         }
-        $sym_table = uprofiler_compute_flat_info($raw_data, $totals);
+        $runDataObject = new RunData($raw_data);
+        $sym_table     = $runDataObject->getFlat();
+        $totals        = $runDataObject->getTotals();
 
         if ($this->critical) {
             $children_table = $this->get_children_table($raw_data);
