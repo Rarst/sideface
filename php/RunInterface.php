@@ -2,6 +2,8 @@
 
 namespace Rarst\Sideface;
 
+use DateTime;
+
 interface RunInterface
 {
     /**
@@ -18,4 +20,9 @@ interface RunInterface
      * @return array
      */
     public function getData();
+
+    /**
+     * @return DateTime
+     */
+    public function getTime();
 }

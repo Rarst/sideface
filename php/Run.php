@@ -1,21 +1,26 @@
 <?php
 namespace Rarst\Sideface;
 
+use DateTime;
+
 class Run implements RunInterface
 {
     protected $id;
     protected $source;
+    protected $time;
     protected $data;
 
     /**
      * @param string $id
      * @param string $source
+     * @param string $timestamp
      * @param array  $data
      */
-    public function __construct($id, $source, $data)
+    public function __construct($id, $source, $timestamp, $data)
     {
         $this->id     = $id;
         $this->source = $source;
+        $this->time   = new \DateTimeImmutable('@'.$timestamp);
         $this->data   = $data;
     }
 
@@ -41,5 +46,13 @@ class Run implements RunInterface
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * @return DateTime
+     */
+    public function getTime()
+    {
+        return $this->time;
     }
 }

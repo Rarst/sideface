@@ -86,7 +86,8 @@ $app->get('/{source}', function (Application $app, $source) {
 
     if ($source) {
         $runsList = array_filter($runsList, function ($run) use ($source) {
-            return $run['source'] === $source;
+            /** @var RunInterface $run */
+            return $run->getSource() === $source;
         });
     }
 

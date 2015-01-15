@@ -21,7 +21,6 @@
                 <th>Source</th>
             {% endif %}
             <th>Date</th>
-            <th>Type</th>
         </tr>
         </thead>
         <tbody>
@@ -37,7 +36,6 @@
                     <td><a href="{{ url('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
                 {% endif %}
                 <td>{{ run.time|date('Y-m-d h:m:s') }}</td>
-                <td>{{ run.suffix }}</td>
             </tr>
         {% endfor %}
         </tbody>

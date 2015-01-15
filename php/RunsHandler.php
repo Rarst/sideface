@@ -54,7 +54,7 @@ class RunsHandler implements iUprofilerRuns
             return false;
         }
         $contents = file_get_contents($fileName);
-        return new Run($runId, $source, unserialize($contents));
+        return new Run($runId, $source, filemtime($fileName), unserialize($contents));
     }
 
     /**
@@ -78,6 +78,9 @@ class RunsHandler implements iUprofilerRuns
         return $runId;
     }
 
+    /**
+     * @return RunInterface[]
+     */
     public function getRunsList()
     {
         $runs = [ ];
@@ -90,12 +93,7 @@ class RunsHandler implements iUprofilerRuns
         });
         foreach ($files as $file) {
             list( $run, $source ) = explode('.', basename($file, '.' . $this->suffix), 2);
-            $runs[] = [
-                'id'     => $run,
-                'source' => $source,
-                'suffix' => $this->suffix,
-                'time'   => filemtime($file),
-            ];
+            $runs[] = $this->getRun($run, $source);
         }
         return $runs;
     }
