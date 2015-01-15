@@ -387,7 +387,8 @@ class Report
             $run2_data = $this->trimRun($run2_data, [ $symbol ]);
         }
 
-        $run_delta     = uprofiler_compute_diff($run1_data, $run2_data);
+        $runDataObject = new RunData($run1_data);
+        $run_delta     = $runDataObject->diffTo($run2_data);
         $runDataObject = new RunData($run_delta);
         $symbol_tab    = $runDataObject->getFlat();
         $this->totals  = $runDataObject->getTotals();

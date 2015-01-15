@@ -158,50 +158,6 @@ function uprofiler_build_parent_child_key($parent, $child)
 }
 
 /**
- * Hierarchical diff:
- * Compute and return difference of two call graphs: Run2 - Run1.
- *
- * @author Kannan
- */
-function uprofiler_compute_diff($uprofiler_data1, $uprofiler_data2)
-{
-    global $display_calls;
-
-    // use the second run to decide what metrics we will do the diff on
-    $metrics = uprofiler_get_metrics($uprofiler_data2);
-
-    $uprofiler_delta = $uprofiler_data2;
-
-    foreach ($uprofiler_data1 as $parent_child => $info) {
-
-        if (! isset( $uprofiler_delta[$parent_child] )) {
-
-            // this pc combination was not present in run1;
-            // initialize all values to zero.
-            if ($display_calls) {
-                $uprofiler_delta[$parent_child] = [ "ct" => 0 ];
-            } else {
-                $uprofiler_delta[$parent_child] = [ ];
-            }
-            foreach ($metrics as $metric) {
-                $uprofiler_delta[$parent_child][$metric] = 0;
-            }
-        }
-
-        if ($display_calls) {
-            $uprofiler_delta[$parent_child]["ct"] -= $info["ct"];
-        }
-
-        foreach ($metrics as $metric) {
-            $uprofiler_delta[$parent_child][$metric] -= $info[$metric];
-        }
-    }
-
-    return $uprofiler_delta;
-}
-
-
-/**
  * Compute inclusive metrics for function. This code was factored out
  * of uprofiler_compute_flat_info().
  *

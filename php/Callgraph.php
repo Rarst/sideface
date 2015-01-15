@@ -61,15 +61,15 @@ class Callgraph
         $run2,
         $source
     ) {
-        $raw_data1     = $uprofiler_runs_impl->get_run($run1, $source, $desc_unused);
-        $raw_data2     = $uprofiler_runs_impl->get_run($run2, $source, $desc_unused);
-        $runDataObject = new RunData($raw_data1);
-        $symbol_tab1   = $runDataObject->getFlat();
-        $runDataObject = new RunData($raw_data2);
-        $symbol_tab2   = $runDataObject->getFlat();
-        $run_delta     = uprofiler_compute_diff($raw_data1, $raw_data2);
-        $script        = $this->generate_dot_script($run_delta, $source, null, $symbol_tab1, $symbol_tab2);
-        $content       = $this->generate_image_by_dot($script);
+        $raw_data1      = $uprofiler_runs_impl->get_run($run1, $source, $desc_unused);
+        $raw_data2      = $uprofiler_runs_impl->get_run($run2, $source, $desc_unused);
+        $runDataObject1 = new RunData($raw_data1);
+        $symbol_tab1    = $runDataObject1->getFlat();
+        $runDataObject2 = new RunData($raw_data2);
+        $symbol_tab2    = $runDataObject2->getFlat();
+        $run_delta      = $runDataObject1->diffTo($raw_data2);
+        $script         = $this->generate_dot_script($run_delta, $source, null, $symbol_tab1, $symbol_tab2);
+        $content        = $this->generate_image_by_dot($script);
 
         $this->generate_mime_header(strlen($content));
         echo $content;

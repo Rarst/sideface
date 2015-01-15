@@ -80,6 +80,32 @@ class RunData implements RunDataInterface
 
     public function diffTo(array $data)
     {
-        // TODO: Implement diffTo() method.
+        global $display_calls;
+
+        $metrics = uprofiler_get_metrics($data);
+        $delta   = $data;
+
+        foreach ($this->data as $parent_child => $info) {
+            if (! isset( $delta[$parent_child] )) {
+                if ($display_calls) {
+                    $delta[$parent_child] = [ 'ct' => 0 ];
+                } else {
+                    $delta[$parent_child] = [ ];
+                }
+                foreach ($metrics as $metric) {
+                    $delta[$parent_child][$metric] = 0;
+                }
+            }
+
+            if ($display_calls) {
+                $delta[$parent_child]['ct'] -= $info['ct'];
+            }
+
+            foreach ($metrics as $metric) {
+                $delta[$parent_child][$metric] -= $info[$metric];
+            }
+        }
+
+        return $delta;
     }
 }
