@@ -4,7 +4,7 @@
     <li><a href="{{ url('runs_list') }}">Runs</a></li>
     <li><a href="{{ url('runs_list', {source:source}) }}">{{ source }}</a></li>
     {% if symbol %}
-        <li><a href="{{ url('single_run', {source:source,run:run}) }}">{{ run }}</a></li>
+        <li><a href="{{ url('single_run', {source:source,runId:run}) }}">{{ run }}</a></li>
         <li>{{ symbol }}</li>
     {% else %}
         <li>{{ run }}</li>
