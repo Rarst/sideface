@@ -61,9 +61,6 @@ class Callgraph
         $run2,
         $source
     ) {
-        global $total1;
-        global $total2;
-
         $raw_data1 = $uprofiler_runs_impl->get_run($run1, $source, $desc_unused);
         $raw_data2 = $uprofiler_runs_impl->get_run($run2, $source, $desc_unused);
         // init_metrics($raw_data1, null, null);
