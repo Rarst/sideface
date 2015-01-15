@@ -14,7 +14,7 @@ class Report
     protected $totals = [ ];
     protected $totals_1 = [ ];
     protected $totals_2 = [ ];
-    protected $metrics = [];
+    protected $metrics = [ ];
 
     protected $descriptions = [
         'fn'           => 'Function Name',
@@ -720,7 +720,7 @@ class Report
             echo '<th></th>';
             echo '</tr>';
 
-            foreach ($metrics as $metric) {
+            foreach ($this->metrics as $metric) {
                 echo '<tr>';
                 echo '<td>Total ' . str_replace('<br>', ' ', $this->stat_description($metric)) . ':</td>';
                 echo '<td>' . number_format($this->totals[$metric]) . ' '
