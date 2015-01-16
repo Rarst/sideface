@@ -617,7 +617,7 @@ class Report
                 $results[]      = $info_tmp;
             }
         }
-        usort($results, 'sort_cbk');
+        usort($results, [ $this, 'sortCallback' ]);
 
         if (count($results) > 0) {
             $this->print_pc_array($results, $base_ct, $base_info, true);
@@ -637,7 +637,7 @@ class Report
                 }
             }
         }
-        usort($results, 'sort_cbk');
+        usort($results, [ $this, 'sortCallback' ]);
 
         if (count($results)) {
             $this->print_pc_array($results, $base_ct, $base_info, false);
@@ -760,7 +760,7 @@ class Report
             $tmp['fn']   = $symbol;
             $flat_data[] = $tmp;
         }
-        usort($flat_data, 'sort_cbk');
+        usort($flat_data, [ $this, 'sortCallback' ]);
 
         print( '<br>' );
 
@@ -927,5 +927,34 @@ class Report
     public function stat_description($stat)
     {
         return $this->descriptions[$stat];
+    }
+
+    public function sortCallback($a, $b)
+    {
+        global $sort_col;
+        global $diff_mode;
+
+        if ($sort_col == 'fn') {
+            $left  = strtoupper($a['fn']);
+            $right = strtoupper($b['fn']);
+
+            if ($left == $right) {
+                return 0;
+            }
+            return ( $left < $right ) ? - 1 : 1;
+        } else {
+            $left  = $a[$sort_col];
+            $right = $b[$sort_col];
+
+            if ($diff_mode) {
+                $left  = abs($left);
+                $right = abs($right);
+            }
+
+            if ($left == $right) {
+                return 0;
+            }
+            return ( $left > $right ) ? - 1 : 1;
+        }
     }
 }

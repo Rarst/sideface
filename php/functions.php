@@ -40,46 +40,6 @@ function uprofiler_percent_format($s, $precision = 1)
     return sprintf('%.' . $precision . 'f%%', 100 * $s);
 }
 
-/**
- * Callback comparison operator (passed to usort() for sorting array of
- * tuples) that compares array elements based on the sort column
- * specified in $sort_col (global parameter).
- *
- * @author Kannan
- */
-function sort_cbk($a, $b)
-{
-    global $sort_col;
-    global $diff_mode;
-
-    if ($sort_col == "fn") {
-        // case insensitive ascending sort for function names
-        $left  = strtoupper($a["fn"]);
-        $right = strtoupper($b["fn"]);
-
-        if ($left == $right) {
-            return 0;
-        }
-        return ( $left < $right ) ? - 1 : 1;
-    } else {
-
-        // descending sort for all others
-        $left  = $a[$sort_col];
-        $right = $b[$sort_col];
-
-        // if diff mode, sort by absolute value of regression/improvement
-        if ($diff_mode) {
-            $left  = abs($left);
-            $right = abs($right);
-        }
-
-        if ($left == $right) {
-            return 0;
-        }
-        return ( $left > $right ) ? - 1 : 1;
-    }
-}
-
 /*
  * The list of possible metrics collected as part of uprofiler that
  * require inclusive/exclusive handling while reporting.
