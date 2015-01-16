@@ -9,6 +9,8 @@ class Report
     protected $source = '';
     protected $run = '';
 
+    protected $sort_col = 'wt';
+    protected $diff_mode = false;
     protected $stats = [ ];
     protected $pc_stats = [ ];
     protected $totals = [ ];
@@ -69,6 +71,40 @@ class Report
         'excl_samples',
     ];
 
+    protected $format_cbk = [
+        'fn'           => '',
+        'ct'           => 'uprofiler_count_format',
+        'Calls%'       => 'uprofiler_percent_format',
+        'wt'           => 'number_format',
+        'IWall%'       => 'uprofiler_percent_format',
+        'excl_wt'      => 'number_format',
+        'EWall%'       => 'uprofiler_percent_format',
+        'ut'           => 'number_format',
+        'IUser%'       => 'uprofiler_percent_format',
+        'excl_ut'      => 'number_format',
+        'EUser%'       => 'uprofiler_percent_format',
+        'st'           => 'number_format',
+        'ISys%'        => 'uprofiler_percent_format',
+        'excl_st'      => 'number_format',
+        'ESys%'        => 'uprofiler_percent_format',
+        'cpu'          => 'number_format',
+        'ICpu%'        => 'uprofiler_percent_format',
+        'excl_cpu'     => 'number_format',
+        'ECpu%'        => 'uprofiler_percent_format',
+        'mu'           => 'number_format',
+        'IMUse%'       => 'uprofiler_percent_format',
+        'excl_mu'      => 'number_format',
+        'EMUse%'       => 'uprofiler_percent_format',
+        'pmu'          => 'number_format',
+        'IPMUse%'      => 'uprofiler_percent_format',
+        'excl_pmu'     => 'number_format',
+        'EPMUse%'      => 'uprofiler_percent_format',
+        'samples'      => 'number_format',
+        'ISamples%'    => 'uprofiler_percent_format',
+        'excl_samples' => 'number_format',
+        'ESamples%'    => 'uprofiler_percent_format',
+    ];
+
     public function __construct($args)
     {
         $this->source = $args['source'];
@@ -82,14 +118,11 @@ class Report
 
     public function initMetrics($data, $symbol, $sort, $diff_report = false)
     {
-        global $diff_mode;
-        global $sort_col;
-
-        $diff_mode = $diff_report;
+        $this->diff_mode = $diff_report;
 
         if (! empty( $sort )) {
             if (in_array($sort, $this->sortable_columns)) {
-                $sort_col = $sort;
+                $this->sort_col = $sort;
             } else {
                 print( "Invalid Sort Key $sort specified in URL" );
             }
@@ -98,7 +131,7 @@ class Report
         // parent/child report doesn't support exclusive times yet.
         // So, change sort hyperlinks to closest fit.
         if (! empty( $symbol )) {
-            $sort_col = str_replace('excl_', '', $sort_col);
+            $this->sort_col = str_replace('excl_', '', $this->sort_col);
         }
 
         $this->stats      = [ 'fn', 'ct', 'Calls%' ];
@@ -437,12 +470,9 @@ class Report
         $run2 = 0,
         $symbol_info2 = null
     ) {
-        global $diff_mode;
-        global $format_cbk;
-
         $possible_metrics = uprofiler_get_possible_metrics();
 
-        if ($diff_mode) {
+        if ($this->diff_mode) {
             $diff_text = '<b>Diff</b>';
             $regr_impr = "<i style='color:red'>Regression</i>/<i style='color:green'>Improvement</i>";
         } else {
@@ -450,7 +480,7 @@ class Report
             $regr_impr = '';
         }
 
-        if ($diff_mode) {
+        if ($this->diff_mode) {
             print( "<h3>$regr_impr summary for $rep_symbol</h3>" );
             print( '<table class="table table-condensed">' . "\n" );
             print( '<tr>' );
@@ -462,9 +492,9 @@ class Report
             print( '</tr>' );
             print( '<tr>' );
             print( '<td>Number of Function Calls</td>' );
-            $this->print_td_num($symbol_info1['ct'], $format_cbk['ct']);
-            $this->print_td_num($symbol_info2['ct'], $format_cbk['ct']);
-            $this->print_td_num($symbol_info2['ct'] - $symbol_info1['ct'], $format_cbk['ct']);
+            $this->print_td_num($symbol_info1['ct'], $this->format_cbk['ct']);
+            $this->print_td_num($symbol_info2['ct'], $this->format_cbk['ct']);
+            $this->print_td_num($symbol_info2['ct'] - $symbol_info1['ct'], $this->format_cbk['ct']);
             $this->print_td_pct($symbol_info2['ct'] - $symbol_info1['ct'], $symbol_info1['ct']);
             print( '</tr>' );
 
@@ -474,9 +504,9 @@ class Report
                 // Inclusive stat for metric
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
-                $this->print_td_num($symbol_info1[$m], $format_cbk[$m]);
-                $this->print_td_num($symbol_info2[$m], $format_cbk[$m]);
-                $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m]);
+                $this->print_td_num($symbol_info1[$m], $this->format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m], $this->format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $this->format_cbk[$m]);
                 $this->print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m]);
                 print( '</tr>' );
 
@@ -491,9 +521,9 @@ class Report
                 if ($symbol_info2['ct'] > 0) {
                     $avg_info2 = ( $symbol_info2[$m] / $symbol_info2['ct'] );
                 }
-                $this->print_td_num($avg_info1, $format_cbk[$m]);
-                $this->print_td_num($avg_info2, $format_cbk[$m]);
-                $this->print_td_num($avg_info2 - $avg_info1, $format_cbk[$m]);
+                $this->print_td_num($avg_info1, $this->format_cbk[$m]);
+                $this->print_td_num($avg_info2, $this->format_cbk[$m]);
+                $this->print_td_num($avg_info2 - $avg_info1, $this->format_cbk[$m]);
                 $this->print_td_pct($avg_info2 - $avg_info1, $avg_info1);
                 print( '</tr>' );
 
@@ -501,9 +531,9 @@ class Report
                 $m = 'excl_' . $metric;
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
-                $this->print_td_num($symbol_info1[$m], $format_cbk[$m]);
-                $this->print_td_num($symbol_info2[$m], $format_cbk[$m]);
-                $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $format_cbk[$m]);
+                $this->print_td_num($symbol_info1[$m], $this->format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m], $this->format_cbk[$m]);
+                $this->print_td_num($symbol_info2[$m] - $symbol_info1[$m], $this->format_cbk[$m]);
                 $this->print_td_pct($symbol_info2[$m] - $symbol_info1[$m], $symbol_info1[$m]);
                 print( '</tr>' );
             }
@@ -540,12 +570,12 @@ class Report
         print( "<td><a href=''>$rep_symbol</a>" );
         print( '</td>' );
 
-        $this->print_td_num($symbol_info['ct'], $format_cbk['ct']);
+        $this->print_td_num($symbol_info['ct'], $this->format_cbk['ct']);
         $this->print_td_pct($symbol_info['ct'], $this->totals['ct']);
 
         // Inclusive Metrics for current function
         foreach ($this->metrics as $metric) {
-            $this->print_td_num($symbol_info[$metric], $format_cbk[$metric]);
+            $this->print_td_num($symbol_info[$metric], $this->format_cbk[$metric]);
             $this->print_td_pct($symbol_info[$metric], $this->totals[$metric]);
         }
         print( '</tr>' );
@@ -559,7 +589,7 @@ class Report
         foreach ($this->metrics as $metric) {
             $this->print_td_num(
                 $symbol_info['excl_' . $metric],
-                $format_cbk['excl_' . $metric],
+                $this->format_cbk['excl_' . $metric],
                 "type='Child' metric='{$metric}'"
             );
             $this->print_td_pct(
@@ -620,13 +650,13 @@ class Report
         print( "var func_metrics = new Array();\n" );
         print( "var metrics_col  = new Array();\n" );
         print( "var metrics_desc  = new Array();\n" );
-        if ($diff_mode) {
+        if ($this->diff_mode) {
             print( "var diff_mode = true;\n" );
         } else {
             print( "var diff_mode = false;\n" );
         }
         $column_index = 3; // First three columns are Func Name, Calls, Calls%
-        foreach ($metrics as $metric) {
+        foreach ($this->metrics as $metric) {
             print( "func_metrics[\"" . $metric . "\"] = " . round($symbol_info[$metric]) . ";\n" );
             print( "metrics_col[\"" . $metric . "\"] = " . $column_index . ";\n" );
             print( "metrics_desc[\"" . $metric . "\"] = \"" . $possible_metrics[$metric][2] . "\";\n" );
@@ -641,13 +671,9 @@ class Report
 
     public function full_report($symbol_tab, $run1, $run2)
     {
-        global $diff_mode;
-        global $sort_col;
-        global $format_cbk;
-
         $possible_metrics = uprofiler_get_possible_metrics();
 
-        if ($diff_mode) {
+        if ($this->diff_mode) {
             print( '<h3>Overall Diff Summary</h3>' );
             print( '<table class="table table-condensed">' . "\n" );
             print( '<tr>' );
@@ -659,9 +685,9 @@ class Report
             print( '</tr>' );
             print( '<tr>' );
             print( '<td>Number of Function Calls</td>' );
-            $this->print_td_num($this->totals_1['ct'], $format_cbk['ct']);
-            $this->print_td_num($this->totals_2['ct'], $format_cbk['ct']);
-            $this->print_td_num($this->totals_2['ct'] - $this->totals_1['ct'], $format_cbk['ct']);
+            $this->print_td_num($this->totals_1['ct'], $this->format_cbk['ct']);
+            $this->print_td_num($this->totals_2['ct'], $this->format_cbk['ct']);
+            $this->print_td_num($this->totals_2['ct'] - $this->totals_1['ct'], $this->format_cbk['ct']);
             $this->print_td_pct($this->totals_2['ct'] - $this->totals_1['ct'], $this->totals_1['ct']);
             print( '</tr>' );
 
@@ -669,9 +695,9 @@ class Report
                 $m = $metric;
                 print( '<tr>' );
                 print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . '</td>' );
-                $this->print_td_num($this->totals_1[$m], $format_cbk[$m]);
-                $this->print_td_num($this->totals_2[$m], $format_cbk[$m]);
-                $this->print_td_num($this->totals_2[$m] - $this->totals_1[$m], $format_cbk[$m]);
+                $this->print_td_num($this->totals_1[$m], $this->format_cbk[$m]);
+                $this->print_td_num($this->totals_2[$m], $this->format_cbk[$m]);
+                $this->print_td_num($this->totals_2[$m] - $this->totals_1[$m], $this->format_cbk[$m]);
                 $this->print_td_pct($this->totals_2[$m] - $this->totals_1[$m], $this->totals_1[$m]);
                 print( '<tr>' );
             }
@@ -728,9 +754,9 @@ class Report
             $limit = 100;  // display only limited number of rows
         }
 
-        $desc = str_replace('<br>', ' ', $this->descriptions[$sort_col]);
+        $desc = str_replace('<br>', ' ', $this->descriptions[$this->sort_col]);
 
-        if ($diff_mode) {
+        if ($this->diff_mode) {
             if ($all) {
                 $title = "Total Diff Report: Sorted by absolute value of regression/improvement in $desc";
             } else {
@@ -793,8 +819,6 @@ class Report
 
     public function print_function_info($info)
     {
-        global $format_cbk;
-
         print( '<tr>' );
 
         $href = "/{$this->source}/{$this->run}/{$info['fn']}";
@@ -803,17 +827,17 @@ class Report
         print( "<a href='$href'>{$info['fn']}</a>" );
         print( "</td>\n" );
 
-        $this->print_td_num($info['ct'], $format_cbk['ct']);
+        $this->print_td_num($info['ct'], $this->format_cbk['ct']);
         $this->print_td_pct($info['ct'], $this->totals['ct']);
 
         // Other metrics..
         foreach ($this->metrics as $metric) {
             // Inclusive metric
-            $this->print_td_num($info[$metric], $format_cbk[$metric]);
+            $this->print_td_num($info[$metric], $this->format_cbk[$metric]);
             $this->print_td_pct($info[$metric], $this->totals[$metric]);
 
             // Exclusive Metric
-            $this->print_td_num($info['excl_' . $metric], $format_cbk['excl_' . $metric]);
+            $this->print_td_num($info['excl_' . $metric], $this->format_cbk['excl_' . $metric]);
             $this->print_td_pct($info['excl_' . $metric], $this->totals[$metric]);
         }
 
@@ -841,16 +865,14 @@ class Report
 
     public function pc_info($info, $base_ct, $base_info, $parent)
     {
-        global $format_cbk;
-
         $type        = $parent ? 'Parent' : 'Child';
         $mouseoverct = "type='{$type}' metric='ct'";
-        $this->print_td_num($info['ct'], $format_cbk['ct'], $mouseoverct);
+        $this->print_td_num($info['ct'], $this->format_cbk['ct'], $mouseoverct);
         $this->print_td_pct($info['ct'], $base_ct, $mouseoverct);
 
         /* Inclusive metric values  */
         foreach ($this->metrics as $metric) {
-            $this->print_td_num($info[$metric], $format_cbk[$metric], "type='{$type}' metric='{$metric}'");
+            $this->print_td_num($info[$metric], $this->format_cbk[$metric], "type='{$type}' metric='{$metric}'");
             $this->print_td_pct($info[$metric], $base_info[$metric], "type='{$type}' metric='{$metric}'");
         }
     }
@@ -878,10 +900,7 @@ class Report
 
     public function sortCallback($a, $b)
     {
-        global $sort_col;
-        global $diff_mode;
-
-        if ($sort_col == 'fn') {
+        if ($this->sort_col == 'fn') {
             $left  = strtoupper($a['fn']);
             $right = strtoupper($b['fn']);
 
@@ -890,10 +909,10 @@ class Report
             }
             return ( $left < $right ) ? - 1 : 1;
         } else {
-            $left  = $a[$sort_col];
-            $right = $b[$sort_col];
+            $left  = $a[$this->sort_col];
+            $right = $b[$this->sort_col];
 
-            if ($diff_mode) {
+            if ($this->diff_mode) {
                 $left  = abs($left);
                 $right = abs($right);
             }

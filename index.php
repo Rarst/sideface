@@ -8,42 +8,6 @@ use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
 
-$sort_col         = 'wt';
-$diff_mode        = false;
-$format_cbk       = [
-    'fn'           => '',
-    'ct'           => 'uprofiler_count_format',
-    'Calls%'       => 'uprofiler_percent_format',
-    'wt'           => 'number_format',
-    'IWall%'       => 'uprofiler_percent_format',
-    'excl_wt'      => 'number_format',
-    'EWall%'       => 'uprofiler_percent_format',
-    'ut'           => 'number_format',
-    'IUser%'       => 'uprofiler_percent_format',
-    'excl_ut'      => 'number_format',
-    'EUser%'       => 'uprofiler_percent_format',
-    'st'           => 'number_format',
-    'ISys%'        => 'uprofiler_percent_format',
-    'excl_st'      => 'number_format',
-    'ESys%'        => 'uprofiler_percent_format',
-    'cpu'          => 'number_format',
-    'ICpu%'        => 'uprofiler_percent_format',
-    'excl_cpu'     => 'number_format',
-    'ECpu%'        => 'uprofiler_percent_format',
-    'mu'           => 'number_format',
-    'IMUse%'       => 'uprofiler_percent_format',
-    'excl_mu'      => 'number_format',
-    'EMUse%'       => 'uprofiler_percent_format',
-    'pmu'          => 'number_format',
-    'IPMUse%'      => 'uprofiler_percent_format',
-    'excl_pmu'     => 'number_format',
-    'EPMUse%'      => 'uprofiler_percent_format',
-    'samples'      => 'number_format',
-    'ISamples%'    => 'uprofiler_percent_format',
-    'excl_samples' => 'number_format',
-    'ESamples%'    => 'uprofiler_percent_format',
-];
-
 $app = new Application([
     'debug' => true,
 ]);
