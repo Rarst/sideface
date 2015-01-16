@@ -84,7 +84,6 @@ class Report
     {
         global $diff_mode;
         global $sort_col;
-        global $display_calls;
 
         $diff_mode = $diff_report;
 
@@ -96,30 +95,13 @@ class Report
             }
         }
 
-        // For C++ profiler runs, walltime attribute isn't present.
-        // In that case, use 'samples' as the default sort column.
-        if (! isset( $data['main()']['wt'] )) {
-            if ($sort_col == 'wt') {
-                $sort_col = 'samples';
-            }
-
-            // C++ profiler data doesn't have call counts.
-            // ideally we should check to see if 'ct' metric
-            // is present for 'main()'. But currently 'ct'
-            // metric is artificially set to 1. So, relying
-            // on absence of 'wt' metric instead.
-            $display_calls = false;
-        } else {
-            $display_calls = true;
-        }
-
         // parent/child report doesn't support exclusive times yet.
         // So, change sort hyperlinks to closest fit.
         if (! empty( $symbol )) {
             $sort_col = str_replace('excl_', '', $sort_col);
         }
 
-        $this->stats      = $display_calls ? [ 'fn', 'ct', 'Calls%' ] : [ 'fn' ];
+        $this->stats      = [ 'fn', 'ct', 'Calls%' ];
         $this->pc_stats   = $this->stats;
         $possible_metrics = uprofiler_get_possible_metrics($data);
 
@@ -457,7 +439,6 @@ class Report
     ) {
         global $diff_mode;
         global $format_cbk;
-        global $display_calls;
 
         $possible_metrics = uprofiler_get_possible_metrics();
 
@@ -480,15 +461,12 @@ class Report
             print( "<th>Diff%</th>" );
             print( '</tr>' );
             print( '<tr>' );
-
-            if ($display_calls) {
-                print( '<td>Number of Function Calls</td>' );
-                $this->print_td_num($symbol_info1['ct'], $format_cbk['ct']);
-                $this->print_td_num($symbol_info2['ct'], $format_cbk['ct']);
-                $this->print_td_num($symbol_info2['ct'] - $symbol_info1['ct'], $format_cbk['ct']);
-                $this->print_td_pct($symbol_info2['ct'] - $symbol_info1['ct'], $symbol_info1['ct']);
-                print( '</tr>' );
-            }
+            print( '<td>Number of Function Calls</td>' );
+            $this->print_td_num($symbol_info1['ct'], $format_cbk['ct']);
+            $this->print_td_num($symbol_info2['ct'], $format_cbk['ct']);
+            $this->print_td_num($symbol_info2['ct'] - $symbol_info1['ct'], $format_cbk['ct']);
+            $this->print_td_pct($symbol_info2['ct'] - $symbol_info1['ct'], $symbol_info1['ct']);
+            print( '</tr>' );
 
             foreach ($this->metrics as $metric) {
                 $m = $metric;
@@ -562,11 +540,8 @@ class Report
         print( "<td><a href=''>$rep_symbol</a>" );
         print( '</td>' );
 
-        if ($display_calls) {
-            // Call Count
-            $this->print_td_num($symbol_info['ct'], $format_cbk['ct']);
-            $this->print_td_pct($symbol_info['ct'], $this->totals['ct']);
-        }
+        $this->print_td_num($symbol_info['ct'], $format_cbk['ct']);
+        $this->print_td_pct($symbol_info['ct'], $this->totals['ct']);
 
         // Inclusive Metrics for current function
         foreach ($this->metrics as $metric) {
@@ -577,12 +552,8 @@ class Report
 
         print( '<tr>' );
         print( '<td>' . "Exclusive Metrics $diff_text for Current Function</td>" );
-
-        if ($display_calls) {
-            // Call Count
-            print( '<td></td>' );
-            print( '<td></td>' );
-        }
+        print( '<td></td>' );
+        print( '<td></td>' );
 
         // Exclusive Metrics for current function
         foreach ($this->metrics as $metric) {
@@ -601,11 +572,7 @@ class Report
 
         // list of callers/parent functions
         $results = [ ];
-        if ($display_calls) {
-            $base_ct = $symbol_info['ct'];
-        } else {
-            $base_ct = 0;
-        }
+        $base_ct = $symbol_info['ct'];
         foreach ($this->metrics as $metric) {
             $base_info[$metric] = $symbol_info[$metric];
         }
@@ -632,9 +599,7 @@ class Report
                 $info_tmp       = $info;
                 $info_tmp['fn'] = $child;
                 $results[]      = $info_tmp;
-                if ($display_calls) {
-                    $base_ct += $info['ct'];
-                }
+                $base_ct += $info['ct'];
             }
         }
         usort($results, [ $this, 'sortCallback' ]);
@@ -651,9 +616,7 @@ class Report
         print( '<script language="javascript">' . "\n" );
         print( "var func_name = '\"" . $rep_symbol . "\"';\n" );
         print( "var total_child_ct  = $base_ct;\n" );
-        if ($display_calls) {
-            print( "var func_ct   = " . $symbol_info['ct'] . ";\n" );
-        }
+        print( "var func_ct   = " . $symbol_info['ct'] . ";\n" );
         print( "var func_metrics = new Array();\n" );
         print( "var metrics_col  = new Array();\n" );
         print( "var metrics_desc  = new Array();\n" );
@@ -681,7 +644,6 @@ class Report
         global $diff_mode;
         global $sort_col;
         global $format_cbk;
-        global $display_calls;
 
         $possible_metrics = uprofiler_get_possible_metrics();
 
@@ -695,16 +657,13 @@ class Report
             print( '<th>Diff</th>' );
             print( '<th>Diff%</th>' );
             print( '</tr>' );
-
-            if ($display_calls) {
-                print( '<tr>' );
-                print( '<td>Number of Function Calls</td>' );
-                $this->print_td_num($this->totals_1['ct'], $format_cbk['ct']);
-                $this->print_td_num($this->totals_2['ct'], $format_cbk['ct']);
-                $this->print_td_num($this->totals_2['ct'] - $this->totals_1['ct'], $format_cbk['ct']);
-                $this->print_td_pct($this->totals_2['ct'] - $this->totals_1['ct'], $this->totals_1['ct']);
-                print( '</tr>' );
-            }
+            print( '<tr>' );
+            print( '<td>Number of Function Calls</td>' );
+            $this->print_td_num($this->totals_1['ct'], $format_cbk['ct']);
+            $this->print_td_num($this->totals_2['ct'], $format_cbk['ct']);
+            $this->print_td_num($this->totals_2['ct'] - $this->totals_1['ct'], $format_cbk['ct']);
+            $this->print_td_pct($this->totals_2['ct'] - $this->totals_1['ct'], $this->totals_1['ct']);
+            print( '</tr>' );
 
             foreach ($this->metrics as $metric) {
                 $m = $metric;
@@ -737,13 +696,10 @@ class Report
                 echo '</tr>';
             }
 
-            if ($display_calls) {
-                echo '<tr>';
-                echo '<td>Number of Function Calls:</td>';
-                echo '<td>' . number_format($this->totals['ct']) . '</td>';
-                echo '</tr>';
-            }
-
+            echo '<tr>';
+            echo '<td>Number of Function Calls:</td>';
+            echo '<td>' . number_format($this->totals['ct']) . '</td>';
+            echo '</tr>';
             echo "</table>";
             print( "</p>\n" );
 
@@ -838,7 +794,6 @@ class Report
     public function print_function_info($info)
     {
         global $format_cbk;
-        global $display_calls;
 
         print( '<tr>' );
 
@@ -848,11 +803,8 @@ class Report
         print( "<a href='$href'>{$info['fn']}</a>" );
         print( "</td>\n" );
 
-        if ($display_calls) {
-            // Call Count..
-            $this->print_td_num($info['ct'], $format_cbk['ct']);
-            $this->print_td_pct($info['ct'], $this->totals['ct']);
-        }
+        $this->print_td_num($info['ct'], $format_cbk['ct']);
+        $this->print_td_pct($info['ct'], $this->totals['ct']);
 
         // Other metrics..
         foreach ($this->metrics as $metric) {
@@ -890,16 +842,11 @@ class Report
     public function pc_info($info, $base_ct, $base_info, $parent)
     {
         global $format_cbk;
-        global $display_calls;
 
-        $type = $parent ? 'Parent' : 'Child';
-
-        if ($display_calls) {
-            $mouseoverct = "type='{$type}' metric='ct'";
-            /* call count */
-            $this->print_td_num($info['ct'], $format_cbk['ct'], $mouseoverct);
-            $this->print_td_pct($info['ct'], $base_ct, $mouseoverct);
-        }
+        $type        = $parent ? 'Parent' : 'Child';
+        $mouseoverct = "type='{$type}' metric='ct'";
+        $this->print_td_num($info['ct'], $format_cbk['ct'], $mouseoverct);
+        $this->print_td_pct($info['ct'], $base_ct, $mouseoverct);
 
         /* Inclusive metric values  */
         foreach ($this->metrics as $metric) {

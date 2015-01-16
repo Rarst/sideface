@@ -14,8 +14,6 @@ class RunData implements RunDataInterface
 
     public function getFlat()
     {
-        global $display_calls;
-
         if (! empty( $this->flat )) {
             return $this->flat;
         }
@@ -43,9 +41,7 @@ class RunData implements RunDataInterface
             foreach ($metrics as $metric) {
                 $this->flat[$symbol]['excl_' . $metric] = $this->flat[$symbol][$metric];
             }
-            if ($display_calls) {
-                $this->totals['ct'] += $info['ct'];
-            }
+            $this->totals['ct'] += $info['ct'];
         }
 
         foreach ($this->data as $parent_child => $info) {
@@ -75,8 +71,6 @@ class RunData implements RunDataInterface
 
     public function getInclusive()
     {
-        global $display_calls;
-
         $metrics    = $this->getMetrics($this->data);
         $symbol_tab = [ ];
 
@@ -84,18 +78,13 @@ class RunData implements RunDataInterface
             list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
 
             if (! isset( $symbol_tab[$child] )) {
-                if ($display_calls) {
-                    $symbol_tab[$child] = [ 'ct' => $info['ct'] ];
-                } else {
-                    $symbol_tab[$child] = [ ];
-                }
+                $symbol_tab[$child] = [ 'ct' => $info['ct'] ];
+
                 foreach ($metrics as $metric) {
                     $symbol_tab[$child][$metric] = $info[$metric];
                 }
             } else {
-                if ($display_calls) {
-                    $symbol_tab[$child]['ct'] += $info['ct'];
-                }
+                $symbol_tab[$child]['ct'] += $info['ct'];
 
                 foreach ($metrics as $metric) {
                     $symbol_tab[$child][$metric] += $info[$metric];
@@ -108,26 +97,19 @@ class RunData implements RunDataInterface
 
     public function diffTo(array $data)
     {
-        global $display_calls;
-
         $metrics = $this->getMetrics($data);
         $delta   = $data;
 
         foreach ($this->data as $parent_child => $info) {
             if (! isset( $delta[$parent_child] )) {
-                if ($display_calls) {
-                    $delta[$parent_child] = [ 'ct' => 0 ];
-                } else {
-                    $delta[$parent_child] = [ ];
-                }
+                $delta[$parent_child] = [ 'ct' => 0 ];
+
                 foreach ($metrics as $metric) {
                     $delta[$parent_child][$metric] = 0;
                 }
             }
 
-            if ($display_calls) {
-                $delta[$parent_child]['ct'] -= $info['ct'];
-            }
+            $delta[$parent_child]['ct'] -= $info['ct'];
 
             foreach ($metrics as $metric) {
                 $delta[$parent_child][$metric] -= $info[$metric];
