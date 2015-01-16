@@ -101,29 +101,6 @@ function uprofiler_get_possible_metrics()
     return $possible_metrics;
 }
 
-/*
- * Get the list of metrics present in $uprofiler_data as an array.
- *
- * @author Kannan
- */
-function uprofiler_get_metrics($uprofiler_data)
-{
-
-    // get list of valid metrics
-    $possible_metrics = uprofiler_get_possible_metrics();
-
-    // return those that are present in the raw data.
-    // We'll just look at the root of the subtree for this.
-    $metrics = [ ];
-    foreach ($possible_metrics as $metric => $desc) {
-        if (isset( $uprofiler_data["main()"][$metric] )) {
-            $metrics[] = $metric;
-        }
-    }
-
-    return $metrics;
-}
-
 /**
  * Takes a parent/child function name encoded as
  * "a==>b" and returns array("a", "b").
@@ -155,71 +132,4 @@ function uprofiler_build_parent_child_key($parent, $child)
     } else {
         return $child;
     }
-}
-
-/**
- * Compute inclusive metrics for function. This code was factored out
- * of uprofiler_compute_flat_info().
- *
- * The raw data contains inclusive metrics of a function for each
- * unique parent function it is called from. The total inclusive metrics
- * for a function is therefore the sum of inclusive metrics for the
- * function across all parents.
- *
- * @return array  Returns a map of function name to total (across all parents)
- *                inclusive metrics for the function.
- *
- * @author Kannan
- */
-function uprofiler_compute_inclusive_times($raw_data)
-{
-    global $display_calls;
-
-    $metrics = uprofiler_get_metrics($raw_data);
-
-    $symbol_tab = [ ];
-
-    /*
-     * First compute inclusive time for each function and total
-     * call count for each function across all parents the
-     * function is called from.
-     */
-    foreach ($raw_data as $parent_child => $info) {
-
-        list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
-
-        if ($parent == $child) {
-            /*
-             * uprofiler PHP extension should never trigger this situation any more.
-             * Recursion is handled in the uprofiler PHP extension by giving nested
-             * calls a unique recursion-depth appended name (for example, foo@1).
-             */
-            error_log("Error in Raw Data: parent & child are both: $parent");
-            return;
-        }
-
-        if (! isset( $symbol_tab[$child] )) {
-
-            if ($display_calls) {
-                $symbol_tab[$child] = [ "ct" => $info["ct"] ];
-            } else {
-                $symbol_tab[$child] = [ ];
-            }
-            foreach ($metrics as $metric) {
-                $symbol_tab[$child][$metric] = $info[$metric];
-            }
-        } else {
-            if ($display_calls) {
-                /* increment call count for this child */
-                $symbol_tab[$child]["ct"] += $info["ct"];
-            }
-
-            /* update inclusive times/metric for this child  */
-            foreach ($metrics as $metric) {
-                $symbol_tab[$child][$metric] += $info[$metric];
-            }
-        }
-    }
-
-    return $symbol_tab;
 }

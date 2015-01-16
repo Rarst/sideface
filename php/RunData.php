@@ -20,7 +20,7 @@ class RunData implements RunDataInterface
             return $this->flat;
         }
 
-        $metrics = uprofiler_get_metrics($this->data);
+        $metrics = $this->getMetrics($this->data);
 
         $this->totals = [
             'ct'      => 0,
@@ -33,7 +33,7 @@ class RunData implements RunDataInterface
             'samples' => 0
         ];
 
-        $this->flat = uprofiler_compute_inclusive_times($this->data);
+        $this->flat = $this->getInclusive();
 
         foreach ($metrics as $metric) {
             $this->totals[$metric] = $this->flat['main()'][$metric];
@@ -75,14 +75,42 @@ class RunData implements RunDataInterface
 
     public function getInclusive()
     {
-        // TODO: Implement getInclusive() method.
+        global $display_calls;
+
+        $metrics    = $this->getMetrics($this->data);
+        $symbol_tab = [ ];
+
+        foreach ($this->data as $parent_child => $info) {
+            list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
+
+            if (! isset( $symbol_tab[$child] )) {
+                if ($display_calls) {
+                    $symbol_tab[$child] = [ 'ct' => $info['ct'] ];
+                } else {
+                    $symbol_tab[$child] = [ ];
+                }
+                foreach ($metrics as $metric) {
+                    $symbol_tab[$child][$metric] = $info[$metric];
+                }
+            } else {
+                if ($display_calls) {
+                    $symbol_tab[$child]['ct'] += $info['ct'];
+                }
+
+                foreach ($metrics as $metric) {
+                    $symbol_tab[$child][$metric] += $info[$metric];
+                }
+            }
+        }
+
+        return $symbol_tab;
     }
 
     public function diffTo(array $data)
     {
         global $display_calls;
 
-        $metrics = uprofiler_get_metrics($data);
+        $metrics = $this->getMetrics($data);
         $delta   = $data;
 
         foreach ($this->data as $parent_child => $info) {
@@ -107,5 +135,19 @@ class RunData implements RunDataInterface
         }
 
         return $delta;
+    }
+
+    public function getMetrics(array $data)
+    {
+        $possible_metrics = uprofiler_get_possible_metrics();
+        $metrics          = [ ];
+
+        foreach ($possible_metrics as $metric => $desc) {
+            if (isset( $data['main()'][$metric] )) {
+                $metrics[] = $metric;
+            }
+        }
+
+        return $metrics;
     }
 }
