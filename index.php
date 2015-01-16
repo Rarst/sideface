@@ -2,21 +2,14 @@
 
 namespace Rarst\Sideface;
 
-use Silex\Provider\TwigServiceProvider;
-use Silex\Provider\UrlGeneratorServiceProvider;
 use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
 
 $app = new Application([
-    'debug' => true,
-]);
-
-$app->register(new TwigServiceProvider(), [
     'twig.path' => __DIR__ . '/twig',
+    'debug'     => true,
 ]);
-
-$app->register(new UrlGeneratorServiceProvider());
 
 $app->get('/{source}', function (Application $app, $source) {
 
