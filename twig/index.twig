@@ -29,9 +29,11 @@
     {% endblock %}
 </div>
 {% endblock %}
-<script src='/assets/jquery/jquery-1.2.6.js'></script>
-<script src='/assets/jquery/jquery.tooltip.js'></script>
-<script src='/assets/jquery/jquery.autocomplete.js'></script>
-<script src='/assets/js/uprofiler_report.js'></script>
+{% block scripts %}
+<script src='/vendor/components/jquery/jquery.min.js'></script>
+{#<script src='/assets/jquery/jquery.tooltip.js'></script>#}
+{#<script src='/assets/jquery/jquery.autocomplete.js'></script>#}
+{#<script src='/assets/js/uprofiler_report.js'></script>#}
+{% endblock %}
 </body>
 </html>

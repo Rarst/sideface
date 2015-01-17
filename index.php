@@ -49,22 +49,27 @@ $app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $s
     ->value('symbol', false)
     ->bind('diff_runs');
 
-$app->get('/{source}/{runId}/callgraph.{callgraphType}', function (Application $app, $source, $runId, $callgraphType) {
+$app->get('/{source}/{runId}/callgraph{callgraphType}', function (Application $app, $source, $runId, $callgraphType) {
 
     ini_set('max_execution_time', 100);
 
     $callgraph = new Callgraph([
-        'type' => $callgraphType,
+        'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
     ]);
 
     $uprofiler_runs_impl = new UprofilerRuns_Default();
 
-//    ob_start();
+    if ($callgraphType) {
+        $callgraph->render_image($uprofiler_runs_impl, $runId, $source);
+        return ''; // TODO wrapper, headers
+    }
+    ob_start();
     $callgraph->render_image($uprofiler_runs_impl, $runId, $source);
+    $svg = ob_get_clean();
 
-    return ''; // TODO wrapper, headers
-//    return ob_get_clean();
+    return $app->render('callgraph.twig',['svg'=>$svg]);
 })
+    ->value('callgraphType', false)
     ->bind('single_callgraph');
 
 $app->get('/{source}/{runId}/{symbol}', function (Application $app, $source, $runId, $symbol) {
