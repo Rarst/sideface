@@ -28,7 +28,31 @@ $app->get('/{source}', function (Application $app, $source) {
     ->value('source', false)
     ->bind('runs_list');
 
-// TODO diff callgraph
+$app->get(
+    '/{source}/{runId1}-{runId2}/callgraph{callgraphType}',
+    function (Application $app, $source, $runId1, $runId2, $callgraphType) {
+
+        ini_set('max_execution_time', 100);
+
+        $callgraph = new Callgraph([
+            'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
+        ]);
+
+        $uprofiler_runs_impl = new UprofilerRuns_Default();
+
+        if ($callgraphType) {
+            $callgraph->render_diff_image($uprofiler_runs_impl, $runId1, $runId2, $source);
+            return ''; // TODO wrapper, headers
+        }
+        ob_start();
+        $callgraph->render_diff_image($uprofiler_runs_impl, $runId1, $runId2, $source);
+        $svg = ob_get_clean();
+
+        return $app->render('callgraph.twig', [ 'svg' => $svg ]);
+    }
+)
+    ->value('callgraphType', false)
+    ->bind('diff_callgraph');
 
 $app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $source, $runId1, $runId2, $symbol) {
 
@@ -67,7 +91,7 @@ $app->get('/{source}/{runId}/callgraph{callgraphType}', function (Application $a
     $callgraph->render_image($uprofiler_runs_impl, $runId, $source);
     $svg = ob_get_clean();
 
-    return $app->render('callgraph.twig',['svg'=>$svg]);
+    return $app->render('callgraph.twig', [ 'svg' => $svg ]);
 })
     ->value('callgraphType', false)
     ->bind('single_callgraph');
