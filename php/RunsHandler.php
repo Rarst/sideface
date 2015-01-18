@@ -2,6 +2,7 @@
 namespace Rarst\Sideface;
 
 use iUprofilerRuns;
+use Symfony\Component\HttpFoundation\Request;
 
 class RunsHandler implements iUprofilerRuns
 {
@@ -96,5 +97,17 @@ class RunsHandler implements iUprofilerRuns
             $runs[] = $this->getRun($run, $source);
         }
         return $runs;
+    }
+
+    /**
+     * @param string  $id
+     * @param Request $request
+     *
+     * @return RunInterface|bool
+     */
+    public function convert($id, Request $request)
+    {
+        $source = $request->attributes->get('source');
+        return $this->getRun($id, $source);
     }
 }

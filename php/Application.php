@@ -15,6 +15,10 @@ class Application extends \Silex\Application
 
         $defaults = [ ];
 
+        $defaults['handler.runs'] = $this->share(function () {
+            return new RunsHandler();
+        });
+
         $this->register(new TwigServiceProvider());
         $this->register(new UrlGeneratorServiceProvider());
 

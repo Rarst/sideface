@@ -2,8 +2,6 @@
 
 namespace Rarst\Sideface;
 
-use Symfony\Component\HttpFoundation\Request;
-
 require __DIR__ . '/vendor/autoload.php';
 
 $app = new Application([
@@ -11,16 +9,9 @@ $app = new Application([
     'debug'     => true,
 ]);
 
-$runConverter = function ($id, Request $request) {
-    $source  = $request->attributes->get('source');
-    $handler = new RunsHandler();
-
-    return $handler->getRun($id, $source);
-};
-
 $app->get('/{source}', function (Application $app, $source) {
 
-    $runsHandler = new RunsHandler();
+    $runsHandler = $app['handler.runs'];
     $runsList    = $runsHandler->getRunsList();
 
     if ($source) {
@@ -56,8 +47,8 @@ $app->get(
         return $app->render('callgraph.twig', [ 'svg' => $svg ]);
     }
 )
-    ->convert('run1', $runConverter)
-    ->convert('run2', $runConverter)
+    ->convert('run1', 'handler.runs:convert')
+    ->convert('run2', 'handler.runs:convert')
     ->value('callgraphType', false)
     ->bind('diff_callgraph');
 
@@ -77,8 +68,8 @@ $app->get(
         ]);
     }
 )
-    ->convert('run1', $runConverter)
-    ->convert('run2', $runConverter)
+    ->convert('run1', 'handler.runs:convert')
+    ->convert('run2', 'handler.runs:convert')
     ->value('symbol', false)
     ->bind('diff_runs');
 
@@ -103,7 +94,7 @@ $app->get(
         return $app->render('callgraph.twig', [ 'svg' => $svg ]);
     }
 )
-    ->convert('run', $runConverter)
+    ->convert('run', 'handler.runs:convert')
     ->value('callgraphType', false)
     ->bind('single_callgraph');
 
@@ -139,7 +130,7 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, RunIn
         'body'   => $report->getBody(),
     ]);
 })
-    ->convert('run', $runConverter)
+    ->convert('run', 'handler.runs:convert')
     ->value('symbol', false)
     ->bind('single_run');
 
