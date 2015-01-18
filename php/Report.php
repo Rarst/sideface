@@ -639,32 +639,6 @@ class Report
         }
 
         print( '</table>' );
-
-        // These will be used for pop-up tips/help.
-        // Related javascript code is in: uprofiler_report.js
-        print( "\n" );
-        print( '<script language="javascript">' . "\n" );
-        print( "var func_name = '\"" . $rep_symbol . "\"';\n" );
-        print( "var total_child_ct  = $base_ct;\n" );
-        print( "var func_ct   = " . $symbol_info['ct'] . ";\n" );
-        print( "var func_metrics = new Array();\n" );
-        print( "var metrics_col  = new Array();\n" );
-        print( "var metrics_desc  = new Array();\n" );
-        if ($this->diff_mode) {
-            print( "var diff_mode = true;\n" );
-        } else {
-            print( "var diff_mode = false;\n" );
-        }
-        $column_index = 3; // First three columns are Func Name, Calls, Calls%
-        foreach ($this->metrics as $metric) {
-            print( "func_metrics[\"" . $metric . "\"] = " . round($symbol_info[$metric]) . ";\n" );
-            print( "metrics_col[\"" . $metric . "\"] = " . $column_index . ";\n" );
-            print( "metrics_desc[\"" . $metric . "\"] = \"" . $possible_metrics[$metric][2] . "\";\n" );
-
-            // each metric has two columns..
-            $column_index += 2;
-        }
-        print( '</script>' );
         print( "\n" );
 
     }
