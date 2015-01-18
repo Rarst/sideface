@@ -376,7 +376,7 @@ class Report
         }
 
         if (empty( $symbol )) {
-            $this->full_report($symbol_tab, $runData, null);
+            $this->full_report($symbol_tab, $run->getId(), null);
         } else {
             $this->symbol_report($runData, $symbol_tab[$symbol], $symbol, $run->getId());
         }
@@ -543,7 +543,7 @@ class Report
 
         print( '<h4>' );
         print( "Parent/Child $regr_impr report for <b>$rep_symbol</b>" );
-        print( " <a href=''>[View Callgraph $diff_text]</a>" ); // TODO callgraph link
+        print( " <a href='/{$this->source}/{$run1}-{$run2}/{$rep_symbol}/callgraph'>[View Callgraph $diff_text]</a>" );
         print( '</h4>' );
 
         print( '<table class="table table-condensed">' . "\n" );
@@ -732,8 +732,9 @@ class Report
             $callgraph_report_title = '[View Full Callgraph]';
         }
 
+        $callgraphLink = $run2 ? "/{$this->source}/{$run1}-{$run2}/callgraph" : "/{$this->source}/{$run1}/callgraph";
         print(
-            '<br><h3>' . "<a href=''>{$callgraph_report_title}</a>" . '</h3>' // TODO callgraph link
+            '<br><h3>' . "<a href='{$callgraphLink}'>{$callgraph_report_title}</a>" . '</h3>'
         );
 
         $flat_data = [ ];
