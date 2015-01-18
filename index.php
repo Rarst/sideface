@@ -2,6 +2,7 @@
 
 namespace Rarst\Sideface;
 
+use Symfony\Component\HttpFoundation\Request;
 use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -10,6 +11,13 @@ $app = new Application([
     'twig.path' => __DIR__ . '/twig',
     'debug'     => true,
 ]);
+
+$runConverter = function ($id, Request $request) {
+    $source  = $request->attributes->get('source');
+    $handler = new RunsHandler();
+
+    return $handler->getRun($id, $source);
+};
 
 $app->get('/{source}', function (Application $app, $source) {
 
@@ -29,8 +37,8 @@ $app->get('/{source}', function (Application $app, $source) {
     ->bind('runs_list');
 
 $app->get(
-    '/{source}/{runId1}-{runId2}/callgraph{callgraphType}',
-    function (Application $app, $source, $runId1, $runId2, $callgraphType) {
+    '/{source}/{run1}-{run2}/callgraph{callgraphType}',
+    function (Application $app, $source, Run $run1, Run $run2, $callgraphType) {
 
         ini_set('max_execution_time', 100);
 
@@ -41,26 +49,25 @@ $app->get(
         $uprofiler_runs_impl = new UprofilerRuns_Default();
 
         if ($callgraphType) {
-            $callgraph->render_diff_image($uprofiler_runs_impl, $runId1, $runId2, $source);
+            $callgraph->render_diff_image($uprofiler_runs_impl, $run1->getId(), $run2->getId(), $source);
             return ''; // TODO wrapper, headers
         }
         ob_start();
-        $callgraph->render_diff_image($uprofiler_runs_impl, $runId1, $runId2, $source);
+        $callgraph->render_diff_image($uprofiler_runs_impl, $run1->getId(), $run2->getId(), $source);
         $svg = ob_get_clean();
 
         return $app->render('callgraph.twig', [ 'svg' => $svg ]);
     }
 )
+    ->convert('run1', $runConverter)
+    ->convert('run2', $runConverter)
     ->value('callgraphType', false)
     ->bind('diff_callgraph');
 
-$app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $source, $runId1, $runId2, $symbol) {
+$app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $source, Run $run1, Run $run2, $symbol) {
 
-    $run         = $runId1 . '-' . $runId2;
-    $runsHandler = new RunsHandler();
-    $run1        = $runsHandler->getRun($runId1, $source);
-    $run2        = $runsHandler->getRun($runId2, $source);
-    $report      = new Report([ 'source' => $source, 'run' => $run ]);
+    $run    = $run1->getId() . '-' . $run2->getId();
+    $report = new Report([ 'source' => $source, 'run' => $run ]);
     $report->profilerDiffReport($run1, $run2, $symbol);
 
     return $app->render('report.twig', [
@@ -70,10 +77,12 @@ $app->get('/{source}/{runId1}-{runId2}/{symbol}', function (Application $app, $s
         'body'   => $report->getBody(),
     ]);
 })
+    ->convert('run1', $runConverter)
+    ->convert('run2', $runConverter)
     ->value('symbol', false)
     ->bind('diff_runs');
 
-$app->get('/{source}/{runId}/callgraph{callgraphType}', function (Application $app, $source, $runId, $callgraphType) {
+$app->get('/{source}/{run}/callgraph{callgraphType}', function (Application $app, $source, Run $run, $callgraphType) {
 
     ini_set('max_execution_time', 100);
 
@@ -84,26 +93,22 @@ $app->get('/{source}/{runId}/callgraph{callgraphType}', function (Application $a
     $uprofiler_runs_impl = new UprofilerRuns_Default();
 
     if ($callgraphType) {
-        $callgraph->render_image($uprofiler_runs_impl, $runId, $source);
+        $callgraph->render_image($uprofiler_runs_impl, $run->getId(), $source);
         return ''; // TODO wrapper, headers
     }
     ob_start();
-    $callgraph->render_image($uprofiler_runs_impl, $runId, $source);
+    $callgraph->render_image($uprofiler_runs_impl, $run->getId(), $source);
     $svg = ob_get_clean();
 
     return $app->render('callgraph.twig', [ 'svg' => $svg ]);
 })
+    ->convert('run', $runConverter)
     ->value('callgraphType', false)
     ->bind('single_callgraph');
 
-$app->get('/{source}/{runId}/{symbol}', function (Application $app, $source, $runId, $symbol) {
+$app->get('/{source}/{run}/{symbol}', function (Application $app, $source, Run $run, $symbol) {
 
 //    global $wts;
-
-    $runsHandler = new RunsHandler();
-    $report      = new Report([ 'source' => $source, 'run' => $runId ]);
-    $run         = $runsHandler->getRun($runId, $source);
-
     // TODO aggregate runs stuff
     // run may be a single run or a comma separate list of runs
     // that'll be aggregated. If "wts" (a comma separated list
@@ -123,15 +128,17 @@ $app->get('/{source}/{runId}/{symbol}', function (Application $app, $source, $ru
 //        $runData = $data['raw'];
 //    }
 
+    $report = new Report([ 'source' => $source, 'run' => $run->getId() ]);
     $report->profilerReport($run, $symbol);
 
     return $app->render('report.twig', [
         'source' => $source,
-        'run'    => $runId,
+        'run'    => $run->getId(),
         'symbol' => $symbol,
         'body'   => $report->getBody(),
     ]);
 })
+    ->convert('run', $runConverter)
     ->value('symbol', false)
     ->bind('single_run');
 
