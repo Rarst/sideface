@@ -1,8 +1,6 @@
 <?php
 namespace Rarst\Sideface;
 
-use iUprofilerRuns;
-
 class Callgraph
 {
     protected $legal_image_types = [ 'jpg', 'gif', 'png', 'svg', 'ps' ];
@@ -37,15 +35,12 @@ class Callgraph
         $this->func     = empty( $args['func'] ) ? '' : $args['func'];
     }
 
-    public function render_image(
-        iUprofilerRuns $uprofiler_runs_impl,
-        $run_id,
-        $source
-    ) {
-        $content = $this->get_content_by_run($uprofiler_runs_impl, $run_id, $source);
+    public function render_image(RunInterface $run)
+    {
+        $content = $this->get_content_by_run($run);
 
         if (! $content) {
-            print "Error: either we can not find profile data for run_id " . $run_id
+            print "Error: either we can not find profile data for run_id " . $run->getId()
                   . " or the threshold " . $this->threshold . " is too small or you do not"
                   . " have 'dot' image generation utility installed.";
             exit();
@@ -55,44 +50,27 @@ class Callgraph
         echo $content;
     }
 
-    public function render_diff_image(
-        iUprofilerRuns $uprofiler_runs_impl,
-        $run1,
-        $run2,
-        $source
-    ) {
-        $raw_data1      = $uprofiler_runs_impl->get_run($run1, $source, $desc_unused);
-        $raw_data2      = $uprofiler_runs_impl->get_run($run2, $source, $desc_unused);
+    public function render_diff_image(RunInterface $run1, RunInterface $run2)
+    {
+        $raw_data1      = $run1->getData();
+        $raw_data2      = $run2->getData();
         $runDataObject1 = new RunData($raw_data1);
         $symbol_tab1    = $runDataObject1->getFlat();
         $runDataObject2 = new RunData($raw_data2);
         $symbol_tab2    = $runDataObject2->getFlat();
         $run_delta      = $runDataObject1->diffTo($raw_data2);
-        $script         = $this->generate_dot_script($run_delta, $source, null, $symbol_tab1, $symbol_tab2);
+        $script         = $this->generate_dot_script($run_delta, $run1->getSource(), null, $symbol_tab1, $symbol_tab2);
         $content        = $this->generate_image_by_dot($script);
 
         $this->generate_mime_header(strlen($content));
         echo $content;
     }
 
-    public function get_content_by_run(
-        iUprofilerRuns $uprofiler_runs_impl,
-        $run_id,
-        $source
-    ) {
-        if (! $run_id) {
-            return "";
-        }
-
-        $raw_data = $uprofiler_runs_impl->get_run($run_id, $source, $description);
-
-        if (! $raw_data) {
-            error_log('Raw data is empty');
-            return '';
-        }
-
-        $script  = $this->generate_dot_script($raw_data, $source, $description);
-        $content = $this->generate_image_by_dot($script);
+    public function get_content_by_run(RunInterface $run)
+    {
+        $raw_data = $run->getData();
+        $script   = $this->generate_dot_script($raw_data, $run->getSource(), '');
+        $content  = $this->generate_image_by_dot($script);
 
         return $content;
     }

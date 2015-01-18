@@ -3,7 +3,6 @@
 namespace Rarst\Sideface;
 
 use Symfony\Component\HttpFoundation\Request;
-use uprofilerRuns_Default;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -38,7 +37,7 @@ $app->get('/{source}', function (Application $app, $source) {
 
 $app->get(
     '/{source}/{run1}-{run2}/callgraph{callgraphType}',
-    function (Application $app, $source, Run $run1, Run $run2, $callgraphType) {
+    function (Application $app, Run $run1, Run $run2, $callgraphType) {
 
         ini_set('max_execution_time', 100);
 
@@ -46,14 +45,12 @@ $app->get(
             'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
         ]);
 
-        $uprofiler_runs_impl = new UprofilerRuns_Default();
-
         if ($callgraphType) {
-            $callgraph->render_diff_image($uprofiler_runs_impl, $run1->getId(), $run2->getId(), $source);
+            $callgraph->render_diff_image($run1, $run2);
             return ''; // TODO wrapper, headers
         }
         ob_start();
-        $callgraph->render_diff_image($uprofiler_runs_impl, $run1->getId(), $run2->getId(), $source);
+        $callgraph->render_diff_image($run1, $run2);
         $svg = ob_get_clean();
 
         return $app->render('callgraph.twig', [ 'svg' => $svg ]);
@@ -64,49 +61,53 @@ $app->get(
     ->value('callgraphType', false)
     ->bind('diff_callgraph');
 
-$app->get('/{source}/{run1}-{run2}/{symbol}', function (Application $app, $source, Run $run1, Run $run2, $symbol) {
+$app->get(
+    '/{source}/{run1}-{run2}/{symbol}',
+    function (Application $app, $source, RunInterface $run1, RunInterface $run2, $symbol) {
 
-    $run    = $run1->getId() . '-' . $run2->getId();
-    $report = new Report([ 'source' => $source, 'run' => $run ]);
-    $report->profilerDiffReport($run1, $run2, $symbol);
+        $run    = $run1->getId() . '-' . $run2->getId();
+        $report = new Report([ 'source' => $source, 'run' => $run ]);
+        $report->profilerDiffReport($run1, $run2, $symbol);
 
-    return $app->render('report.twig', [
-        'source' => $source,
-        'run'    => $run,
-        'symbol' => $symbol,
-        'body'   => $report->getBody(),
-    ]);
-})
+        return $app->render('report.twig', [
+            'source' => $source,
+            'run'    => $run,
+            'symbol' => $symbol,
+            'body'   => $report->getBody(),
+        ]);
+    }
+)
     ->convert('run1', $runConverter)
     ->convert('run2', $runConverter)
     ->value('symbol', false)
     ->bind('diff_runs');
 
-$app->get('/{source}/{run}/callgraph{callgraphType}', function (Application $app, $source, Run $run, $callgraphType) {
+$app->get(
+    '/{source}/{run}/callgraph{callgraphType}',
+    function (Application $app, RunInterface $run, $callgraphType) {
 
-    ini_set('max_execution_time', 100);
+        ini_set('max_execution_time', 100);
 
-    $callgraph = new Callgraph([
-        'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
-    ]);
+        $callgraph = new Callgraph([
+            'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
+        ]);
 
-    $uprofiler_runs_impl = new UprofilerRuns_Default();
+        if ($callgraphType) {
+            $callgraph->render_image($run);
+            return ''; // TODO wrapper, headers
+        }
+        ob_start();
+        $callgraph->render_image($run);
+        $svg = ob_get_clean();
 
-    if ($callgraphType) {
-        $callgraph->render_image($uprofiler_runs_impl, $run->getId(), $source);
-        return ''; // TODO wrapper, headers
+        return $app->render('callgraph.twig', [ 'svg' => $svg ]);
     }
-    ob_start();
-    $callgraph->render_image($uprofiler_runs_impl, $run->getId(), $source);
-    $svg = ob_get_clean();
-
-    return $app->render('callgraph.twig', [ 'svg' => $svg ]);
-})
+)
     ->convert('run', $runConverter)
     ->value('callgraphType', false)
     ->bind('single_callgraph');
 
-$app->get('/{source}/{run}/{symbol}', function (Application $app, $source, Run $run, $symbol) {
+$app->get('/{source}/{run}/{symbol}', function (Application $app, $source, RunInterface $run, $symbol) {
 
 //    global $wts;
     // TODO aggregate runs stuff
