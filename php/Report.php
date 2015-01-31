@@ -676,9 +676,6 @@ class Report
                 print( '<tr>' );
             }
             print( '</table>' );
-
-            $callgraph_report_title = '[View Regressions/Improvements using Callgraph Diff]';
-
         } else {
             print( "<p>\n" );
 
@@ -702,14 +699,7 @@ class Report
             echo '</tr>';
             echo "</table>";
             print( "</p>\n" );
-
-            $callgraph_report_title = '[View Full Callgraph]';
         }
-
-        $callgraphLink = $run2 ? "/{$this->source}/{$run1}-{$run2}/callgraph" : "/{$this->source}/{$run1}/callgraph";
-        print(
-            '<br><h3>' . "<a href='{$callgraphLink}'>{$callgraph_report_title}</a>" . '</h3>'
-        );
 
         $flat_data = [ ];
         foreach ($symbol_tab as $symbol => $info) {
