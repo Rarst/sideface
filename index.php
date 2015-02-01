@@ -75,7 +75,7 @@ $app->get(
 
 $app->get(
     '/{source}/{run}/callgraph{callgraphType}',
-    function (Application $app, RunInterface $run, $callgraphType) {
+    function (Application $app, $source, RunInterface $run, $callgraphType) {
 
         ini_set('max_execution_time', 100);
 
@@ -91,7 +91,11 @@ $app->get(
         $callgraph->render_image($run);
         $svg = ob_get_clean();
 
-        return $app->render('callgraph.twig', [ 'svg' => $svg ]);
+        return $app->render('callgraph.twig', [
+            'source' => $source,
+            'run'    => $run->getId(),
+            'svg'    => $svg
+        ]);
     }
 )
     ->convert('run', 'handler.runs:convert')

@@ -2,11 +2,6 @@
   margin-top: 20px;
 }
 
-#svg {
-  width: 98vw;
-  height: 98vh;
-}
-
 #svg svg {
   width: inherit !important;
   height: inherit !important;
