@@ -22,7 +22,7 @@ class RunsHandler implements iUprofilerRuns
             $dir = ini_get($suffix . '.output_dir');
         }
         if (empty( $dir )) {
-            $dir = sys_get_temp_dir();
+            $dir = __DIR__ . '/../resources/runs/';
         }
         $this->dir = $dir;
     }
