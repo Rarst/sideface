@@ -5,7 +5,7 @@ namespace Rarst\Sideface;
 require __DIR__ . '/../vendor/autoload.php';
 
 $app = new Application([
-    'twig.path' => __DIR__ . '/../twig',
+    'twig.path' => __DIR__ . '/../src/twig',
     'debug'     => true,
 ]);
 

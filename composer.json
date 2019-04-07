@@ -1,36 +1,39 @@
 {
-  "name": "rarst/sideface",
-  "description": "Web viewer for xhprof/uprofiler performance profilers.",
-  "type": "project",
-  "keywords": [
-    "profiling",
-    "performance"
-  ],
-  "homepage": "http://github.com/Rarst/sideface",
-  "license": "Apache-2.0",
-  "authors": [
-    {
-      "name": "Andrey Savchenko",
-      "email": "contact@rarst.net",
-      "homepage": "http://www.Rarst.net/"
+    "name"       : "rarst/sideface",
+    "description": "Web app viewer for XHProf–compatible performance profile files.",
+    "type"       : "project",
+    "keywords"   : [
+        "profiling",
+        "performance"
+    ],
+    "homepage"   : "https://github.com/Rarst/sideface",
+    "license"    : "Apache-2.0",
+    "authors"    : [
+        {
+            "name"    : "Andrey Savchenko",
+            "homepage": "https://www.Rarst.net/"
+        }
+    ],
+    "support"    : {
+        "issues": "https://github.com/Rarst/sideface/issues"
+    },
+    "require"    : {
+        "php"                : ">=5.4",
+        "silex/silex"        : "^1.2.2",
+        "twig/twig"          : "^1.16.3",
+        "components/jquery"  : "^2.1.3",
+        "twbs/bootstrap"     : "^3.3.1",
+        "symfony/twig-bridge": "^2.6.3"
+    },
+    "autoload"   : {
+        "classmap": [
+            "src/legacy/"
+        ],
+        "psr-4"   : {
+            "Rarst\\Sideface\\": "src/"
+        },
+        "files"   : [
+            "src/legacy/functions.php"
+        ]
     }
-  ],
-  "support": {
-    "issues": "https://github.com/Rarst/sideface/issues"
-  },
-  "require": {
-    "php": ">=5.4",
-    "silex/silex":"^1.2.2",
-    "twig/twig": "^1.16.3",
-    "components/jquery": "^2.1.3",
-    "twbs/bootstrap": "^3.3.1",
-    "symfony/twig-bridge": "^2.6.3"
-  },
-  "autoload": {
-    "classmap": ["legacy/"],
-    "psr-4": {"Rarst\\Sideface\\": "php/"},
-    "files": [
-      "php/functions.php"
-    ]
-  }
 }
