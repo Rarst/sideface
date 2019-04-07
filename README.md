@@ -1,4 +1,5 @@
 # Sideface — performance profile viewer
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Rarst/sideface/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Rarst/sideface/?branch=master)
 
 Sideface is a web app viewer for performance profile files from XHProf/uprofiler.
 
