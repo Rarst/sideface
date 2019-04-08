@@ -18,12 +18,13 @@
         "issues": "https://github.com/Rarst/sideface/issues"
     },
     "require"    : {
-        "php"                : ">=5.4",
-        "silex/silex"        : "^1.2.2",
-        "twig/twig"          : "^1.16.3",
-        "components/jquery"  : "^2.1.3",
-        "twbs/bootstrap"     : "^3.3.1",
-        "symfony/twig-bridge": "^2.6.3"
+        "php"                             : ">=5.4",
+        "silex/silex"                     : "^1.2.2",
+        "twig/twig"                       : "^1.16.3",
+        "components/jquery"               : "^2.1.3",
+        "twbs/bootstrap"                  : "^3.3.1",
+        "symfony/twig-bridge"             : "^2.6.3",
+        "frontpack/composer-assets-plugin": "^0.9.4"
     },
     "autoload"   : {
         "classmap": [
@@ -35,5 +36,23 @@
         "files"   : [
             "src/legacy/functions.php"
         ]
+    },
+    "config"     : {
+        "assets-files": {
+            "components/jquery": [
+                "jquery.js",
+                "jquery.min.js",
+                "jquery.min.map"
+            ],
+            "twbs/bootstrap"   : [
+                "dist/css",
+                "dist/fonts",
+                "dist/js"
+            ]
+        },
+        "assets-target": {
+            "components/jquery": "public/assets/jquery-2",
+            "twbs/bootstrap"   : "public/assets/bootstrap"
+        }
     }
 }
