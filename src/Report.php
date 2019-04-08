@@ -120,7 +120,7 @@ class Report
     {
         $this->diff_mode = $diff_report;
 
-        if (! empty( $sort )) {
+        if (! empty($sort)) {
             if (in_array($sort, $this->sortable_columns)) {
                 $this->sort_col = $sort;
             } else {
@@ -130,7 +130,7 @@ class Report
 
         // parent/child report doesn't support exclusive times yet.
         // So, change sort hyperlinks to closest fit.
-        if (! empty( $symbol )) {
+        if (! empty($symbol)) {
             $this->sort_col = str_replace('excl_', '', $this->sort_col);
         }
 
@@ -139,7 +139,7 @@ class Report
         $possible_metrics = uprofiler_get_possible_metrics($data);
 
         foreach ($possible_metrics as $metric => $desc) {
-            if (isset( $data['main()'][$metric] )) {
+            if (isset($data['main()'][$metric])) {
                 $this->metrics[] = $metric;
                 // flat (top-level reports): we can compute
                 // exclusive metrics reports as well.
@@ -202,7 +202,7 @@ class Report
                         // for now, just to keep data size small, skip "peak" memory usage
                         // data while aggregating.
                         // The "regular" memory usage data will still be tracked.
-                        if (isset( $val )) {
+                        if (isset($val)) {
                             $metrics[] = $metric;
                         }
                     }
@@ -254,7 +254,7 @@ class Report
                     }
                 }
 
-                if (! isset( $raw_data_total[$parent_child] )) {
+                if (! isset($raw_data_total[$parent_child])) {
                     foreach ($metrics as $metric) {
                         $raw_data_total[$parent_child][$metric] = ( $wt * $info[$metric] );
                     }
@@ -268,7 +268,7 @@ class Report
 
         $runs_string = implode(",", $runs);
 
-        if (isset( $wts )) {
+        if (isset($wts)) {
             $wts_string          = "in the ratio (" . implode(":", $wts) . ")";
             $normalization_count = array_sum($wts);
         } else {
@@ -292,13 +292,13 @@ class Report
      */
     public function normalizeMetrics($data, $runs)
     {
-        if (empty( $data ) || ( $runs == 0 )) {
+        if (empty($data) || ( $runs == 0 )) {
             return $data;
         }
 
         $normalized = [ ];
 
-        if (isset( $data['==>main()'] ) && isset( $data['main()'] )) {
+        if (isset($data['==>main()']) && isset($data['main()'])) {
             error_log('Error: both ==>main() and main() set in raw data.');
         }
 
@@ -320,15 +320,15 @@ class Report
     public function is_valid_run($run_id, $raw_data)
     {
         $main_info = $raw_data["main()"];
-        if (empty( $main_info )) {
+        if (empty($main_info)) {
             error_log("uprofiler: main() missing in raw data for Run ID: $run_id");
             return false;
         }
 
         // raw data should contain either wall time or samples information...
-        if (isset( $main_info['wt'] )) {
+        if (isset($main_info['wt'])) {
             $metric = 'wt';
-        } elseif (isset( $main_info['samples'] )) {
+        } elseif (isset($main_info['samples'])) {
             $metric = 'samples';
         } else {
             error_log("uprofiler: Wall Time information missing from Run ID: $run_id");
@@ -362,7 +362,7 @@ class Report
         $runData = $run->getData();
         $this->initMetrics($runData, $symbol, 'wt', false);
 
-        if (! empty( $symbol )) {
+        if (! empty($symbol)) {
             $runData = $this->trimRun($runData, [ $symbol ]);
         }
 
@@ -370,12 +370,12 @@ class Report
         $symbol_tab    = $runDataObject->getFlat();
         $this->totals  = $runDataObject->getTotals();
 
-        if (! empty( $symbol ) && ! isset( $symbol_tab[$symbol] )) {
+        if (! empty($symbol) && ! isset($symbol_tab[$symbol])) {
             echo "Symbol {$symbol} not found in uprofiler run";
             return;
         }
 
-        if (empty( $symbol )) {
+        if (empty($symbol)) {
             $this->full_report($symbol_tab, $run->getId(), null);
         } else {
             $this->symbol_report($runData, $symbol_tab[$symbol], $symbol, $run->getId());
@@ -397,7 +397,7 @@ class Report
         $run2_data = $run2->getData();
         $this->initMetrics($run2_data, $symbol, 'wt', true);
 
-        if (! empty( $symbol )) {
+        if (! empty($symbol)) {
             $run1_data = $this->trimRun($run1_data, [ $symbol ]);
             $run2_data = $this->trimRun($run2_data, [ $symbol ]);
         }
@@ -408,7 +408,7 @@ class Report
         $symbol_tab    = $runDataObject->getFlat();
         $this->totals  = $runDataObject->getTotals();
 
-        if (! empty( $symbol ) && ! isset( $symbol_tab[$symbol] )) {
+        if (! empty($symbol) && ! isset($symbol_tab[$symbol])) {
             echo "Symbol {$symbol} not found in uprofiler run";
             return;
         }
@@ -420,11 +420,11 @@ class Report
         $symbol_tab2    = $runDataObject->getFlat();
         $this->totals_2 = $runDataObject->getTotals();
 
-        if (empty( $symbol )) {
+        if (empty($symbol)) {
             $this->full_report($symbol_tab, $run1->getId(), $run2->getId());
         } else {
-            $info1 = isset( $symbol_tab1[$symbol] ) ? $symbol_tab1[$symbol] : null;
-            $info2 = isset( $symbol_tab2[$symbol] ) ? $symbol_tab2[$symbol] : null;
+            $info1 = isset($symbol_tab1[$symbol]) ? $symbol_tab1[$symbol] : null;
+            $info2 = isset($symbol_tab2[$symbol]) ? $symbol_tab2[$symbol] : null;
             $this->symbol_report(
                 $run_delta,
                 $symbol_tab[$symbol],
@@ -640,7 +640,6 @@ class Report
 
         print( '</table>' );
         print( "\n" );
-
     }
 
     public function full_report($symbol_tab, $run1, $run2)
@@ -711,7 +710,7 @@ class Report
 
         print( '<br>' );
 
-        if (! empty( $_GET['all'] )) {
+        if (! empty($_GET['all'])) {
             $all   = true;
             $limit = 0;    // display all rows
         } else {
@@ -844,7 +843,7 @@ class Report
 
     public function print_td_num($num, $fmt_func, $attributes = null)
     {
-        if (! empty( $fmt_func ) && is_numeric($num)) {
+        if (! empty($fmt_func) && is_numeric($num)) {
             $num = call_user_func($fmt_func, $num);
         }
 

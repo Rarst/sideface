@@ -14,7 +14,7 @@ class RunData implements RunDataInterface
 
     public function getFlat()
     {
-        if (! empty( $this->flat )) {
+        if (! empty($this->flat)) {
             return $this->flat;
         }
 
@@ -50,7 +50,7 @@ class RunData implements RunDataInterface
             if ($parent) {
                 foreach ($metrics as $metric) {
                     // make sure the parent exists hasn't been pruned.
-                    if (isset( $this->flat[$parent] )) {
+                    if (isset($this->flat[$parent])) {
                         $this->flat[$parent]['excl_' . $metric] -= $info[$metric];
                     }
                 }
@@ -62,7 +62,7 @@ class RunData implements RunDataInterface
 
     public function getTotals()
     {
-        if (empty( $this->totals )) {
+        if (empty($this->totals)) {
             $this->getFlat();
         }
 
@@ -77,7 +77,7 @@ class RunData implements RunDataInterface
         foreach ($this->data as $parent_child => $info) {
             list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
 
-            if (! isset( $symbol_tab[$child] )) {
+            if (! isset($symbol_tab[$child])) {
                 $symbol_tab[$child] = [ 'ct' => $info['ct'] ];
 
                 foreach ($metrics as $metric) {
@@ -101,7 +101,7 @@ class RunData implements RunDataInterface
         $delta   = $data;
 
         foreach ($this->data as $parent_child => $info) {
-            if (! isset( $delta[$parent_child] )) {
+            if (! isset($delta[$parent_child])) {
                 $delta[$parent_child] = [ 'ct' => 0 ];
 
                 foreach ($metrics as $metric) {
@@ -125,7 +125,7 @@ class RunData implements RunDataInterface
         $metrics          = [ ];
 
         foreach ($possible_metrics as $metric => $desc) {
-            if (isset( $data['main()'][$metric] )) {
+            if (isset($data['main()'][$metric])) {
                 $metrics[] = $metric;
             }
         }

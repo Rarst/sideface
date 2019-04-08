@@ -18,10 +18,10 @@ class RunsHandler implements iUprofilerRuns
     public function __construct($dir = null, $suffix = 'uprofiler')
     {
         $this->suffix = $suffix;
-        if (empty( $dir )) {
+        if (empty($dir)) {
             $dir = ini_get($suffix . '.output_dir');
         }
-        if (empty( $dir )) {
+        if (empty($dir)) {
             $dir = __DIR__ . '/../resources/runs/';
         }
         $this->dir = $dir;
@@ -36,7 +36,7 @@ class RunsHandler implements iUprofilerRuns
     protected function getFileName($runId, $source)
     {
         $file = "{$runId}.{$source}.{$this->suffix}";
-        if (! empty( $this->dir )) {
+        if (! empty($this->dir)) {
             $file = $this->dir . '/' . $file;
         }
         return $file;

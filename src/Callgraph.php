@@ -19,20 +19,20 @@ class Callgraph
 
     public function __construct(array $args = [ ])
     {
-        if (empty( $args['threshold'] ) || $args['threshold'] < 0 || $args['threshold'] > 1) {
+        if (empty($args['threshold']) || $args['threshold'] < 0 || $args['threshold'] > 1) {
             $this->threshold = '0.01';
         } else {
             $this->threshold = $args['threshold'];
         }
 
-        if (empty( $args['type'] ) || ! in_array($args['type'], $this->legal_image_types)) {
+        if (empty($args['type']) || ! in_array($args['type'], $this->legal_image_types)) {
             $this->type = 'svg';
         } else {
             $this->type = $args['type'];
         }
 
-        $this->critical = isset( $args['critical'] ) ? (bool) $args['critical'] : true;
-        $this->func     = empty( $args['func'] ) ? '' : $args['func'];
+        $this->critical = isset($args['critical']) ? (bool) $args['critical'] : true;
+        $this->func     = empty($args['func']) ? '' : $args['func'];
     }
 
     public function render_image(RunInterface $run)
@@ -102,10 +102,10 @@ class Callgraph
             $visited        = [ ];
             while ($node) {
                 $visited[$node] = true;
-                if (isset( $children_table[$node] )) {
+                if (isset($children_table[$node])) {
                     $max_child = null;
                     foreach ($children_table[$node] as $child) {
-                        if (isset( $visited[$child] )) {
+                        if (isset($visited[$child])) {
                             continue;
                         }
                         if ($max_child === null ||
@@ -140,13 +140,13 @@ class Callgraph
                 if (array_key_exists($cur_del_func, $sym_table) &&
                     $sym_table[$cur_del_func]['ct'] == $total_times
                 ) {
-                    unset( $sym_table[$cur_del_func] );
+                    unset($sym_table[$cur_del_func]);
                 }
             }
         }
 
         // use the function to filter out irrelevant functions.
-        if (! empty( $this->func )) {
+        if (! empty($this->func)) {
             $interested_funcs = [ ];
             foreach ($raw_data as $parent_child => $info) {
                 list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
@@ -157,7 +157,7 @@ class Callgraph
             }
             foreach ($sym_table as $symbol => $info) {
                 if (! array_key_exists($symbol, $interested_funcs)) {
-                    unset( $sym_table[$symbol] );
+                    unset($sym_table[$symbol]);
                 }
             }
         }
@@ -171,8 +171,8 @@ class Callgraph
         $cur_id = 0;
         $max_wt = 0;
         foreach ($sym_table as $symbol => $info) {
-            if (empty( $this->func ) && abs($info['wt'] / $totals['wt']) < $this->threshold) {
-                unset( $sym_table[$symbol] );
+            if (empty($this->func) && abs($info['wt'] / $totals['wt']) < $this->threshold) {
+                unset($sym_table[$symbol]);
                 continue;
             }
             if ($max_wt == 0 || $max_wt < abs($info['excl_wt'])) {
@@ -208,7 +208,7 @@ class Callgraph
             if ($symbol == 'main()') {
                 $shape = 'octagon';
                 $name  = 'Total: ' . ( $totals['wt'] / 1000.0 ) . " ms\\n";
-                $name .= addslashes(isset( $page ) ? $page : $symbol);
+                $name .= addslashes(isset($page) ? $page : $symbol);
             } else {
                 $shape = 'box';
                 $name  = addslashes($symbol) . "\\nInc: " . sprintf('%.3f', $info['wt'] / 1000) .
@@ -220,7 +220,7 @@ class Callgraph
                          . sprintf('%.1f%%', 100 * $info['excl_wt'] / $totals['wt'])
                          . ")\\n" . $info['ct'] . " total calls\"";
             } else {
-                if (isset( $left[$symbol] ) && isset( $right[$symbol] )) {
+                if (isset($left[$symbol]) && isset($right[$symbol])) {
                     $label = ", label=\"" . addslashes($symbol) .
                              "\\nInc: " . ( sprintf('%.3f', $left[$symbol]['wt'] / 1000.0) )
                              . ' ms - '
@@ -233,7 +233,7 @@ class Callgraph
                              "\\nCalls: " . ( sprintf('%.3f', $left[$symbol]['ct']) ) . ' - '
                              . ( sprintf('%.3f', $right[$symbol]['ct']) ) . ' = '
                              . ( sprintf('%.3f', $info['ct']) ) . "\"";
-                } elseif (isset( $left[$symbol] )) {
+                } elseif (isset($left[$symbol])) {
                     $label = ", label=\"" . addslashes($symbol) .
                              "\\nInc: " . ( sprintf('%.3f', $left[$symbol]['wt'] / 1000.0) )
                              . " ms - 0 ms = " . ( sprintf('%.3f', $info['wt'] / 1000.0) )
@@ -263,11 +263,11 @@ class Callgraph
         foreach ($raw_data as $parent_child => $info) {
             list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
 
-            if (isset( $sym_table[$parent] )
-                && isset( $sym_table[$child] )
+            if (isset($sym_table[$parent])
+                && isset($sym_table[$child])
                 && (
-                    empty( $this->func )
-                    || ( ! empty( $this->func ) && ( $parent == $this->func || $child == $this->func ) )
+                    empty($this->func)
+                    || ( ! empty($this->func) && ( $parent == $this->func || $child == $this->func ) )
                 )
             ) {
                 $label = $info['ct'] == 1 ? $info['ct'] . " call" : $info['ct'] . " calls";
@@ -286,7 +286,7 @@ class Callgraph
                 $linewidth  = 1;
                 $arrow_size = 1;
 
-                if ($this->critical && isset( $path_edges[uprofiler_build_parent_child_key($parent, $child)] )) {
+                if ($this->critical && isset($path_edges[uprofiler_build_parent_child_key($parent, $child)])) {
                     $linewidth  = 10;
                     $arrow_size = 2;
                 }
@@ -323,7 +323,7 @@ class Callgraph
             $output = stream_get_contents($pipes[1]);
             $err    = stream_get_contents($pipes[2]);
 
-            if (! empty( $err )) {
+            if (! empty($err)) {
                 print "failed to execute cmd: \"$cmd\". stderr: `$err'\n";
                 exit;
             }
@@ -371,7 +371,7 @@ class Callgraph
         $children_table = [ ];
         foreach ($raw_data as $parent_child => $info) {
             list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
-            if (! isset( $children_table[$parent] )) {
+            if (! isset($children_table[$parent])) {
                 $children_table[$parent] = [ $child ];
             } else {
                 $children_table[$parent][] = $child;

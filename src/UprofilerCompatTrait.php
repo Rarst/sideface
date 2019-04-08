@@ -27,7 +27,7 @@ trait UprofilerCompatTrait
     public function get_run($run_id, $type, &$run_desc)
     {
         $run = $this->getRun($run_id, $type);
-        if (empty( $run )) {
+        if (empty($run)) {
             $run_desc = "Invalid Run Id = $run_id";
             return null;
         }
