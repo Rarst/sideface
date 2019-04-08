@@ -26,6 +26,9 @@
         "symfony/twig-bridge"             : "^2.6.3",
         "frontpack/composer-assets-plugin": "^0.9.4"
     },
+    "require-dev": {
+        "pds/skeleton": "^1.0"
+    },
     "autoload"   : {
         "classmap": [
             "src/legacy/"
