@@ -198,7 +198,7 @@ class Report
             // use the first run to derive what metrics to aggregate on.
             if ($idx == 0) {
                 foreach ($raw_data['main()'] as $metric => $val) {
-                    if ($metric != "pmu") {
+                    if ($metric != 'pmu') {
                         // for now, just to keep data size small, skip "peak" memory usage
                         // data while aggregating.
                         // The "regular" memory usage data will still be tracked.
@@ -226,11 +226,11 @@ class Report
                 // it shows up above the new entry in reports sorted by
                 // inclusive metrics or call counts.
                 if ($page) {
-                    foreach ($raw_data["main()"] as $metric => $val) {
+                    foreach ($raw_data['main()'] as $metric => $val) {
                         $fake_edge[$metric] = $val;
                         $new_main[$metric]  = $val + 0.00001;
                     }
-                    $raw_data["main()"]                                                      = $new_main;
+                    $raw_data['main()']                                                      = $new_main;
                     $raw_data[uprofiler_build_parent_child_key('main()', "__script::$page")] = $fake_edge;
                 } else {
                     $use_script_name = false;
@@ -266,13 +266,13 @@ class Report
             }
         }
 
-        $runs_string = implode(",", $runs);
+        $runs_string = implode(',', $runs);
 
         if (isset($wts)) {
-            $wts_string          = "in the ratio (" . implode(":", $wts) . ")";
+            $wts_string          = 'in the ratio (' . implode(':', $wts) . ')';
             $normalization_count = array_sum($wts);
         } else {
-            $wts_string          = "";
+            $wts_string          = '';
             $normalization_count = $run_count;
         }
 
@@ -319,7 +319,7 @@ class Report
      */
     public function is_valid_run($run_id, $raw_data)
     {
-        $main_info = $raw_data["main()"];
+        $main_info = $raw_data['main()'];
         if (empty($main_info)) {
             error_log("uprofiler: main() missing in raw data for Run ID: $run_id");
             return false;
@@ -343,7 +343,7 @@ class Report
                 error_log("uprofiler: $metric should not be negative: Run ID $run_id" . serialize($info));
                 return false;
             }
-            if ($val > ( 86400000000 )) {
+            if ($val > 86400000000) {
                 error_log("uprofiler: $metric > 1 day found in Run ID: $run_id " . serialize($info));
                 return false;
             }
@@ -485,10 +485,10 @@ class Report
             print( '<table class="table table-condensed">' . "\n" );
             print( '<tr>' );
             print( "<th>$rep_symbol</th>" );
-            print( "<th><a href=" . "/{$this->source}/{$run1}" . ">Run #$run1</a></th>" );
-            print( "<th><a href=" . "/{$this->source}/{$run2}" . ">Run #$run2</a></th>" );
-            print( "<th>Diff</th>" );
-            print( "<th>Diff%</th>" );
+            print('<th><a href=' . "/{$this->source}/{$run1}" . ">Run #$run1</a></th>" );
+            print('<th><a href=' . "/{$this->source}/{$run2}" . ">Run #$run2</a></th>" );
+            print('<th>Diff</th>');
+            print('<th>Diff%</th>');
             print( '</tr>' );
             print( '<tr>' );
             print( '<td>Number of Function Calls</td>' );
@@ -512,7 +512,7 @@ class Report
 
                 // AVG (per call) Inclusive stat for metric
                 print( '<tr>' );
-                print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . " per call </td>" );
+                print( '<td>' . str_replace('<br>', ' ', $this->descriptions[$m]) . ' per call </td>');
                 $avg_info1 = 'N/A';
                 $avg_info2 = 'N/A';
                 if ($symbol_info1['ct'] > 0) {
@@ -608,7 +608,7 @@ class Report
         }
         foreach ($run_data as $parent_child => $info) {
             list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
-            if (( $child == $rep_symbol ) && ( $parent )) {
+            if (( $child == $rep_symbol ) && $parent) {
                 $info_tmp       = $info;
                 $info_tmp['fn'] = $parent;
                 $results[]      = $info_tmp;
@@ -696,7 +696,7 @@ class Report
             echo '<td>Number of Function Calls:</td>';
             echo '<td>' . number_format($this->totals['ct']) . '</td>';
             echo '</tr>';
-            echo "</table>";
+            echo '</table>';
             print( "</p>\n" );
         }
 

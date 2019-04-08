@@ -45,19 +45,19 @@ define( 'UPROFILER_BOOL_PARAM', 4 );
 function uprofiler_prune_run($raw_data, $prune_percent)
 {
 
-    $main_info = $raw_data["main()"];
+    $main_info = $raw_data['main()'];
     if (empty( $main_info )) {
-        error_log("uprofiler: main() missing in raw data");
+        error_log('uprofiler: main() missing in raw data');
         return false;
     }
 
     // raw data should contain either wall time or samples information...
-    if (isset( $main_info["wt"] )) {
-        $prune_metric = "wt";
-    } elseif (isset( $main_info["samples"] )) {
-        $prune_metric = "samples";
+    if (isset( $main_info['wt'] )) {
+        $prune_metric = 'wt';
+    } elseif (isset( $main_info['samples'] )) {
+        $prune_metric = 'samples';
     } else {
-        error_log("uprofiler: for main() we must have either wt or samples attribute set");
+        error_log('uprofiler: for main() we must have either wt or samples attribute set');
         return false;
     }
 
@@ -81,14 +81,14 @@ function uprofiler_prune_run($raw_data, $prune_percent)
         if ($flat_info[$child][$prune_metric] < $prune_threshold) {
             unset( $raw_data[$parent_child] ); // prune the edge
         } elseif ($parent &&
-                   ( $parent != "__pruned__()" ) &&
-                   ( $flat_info[$parent][$prune_metric] < $prune_threshold )
+                   ($parent != '__pruned__()') &&
+                  ( $flat_info[$parent][$prune_metric] < $prune_threshold )
         ) {
             // Parent's overall inclusive metric is less than a threshold.
             // All edges to the parent node will get nuked, and this child will
             // be a dangling child.
             // So instead change its parent to be a special function __pruned__().
-            $pruned_edge = uprofiler_build_parent_child_key("__pruned__()", $child);
+            $pruned_edge = uprofiler_build_parent_child_key('__pruned__()', $child);
 
             if (isset( $raw_data[$pruned_edge] )) {
                 foreach ($metrics as $metric) {
@@ -118,7 +118,7 @@ function uprofiler_render_link($content, $href)
     }
 
     if ($href) {
-        $link = '<a href="' . ( $href ) . '"';
+        $link = '<a href="' . $href . '"';
     } else {
         $link = '<span';
     }
@@ -151,16 +151,16 @@ function print_symbol_summary($symbol_info, $stat, $base)
 {
 
     $val  = $symbol_info[$stat];
-    $desc = str_replace("<br>", " ", stat_description($stat));
+    $desc = str_replace('<br>', ' ', stat_description($stat));
 
     print( "$desc: </td>" );
     print( number_format($val) );
-    print( " (" . pct($val, $base) . "% of overall)" );
-    if (substr($stat, 0, 4) == "excl") {
-        $func_base = $symbol_info[str_replace("excl_", "", $stat)];
-        print( " (" . pct($val, $func_base) . "% of this function)" );
+    print(' (' . pct($val, $base) . '% of overall)');
+    if (substr($stat, 0, 4) == 'excl') {
+        $func_base = $symbol_info[str_replace('excl_', '', $stat)];
+        print(' (' . pct($val, $func_base) . '% of this function)');
     }
-    print( "<br>" );
+    print('<br>');
 }
 
 /**
@@ -170,9 +170,9 @@ function print_symbol_summary($symbol_info, $stat, $base)
 function pct($a, $b)
 {
     if ($b == 0) {
-        return "N/A";
+        return 'N/A';
     } else {
-        $res = ( round(( $a * 1000 / $b )) / 10 );
+        $res = (round($a * 1000 / $b) / 10 );
         return $res;
     }
 }
@@ -204,7 +204,7 @@ function uprofiler_get_matching_functions($q, $uprofiler_data)
     // sort it so the answers are in some reliable order...
     asort($res);
 
-    return ( $res );
+    return $res;
 }
 
 /**
@@ -245,8 +245,8 @@ function uprofiler_param_init($params)
                 $p = uprofiler_get_bool_param($k, $v[1]);
                 break;
             default:
-                error_log("Invalid param type passed to uprofiler_param_init: "
-                                . $v[0]);
+                error_log('Invalid param type passed to uprofiler_param_init: '
+                          . $v[0]);
                 exit();
         }
 

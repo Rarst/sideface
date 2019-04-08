@@ -50,13 +50,13 @@ function uprofiler_get_possible_metrics()
 {
     static $possible_metrics =
     [
-        "wt"      => [ "Wall", "microsecs", "walltime" ],
-        "ut"      => [ "User", "microsecs", "user cpu time" ],
-        "st"      => [ "Sys", "microsecs", "system cpu time" ],
-        "cpu"     => [ "Cpu", "microsecs", "cpu time" ],
-        "mu"      => [ "MUse", "bytes", "memory usage" ],
-        "pmu"     => [ "PMUse", "bytes", "peak memory usage" ],
-        "samples" => [ "Samples", "samples", "cpu time" ]
+        'wt'      => ['Wall', 'microsecs', 'walltime'],
+        'ut'      => ['User', 'microsecs', 'user cpu time'],
+        'st'      => ['Sys', 'microsecs', 'system cpu time'],
+        'cpu'     => ['Cpu', 'microsecs', 'cpu time'],
+        'mu'      => ['MUse', 'bytes', 'memory usage'],
+        'pmu'     => ['PMUse', 'bytes', 'peak memory usage'],
+        'samples' => ['Samples', 'samples', 'cpu time']
     ];
     return $possible_metrics;
 }
@@ -69,7 +69,7 @@ function uprofiler_get_possible_metrics()
  */
 function uprofiler_parse_parent_child($parent_child)
 {
-    $ret = explode("==>", $parent_child);
+    $ret = explode('==>', $parent_child);
 
     // Return if both parent and child are set
     if (isset( $ret[1] )) {
@@ -88,7 +88,7 @@ function uprofiler_parse_parent_child($parent_child)
 function uprofiler_build_parent_child_key($parent, $child)
 {
     if ($parent) {
-        return $parent . "==>" . $child;
+        return $parent . '==>' . $child;
     } else {
         return $child;
     }

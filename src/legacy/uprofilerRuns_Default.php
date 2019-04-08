@@ -25,7 +25,7 @@ class uprofilerRuns_Default implements iUprofilerRuns
         $file = "$run_id.$type." . $this->suffix;
 
         if (! empty( $this->dir )) {
-            $file = $this->dir . "/" . $file;
+            $file = $this->dir . '/' . $file;
         }
         return $file;
     }
@@ -39,17 +39,17 @@ class uprofilerRuns_Default implements iUprofilerRuns
         // in which the error_log file resides.
 
         if (empty( $dir )) {
-            $dir = ini_get("uprofiler.output_dir");
+            $dir = ini_get('uprofiler.output_dir');
             if (empty( $dir )) {
 
                 // some default that at least works on unix...
-                $dir = "/tmp";
+                $dir = '/tmp';
 
-                error_log("Warning: Must specify directory location for uprofiler runs. " .
-                                "Trying {$dir} as default. You can either pass the " .
-                                "directory location as an argument to the constructor " .
-                                "for UprofilerRuns_Default() or set uprofiler.output_dir " .
-                                "ini param.");
+                error_log('Warning: Must specify directory location for uprofiler runs. ' .
+                          "Trying {$dir} as default. You can either pass the " .
+                          'directory location as an argument to the constructor ' .
+                          'for UprofilerRuns_Default() or set uprofiler.output_dir ' .
+                          'ini param.');
             }
         }
         $this->dir = $dir;
@@ -106,8 +106,8 @@ class uprofilerRuns_Default implements iUprofilerRuns
                 echo '<li><a href="' . htmlentities($_SERVER['SCRIPT_NAME'])
                      . '?run=' . htmlentities($run) . '&source='
                      . htmlentities($source) . '">'
-                     . htmlentities(basename($file)) . "</a><small> "
-                     . date("Y-m-d H:i:s", filemtime($file)) . "</small></li>\n";
+                     . htmlentities(basename($file)) . '</a><small> '
+                     . date('Y-m-d H:i:s', filemtime($file)) . "</small></li>\n";
             }
             echo "</ul>\n";
         }
