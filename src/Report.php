@@ -872,19 +872,19 @@ class Report
                 return 0;
             }
             return ( $left < $right ) ? - 1 : 1;
-        } else {
-            $left  = $a[$this->sort_col];
-            $right = $b[$this->sort_col];
-
-            if ($this->diff_mode) {
-                $left  = abs($left);
-                $right = abs($right);
-            }
-
-            if ($left == $right) {
-                return 0;
-            }
-            return ( $left > $right ) ? - 1 : 1;
         }
+
+        $left  = $a[$this->sort_col];
+        $right = $b[$this->sort_col];
+
+        if ($this->diff_mode) {
+            $left  = abs($left);
+            $right = abs($right);
+        }
+
+        if ($left == $right) {
+            return 0;
+        }
+        return ($left > $right ) ? - 1 : 1;
     }
 }

@@ -87,9 +87,10 @@ class Callgraph
         $max_fontsize     = 35;
         $max_sizing_ratio = 20;
 
-        if ($left === null) {
+//        if ($left === null) {
             // init_metrics($raw_data, null, null);
-        }
+//        }
+
         $runDataObject = new RunData($raw_data);
         $sym_table     = $runDataObject->getFlat();
         $totals        = $runDataObject->getTotals();
@@ -194,11 +195,9 @@ class Callgraph
             }
             $fillcolor = ( ( $sizing_factor < 1.5 ) ? ', style=filled, fillcolor=red' : '' );
 
-            if ($this->critical) {
-                // highlight nodes along critical path.
-                if (! $fillcolor && array_key_exists($symbol, $path)) {
-                    $fillcolor = ', style=filled, fillcolor=yellow';
-                }
+            // highlight nodes along critical path.
+            if ($this->critical && ! $fillcolor && array_key_exists($symbol, $path)) {
+                $fillcolor = ', style=filled, fillcolor=yellow';
             }
 
             $fontsize = ', fontsize=' . (int) ( $max_fontsize / ( ( $sizing_factor - 1 ) / 10 + 1 ) );
@@ -214,46 +213,45 @@ class Callgraph
                 $name  = addslashes($symbol) . "\\nInc: " . sprintf('%.3f', $info['wt'] / 1000) .
                          ' ms (' . sprintf('%.1f%%', 100 * $info['wt'] / $totals['wt']) . ')';
             }
+
             if ($left === null) {
                 $label = ', label="' . $name . "\\nExcl: "
                          . sprintf('%.3f', $info['excl_wt'] / 1000.0) . ' ms ('
                          . sprintf('%.1f%%', 100 * $info['excl_wt'] / $totals['wt'])
                          . ")\\n" . $info['ct'] . ' total calls"';
+            } elseif (isset($left[$symbol], $right[$symbol])) {
+                $label = ', label="' . addslashes($symbol) .
+                         "\\nInc: " . sprintf('%.3f', $left[$symbol]['wt'] / 1000.0)
+                         . ' ms - '
+                         . sprintf('%.3f', $right[$symbol]['wt'] / 1000.0) . ' ms = '
+                         . sprintf('%.3f', $info['wt'] / 1000.0) . ' ms' .
+                         "\\nExcl: "
+                         . sprintf('%.3f', $left[$symbol]['excl_wt'] / 1000.0)
+                         . ' ms - ' . sprintf('%.3f', $right[$symbol]['excl_wt'] / 1000.0)
+                         . ' ms = ' . sprintf('%.3f', $info['excl_wt'] / 1000.0) . ' ms' .
+                         "\\nCalls: " . sprintf('%.3f', $left[$symbol]['ct']) . ' - '
+                         . sprintf('%.3f', $right[$symbol]['ct']) . ' = '
+                         . sprintf('%.3f', $info['ct']) . '"';
+            } elseif (isset($left[$symbol])) {
+                $label = ', label="' . addslashes($symbol) .
+                         "\\nInc: " . sprintf('%.3f', $left[$symbol]['wt'] / 1000.0)
+                         . ' ms - 0 ms = ' . sprintf('%.3f', $info['wt'] / 1000.0)
+                         . ' ms' . "\\nExcl: "
+                         . sprintf('%.3f', $left[$symbol]['excl_wt'] / 1000.0)
+                         . ' ms - 0 ms = '
+                         . sprintf('%.3f', $info['excl_wt'] / 1000.0) . ' ms' .
+                         "\\nCalls: " . sprintf('%.3f', $left[$symbol]['ct']) . ' - 0 = '
+                         . sprintf('%.3f', $info['ct']) . '"';
             } else {
-                if (isset($left[$symbol]) && isset($right[$symbol])) {
-                    $label = ', label="' . addslashes($symbol) .
-                             "\\nInc: " . sprintf('%.3f', $left[$symbol]['wt'] / 1000.0)
-                             . ' ms - '
-                             . sprintf('%.3f', $right[$symbol]['wt'] / 1000.0) . ' ms = '
-                             . sprintf('%.3f', $info['wt'] / 1000.0) . ' ms' .
-                             "\\nExcl: "
-                             . sprintf('%.3f', $left[$symbol]['excl_wt'] / 1000.0)
-                             . ' ms - ' . sprintf('%.3f', $right[$symbol]['excl_wt'] / 1000.0)
-                             . ' ms = ' . sprintf('%.3f', $info['excl_wt'] / 1000.0) . ' ms' .
-                             "\\nCalls: " . sprintf('%.3f', $left[$symbol]['ct']) . ' - '
-                             . sprintf('%.3f', $right[$symbol]['ct']) . ' = '
-                             . sprintf('%.3f', $info['ct']) . '"';
-                } elseif (isset($left[$symbol])) {
-                    $label = ', label="' . addslashes($symbol) .
-                             "\\nInc: " . sprintf('%.3f', $left[$symbol]['wt'] / 1000.0)
-                             . ' ms - 0 ms = ' . sprintf('%.3f', $info['wt'] / 1000.0)
-                             . ' ms' . "\\nExcl: "
-                             . sprintf('%.3f', $left[$symbol]['excl_wt'] / 1000.0)
-                             . ' ms - 0 ms = '
-                             . sprintf('%.3f', $info['excl_wt'] / 1000.0) . ' ms' .
-                             "\\nCalls: " . sprintf('%.3f', $left[$symbol]['ct']) . ' - 0 = '
-                             . sprintf('%.3f', $info['ct']) . '"';
-                } else {
-                    $label = ', label="' . addslashes($symbol) .
-                             "\\nInc: 0 ms - "
-                             . sprintf('%.3f', $right[$symbol]['wt'] / 1000.0)
-                             . ' ms = ' . sprintf('%.3f', $info['wt'] / 1000.0) . ' ms' .
-                             "\\nExcl: 0 ms - "
-                             . sprintf('%.3f', $right[$symbol]['excl_wt'] / 1000.0)
-                             . ' ms = ' . sprintf('%.3f', $info['excl_wt'] / 1000.0) . ' ms' .
-                             "\\nCalls: 0 - " . sprintf('%.3f', $right[$symbol]['ct'])
-                             . ' = ' . sprintf('%.3f', $info['ct']) . '"';
-                }
+                $label = ', label="' . addslashes($symbol) .
+                         "\\nInc: 0 ms - "
+                         . sprintf('%.3f', $right[$symbol]['wt'] / 1000.0)
+                         . ' ms = ' . sprintf('%.3f', $info['wt'] / 1000.0) . ' ms' .
+                         "\\nExcl: 0 ms - "
+                         . sprintf('%.3f', $right[$symbol]['excl_wt'] / 1000.0)
+                         . ' ms = ' . sprintf('%.3f', $info['excl_wt'] / 1000.0) . ' ms' .
+                         "\\nCalls: 0 - " . sprintf('%.3f', $right[$symbol]['ct'])
+                         . ' = ' . sprintf('%.3f', $info['ct']) . '"';
             }
             $result .= 'N' . $sym_table[$symbol]['id'];
             $result .= "[shape=$shape $label $width $height $fontsize $fillcolor];\n";
@@ -263,11 +261,9 @@ class Callgraph
         foreach ($raw_data as $parent_child => $info) {
             list( $parent, $child ) = uprofiler_parse_parent_child($parent_child);
 
-            if (isset($sym_table[$parent])
-                && isset($sym_table[$child])
-                && (
+            if (isset($sym_table[$parent], $sym_table[$child]) && (
                     empty($this->func)
-                    || ( ! empty($this->func) && ( $parent == $this->func || $child == $this->func ) )
+                    || (! empty($this->func) && ($parent == $this->func || $child == $this->func))
                 )
             ) {
                 $label = $info['ct'] == 1 ? $info['ct'] . ' call' : $info['ct'] . ' calls';
@@ -300,7 +296,7 @@ class Callgraph
                 $result .= ";\n";
             }
         }
-        $result = $result . "\n}";
+        $result .= "\n}";
 
         return $result;
     }
