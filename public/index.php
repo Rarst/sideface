@@ -2,37 +2,60 @@
 
 namespace Rarst\Sideface;
 
+use Slim\App;
+use Slim\Http\Uri;
+use Slim\Views\Twig;
+use Slim\Views\TwigExtension;
+
 require __DIR__ . '/../vendor/autoload.php';
 
-$app = new Application([
-    'twig.path' => __DIR__ . '/../src/twig',
-    'debug'     => true,
+$app = new App([
+    'settings'     => [
+        'displayErrorDetails' => true,
+    ],
+    'handler.runs' => static function () {
+        return new RunsHandler();
+    },
+    'view'         => static function ($container) {
+        $view   = new Twig(__DIR__ . '/../src/twig');
+        $router = $container['router'];
+        $uri    = Uri::createFromEnvironment($container['environment']);
+        $view->addExtension(new TwigExtension($router, $uri));
+
+        return $view;
+    }
 ]);
 
-$app->get('/{source}', function (Application $app, $source) {
+$app->get('/[{source}]', function ($request, $response, $args) {
 
-    $runsHandler = $app['handler.runs'];
+    $runsHandler = $this['handler.runs'];
     $runsList    = $runsHandler->getRunsList();
+    $source      = $args['source'] ?? false;
 
     if ($source) {
-        $runsList = array_filter($runsList, function ($run) use ($source) {
+        $runsList = array_filter($runsList, static function ($run) use ($source) {
             /** @var RunInterface $run */
             return $run->getSource() === $source;
         });
     }
 
-    return $app->render('runs-list.twig', [ 'runs' => $runsList, 'source' => $source ]);
+    return $this->view->render($response, 'runs-list.twig', ['runs' => $runsList, 'source' => $source]);
 })
-    ->value('source', false)
-    ->bind('runs_list');
+    ->setName('runs_list');
 
 $app->get(
-    '/{source}/{run1}-{run2}/callgraph{callgraphType}',
-    function (Application $app, Run $run1, Run $run2, $callgraphType) {
+    '/{source}/{run1}-{run2}/callgraph[{callgraphType}]',
+    function ($request, $response, $args) {
 
         ini_set('max_execution_time', 100);
 
-        $callgraph = new Callgraph([
+        /** @var RunsHandler $runsHandler */
+        $runsHandler   = $this['handler.runs'];
+        $source        = $args['source'];
+        $run1          = $runsHandler->getRun($args['run1'], $source);
+        $run2          = $runsHandler->getRun($args['run2'], $source);
+        $callgraphType = $args['callgraphType'] ?? false;
+        $callgraph     = new Callgraph([
             'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
         ]);
 
@@ -44,23 +67,30 @@ $app->get(
         $callgraph->render_diff_image($run1, $run2);
         $svg = ob_get_clean();
 
-        return $app->render('callgraph.twig', [ 'svg' => $svg ]);
+        return $this->view->render($response, 'callgraph.twig', [
+            'source' => $source,
+            'run'    => $run1->getId() . '-' . $run2->getId(),
+            'svg'    => $svg,
+        ]);
     }
 )
-    ->convert('run1', 'handler.runs:convert')
-    ->convert('run2', 'handler.runs:convert')
-    ->value('callgraphType', false)
-    ->bind('diff_callgraph');
+    ->setName('diff_callgraph');
 
 $app->get(
-    '/{source}/{run1}-{run2}/{symbol}',
-    function (Application $app, $source, RunInterface $run1, RunInterface $run2, $symbol) {
+    '/{source}/{run1}-{run2}/[{symbol}]',
+    function ($request, $response, $args) {
 
-        $run    = $run1->getId() . '-' . $run2->getId();
-        $report = new Report([ 'source' => $source, 'run' => $run ]);
+        /** @var RunsHandler $runsHandler */
+        $runsHandler = $this['handler.runs'];
+        $source      = $args['source'];
+        $run1        = $runsHandler->getRun($args['run1'], $source);
+        $run2        = $runsHandler->getRun($args['run2'], $source);
+        $run         = $run1->getId() . '-' . $run2->getId();
+        $symbol      = $args['symbol'] ?? null;
+        $report      = new Report(['source' => $source, 'run' => $run]);
         $report->profilerDiffReport($run1, $run2, $symbol);
 
-        return $app->render('report.twig', [
+        return $this->view->render($response, 'report.twig', [
             'source' => $source,
             'run'    => $run,
             'symbol' => $symbol,
@@ -68,41 +98,38 @@ $app->get(
         ]);
     }
 )
-    ->convert('run1', 'handler.runs:convert')
-    ->convert('run2', 'handler.runs:convert')
-    ->value('symbol', false)
-    ->bind('diff_runs');
+    ->setName('diff_runs');
 
-$app->get(
-    '/{source}/{run}/callgraph{callgraphType}',
-    function (Application $app, $source, RunInterface $run, $callgraphType) {
+$app->get('/{source}/{run}/callgraph[{callgraphType}]', function ($request, $response, $args) {
 
-        ini_set('max_execution_time', 100);
+    ini_set('max_execution_time', 100);
 
-        $callgraph = new Callgraph([
-            'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
-        ]);
+    /** @var RunsHandler $runsHandler */
+    $runsHandler = $this['handler.runs'];
+    $run         = $runsHandler->getRun($args['run'], $args['source']);
 
-        if ($callgraphType) {
-            $callgraph->render_image($run);
-            return ''; // TODO wrapper, headers
-        }
-        ob_start();
+    $callgraphType = $args['callgraphType'] ?? false;
+    $callgraph     = new Callgraph([
+        'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
+    ]);
+
+    if ($callgraphType) {
         $callgraph->render_image($run);
-        $svg = ob_get_clean();
-
-        return $app->render('callgraph.twig', [
-            'source' => $source,
-            'run'    => $run->getId(),
-            'svg'    => $svg
-        ]);
+        return ''; // TODO wrapper, headers
     }
-)
-    ->convert('run', 'handler.runs:convert')
-    ->value('callgraphType', false)
-    ->bind('single_callgraph');
+    ob_start();
+    $callgraph->render_image($run);
+    $svg = ob_get_clean();
 
-$app->get('/{source}/{run}/{symbol}', function (Application $app, $source, RunInterface $run, $symbol) {
+    return $this->view->render($response, 'callgraph.twig', [
+        'source' => $args['source'],
+        'run'    => $run->getId(),
+        'svg'    => $svg
+    ]);
+})
+    ->setName('single_callgraph');
+
+$app->get('/{source}/{run}/[{symbol}]', function ($request, $response, $args) {
 
 //    global $wts;
     // TODO aggregate runs stuff
@@ -124,18 +151,20 @@ $app->get('/{source}/{run}/{symbol}', function (Application $app, $source, RunIn
 //        $runData = $data['raw'];
 //    }
 
-    $report = new Report([ 'source' => $source, 'run' => $run->getId() ]);
+    /** @var RunsHandler $runsHandler */
+    $runsHandler = $this['handler.runs'];
+    $run         = $runsHandler->getRun($args['run'], $args['source']);
+    $report      = new Report(['source' => $args['source'], 'run' => $run->getId()]);
+    $symbol      = $args['symbol'] ?? null;
     $report->profilerReport($run, $symbol);
 
-    return $app->render('report.twig', [
-        'source' => $source,
+    return $this->view->render($response, 'report.twig', [
+        'source' => $args['source'],
         'run'    => $run->getId(),
         'symbol' => $symbol,
         'body'   => $report->getBody(),
     ]);
 })
-    ->convert('run', 'handler.runs:convert')
-    ->value('symbol', false)
-    ->bind('single_run');
+    ->setName('single_run');
 
 $app->run();

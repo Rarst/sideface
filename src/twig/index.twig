@@ -5,10 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Profiler Report</title>
-    <link href='/assets/css/style.css' rel='stylesheet' type='text/css'/>
-    <link href='/assets/jquery/jquery.tooltip.css' rel='stylesheet' type='text/css'/>
-    <link href='/assets/jquery/jquery.autocomplete.css' rel='stylesheet' type='text/css'/>
+{#    <link href='/assets/jquery/jquery.tooltip.css' rel='stylesheet' type='text/css'/>#}
+{#    <link href='/assets/jquery/jquery.autocomplete.css' rel='stylesheet' type='text/css'/>#}
     <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href='/assets/css/style.css' rel='stylesheet' type='text/css'/>
 </head>
 <body>
 {% block body %}
@@ -19,7 +19,7 @@
                 <div class="col-md-12">
                     <ol class="breadcrumb">
                         {% block breadcrumb_items %}
-                            <li><a href="{{ url('runs_list') }}">Runs</a></li>
+                            <li><a href="{{ path_for('runs_list') }}">Runs</a></li>
                         {% endblock %}
                     </ol>
                 </div>
