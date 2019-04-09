@@ -18,7 +18,7 @@
 
 {% block scripts %}
     {{ parent() }}
-    <script src="/assets/js/svg-pan-zoom.min.js" type="text/javascript"></script>
+    <script src="/assets/svg-pan-zoom/svg-pan-zoom.min.js" type="text/javascript"></script>
     <script type="text/javascript">
         jQuery(document).ready(function ($) {
 
@@ -33,7 +33,7 @@
 
             var callgraph = svgPanZoom('#svg svg', {
                 controlIconsEnabled: true,
-                zoomScaleSensitivity: 0.03,
+                zoomScaleSensitivity: 0.3,
                 minZoom: 0.9,
                 onZoom: function(zoom) {
                     if(zoom<1) {

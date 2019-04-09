@@ -1,5 +1,6 @@
 /vendor
 /resources/runs/*
 !/resources/runs/.gitkeep
-/public/assets/bootstrap
-/public/assets/jquery-2
+/public/assets/*
+!/public/assets/css
+!/public/assets/js
