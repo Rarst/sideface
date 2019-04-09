@@ -35,7 +35,7 @@
                 {% if not source %}
                     <td><a href="{{ path_for('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
                 {% endif %}
-                <td>{{ run.time|date('Y-m-d h:m:s') }}</td>
+                <td>{{ run.time|date('Y-m-d H:i:s') }}</td>
             </tr>
         {% endfor %}
         </tbody>
