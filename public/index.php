@@ -26,7 +26,7 @@ $app = new App([
     }
 ]);
 
-$app->get('/[{source}]', function ($request, $response, $args) {
+$app->get('[/{source}]', function ($request, $response, $args) {
 
     $runsHandler = $this['handler.runs'];
     $runsList    = $runsHandler->getRunsList();
@@ -77,7 +77,7 @@ $app->get(
     ->setName('diff_callgraph');
 
 $app->get(
-    '/{source}/{run1}-{run2}/[{symbol}]',
+    '/{source}/{run1}-{run2}[/{symbol}]',
     function ($request, $response, $args) {
 
         /** @var RunsHandler $runsHandler */
@@ -129,7 +129,7 @@ $app->get('/{source}/{run}/callgraph[{callgraphType}]', function ($request, $res
 })
     ->setName('single_callgraph');
 
-$app->get('/{source}/{run}/[{symbol}]', function ($request, $response, $args) {
+$app->get('/{source}/{run}[/{symbol}]', function ($request, $response, $args) {
 
 //    global $wts;
     // TODO aggregate runs stuff
