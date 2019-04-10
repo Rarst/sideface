@@ -4,76 +4,57 @@ declare(strict_types=1);
 namespace Rarst\Sideface\Callgraph;
 
 use Psr\Http\Message\ResponseInterface;
-use Rarst\Sideface\Callgraph;
 use Rarst\Sideface\Responder\Responder;
-use Rarst\Sideface\RunsHandler;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 class CallgraphAction
 {
-    /** @var RunsHandler */
-    private $handler;
+    /** @var CallgraphDomainLogic */
+    private $domain;
 
     /** @var Responder */
     private $responder;
 
-    public function __construct(RunsHandler $handler, Responder $responder)
+    public function __construct(CallgraphDomainLogic $domain, Responder $responder)
     {
-        $this->handler   = $handler;
+        $this->domain    = $domain;
         $this->responder = $responder;
+
+        ini_set('max_execution_time', '100');
     }
 
     public function show(Request $request, Response $response, array $args): ResponseInterface
     {
-        ini_set('max_execution_time', '100');
+        $imageType = ltrim($args['callgraphType'] ?? 'svg', '.');
+        $image     = $this->domain->getImage($args['run'], $args['source'], $imageType);
 
-        $run = $this->handler->getRun($args['run'], $args['source']);
-
-        $callgraphType = $args['callgraphType'] ?? false;
-        $callgraph     = new Callgraph([
-            'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
-        ]);
-
-        if ($callgraphType) {
-            $callgraph->render_image($run);
-            return ''; // TODO wrapper, headers
-        }
-        ob_start();
-        $callgraph->render_image($run);
-        $svg = ob_get_clean();
+        // TODO image file responses are broken
+//        if (! empty($args['callgraphType'])) {
+        // echo $image;
+//        }
 
         return $this->responder->callgraph($response, [
             'source' => $args['source'],
-            'run'    => $run->getId(),
-            'svg'    => $svg
+            'run'    => $args['run'],
+            'svg'    => $image
         ]);
     }
 
     public function diff(Request $request, Response $response, array $args): ResponseInterface
     {
-        ini_set('max_execution_time', '100');
+        $imageType = ltrim($args['callgraphType'] ?? 'svg', '.');
+        $image     = $this->domain->getDiffImage($args['run1'], $args['run2'], $args['source'], $imageType);
 
-        $source        = $args['source'];
-        $run1          = $this->handler->getRun($args['run1'], $source);
-        $run2          = $this->handler->getRun($args['run2'], $source);
-        $callgraphType = $args['callgraphType'] ?? false;
-        $callgraph     = new Callgraph([
-            'type' => $callgraphType ? ltrim($callgraphType, '.') : 'svg',
-        ]);
-
-        if ($callgraphType) {
-            $callgraph->render_diff_image($run1, $run2);
-            return ''; // TODO wrapper, headers
-        }
-        ob_start();
-        $callgraph->render_diff_image($run1, $run2);
-        $svg = ob_get_clean();
+        // TODO image file responses are broken
+//        if (! empty($args['callgraphType'])) {
+        // echo $image;
+//        }
 
         return $this->responder->callgraph($response, [
-            'source' => $source,
-            'run'    => $run1->getId() . '-' . $run2->getId(),
-            'svg'    => $svg,
+            'source' => $args['source'],
+            'run'    => $args['run1'] . '–' . $args['run2'],
+            'svg'    => $image,
         ]);
     }
 }

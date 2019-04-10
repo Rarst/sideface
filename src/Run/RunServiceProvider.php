@@ -23,8 +23,12 @@ class RunServiceProvider implements ServiceProviderInterface
             return new RunsHandler();
         };
 
+        $container['domain.run'] = static function (Container $container) {
+            return new RunDomainLogic($container['handler.runs']);
+        };
+
         $container['action.run'] = static function (Container $container) {
-            return new RunAction($container['handler.runs'], $container['responder']);
+            return new RunAction($container['domain.run'], $container['responder']);
         };
     }
 }

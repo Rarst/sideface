@@ -49,6 +49,7 @@ class RunsHandler implements iUprofilerRuns
      */
     public function getRun($runId, $source)
     {
+        // TODO make this work without source because IDs are unique and should be enough for lookup
         $fileName = $this->getFileName($runId, $source);
         if (! file_exists($fileName)) {
             return false;

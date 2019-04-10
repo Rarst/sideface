@@ -18,8 +18,12 @@ class CallgraphServiceProvider implements ServiceProviderInterface
      */
     public function register(Container $container): void
     {
+        $container['domain.callgraph'] = static function (Container $container) {
+            return new CallgraphDomainLogic($container['handler.runs']);
+        };
+
         $container['action.callgraph'] = static function (Container $container) {
-            return new CallgraphAction($container['handler.runs'], $container['responder']);
+            return new CallgraphAction($container['domain.callgraph'], $container['responder']);
         };
     }
 }
