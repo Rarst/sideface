@@ -29,10 +29,12 @@ class CallgraphAction
         $imageType = ltrim($args['callgraphType'] ?? 'svg', '.');
         $image     = $this->domain->getImage($args['run'], $args['source'], $imageType);
 
-        // TODO image file responses are broken
-//        if (! empty($args['callgraphType'])) {
-        // echo $image;
-//        }
+        if (! empty($args['callgraphType'])) {
+            return $this->responder->image($response, [
+                'image' => $image,
+                'type'  => $imageType,
+            ]);
+        }
 
         return $this->responder->callgraph($response, [
             'source' => $args['source'],
@@ -46,14 +48,18 @@ class CallgraphAction
         $imageType = ltrim($args['callgraphType'] ?? 'svg', '.');
         $image     = $this->domain->getDiffImage($args['run1'], $args['run2'], $args['source'], $imageType);
 
-        // TODO image file responses are broken
-//        if (! empty($args['callgraphType'])) {
-        // echo $image;
-//        }
+        if (! empty($args['callgraphType'])) {
+            return $this->responder->image($response, [
+                'image' => $image,
+                'type'  => $imageType,
+            ]);
+        }
 
         return $this->responder->callgraph($response, [
             'source' => $args['source'],
             'run'    => $args['run1'] . '–' . $args['run2'],
+            'run1'   => $args['run1'],
+            'run2'   => $args['run2'],
             'svg'    => $image,
         ]);
     }

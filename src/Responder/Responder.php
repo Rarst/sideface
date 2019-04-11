@@ -31,4 +31,31 @@ class Responder
     {
         return $this->view->render($response, 'callgraph.twig', $payload);
     }
+
+    public function image(Response $response, array $payload): ResponseInterface
+    {
+        $response = $response->write($payload['image']);
+        $response = $response->withHeader('Content-Type', $this->getMimeType($payload['type']));
+
+        return $response;
+    }
+
+    private function getMimeType(string $imageType): string
+    {
+        switch ($imageType) {
+            case 'svg':
+                $mime = 'image/svg+xml';
+                break;
+            case 'ps':
+                $mime = 'application/postscript';
+                break;
+            case 'jpg':
+                $mime = 'image/jpeg';
+                break;
+            default:
+                $mime = "image/{$imageType}";
+        }
+
+        return $mime;
+    }
 }

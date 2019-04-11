@@ -37,17 +37,9 @@ class Callgraph
 
     public function render_image(RunInterface $run)
     {
-        $content = $this->get_content_by_run($run);
+        $script = $this->generate_dot_script($run->getData(), $run->getSource(), '');
 
-        if (! $content) {
-            print 'Error: either we can not find profile data for run_id ' . $run->getId()
-                  . ' or the threshold ' . $this->threshold . ' is too small or you do not'
-                  . " have 'dot' image generation utility installed.";
-            exit();
-        }
-
-        $this->generate_mime_header(strlen($content));
-        echo $content;
+        return $this->generate_image_by_dot($script);
     }
 
     public function render_diff_image(RunInterface $run1, RunInterface $run2)
@@ -60,19 +52,8 @@ class Callgraph
         $symbol_tab2    = $runDataObject2->getFlat();
         $run_delta      = $runDataObject1->diffTo($raw_data2);
         $script         = $this->generate_dot_script($run_delta, $run1->getSource(), null, $symbol_tab1, $symbol_tab2);
-        $content        = $this->generate_image_by_dot($script);
 
-        $this->generate_mime_header(strlen($content));
-        echo $content;
-    }
-
-    public function get_content_by_run(RunInterface $run)
-    {
-        $raw_data = $run->getData();
-        $script   = $this->generate_dot_script($raw_data, $run->getSource(), '');
-        $content  = $this->generate_image_by_dot($script);
-
-        return $content;
+        return $this->generate_image_by_dot($script);
     }
 
     public function generate_dot_script(
@@ -332,34 +313,6 @@ class Callgraph
         }
         print "failed to execute cmd \"$cmd\"";
         exit();
-    }
-
-    public function generate_mime_header($length)
-    {
-        switch ($this->type) {
-            case 'jpg':
-                $mime = 'image/jpeg';
-                break;
-            case 'gif':
-                $mime = 'image/gif';
-                break;
-            case 'png':
-                $mime = 'image/png';
-                break;
-            case 'svg':
-                $mime = 'image/svg+xml';
-                break;
-            case 'ps':
-                $mime = 'application/postscript';
-                break;
-            default:
-                $mime = false;
-        }
-
-        if ($mime) {
-            header("Content-type:$mime", true);
-            header("Content-length:$length", true);
-        }
     }
 
     public function get_children_table($raw_data)
