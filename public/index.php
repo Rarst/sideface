@@ -22,8 +22,8 @@ $container->register(new RunServiceProvider());
 $container->register(new CallgraphServiceProvider());
 $container->register(new ResponderServiceProvider());
 
-$app->get('[/{source}]', 'action.run:list')
     ->setName('runs_list');
+$app->get('/[{source}]', 'action.run:list')
 
 $app->get('/{source}/{run1}-{run2}/callgraph[{callgraphType}]', 'action.callgraph:diff')
     ->setName('diff_callgraph');
