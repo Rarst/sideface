@@ -63,7 +63,7 @@ class RunDomainLogic
     {
         $run1   = $this->handler->getRun($runId1, $source);
         $run2   = $this->handler->getRun($runId2, $source);
-        $report = new Report(['source' => $source, 'run' => $runId1 . '–' . $runId2]);
+        $report = new Report(['source' => $source, 'run' => $runId1 . '-' . $runId2]);
 
         $report->profilerDiffReport($run1, $run2, $symbol);
 
