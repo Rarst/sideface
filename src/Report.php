@@ -2,6 +2,8 @@
 namespace Rarst\Sideface;
 
 use iUprofilerRuns;
+use Rarst\Sideface\Run\RunData;
+use Rarst\Sideface\Run\RunInterface;
 
 class Report
 {

@@ -2,6 +2,8 @@
 
 namespace Rarst\Sideface;
 
+use Rarst\Sideface\Run\RunInterface;
+
 /**
  * Implements compatibility layer with iUprofilerRuns interface.
  */

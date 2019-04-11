@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace Rarst\Sideface\Run;
 
 use Rarst\Sideface\Report;
-use Rarst\Sideface\RunInterface;
-use Rarst\Sideface\RunsHandler;
 
 class RunDomainLogic
 {

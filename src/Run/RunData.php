@@ -1,5 +1,5 @@
 <?php
-namespace Rarst\Sideface;
+namespace Rarst\Sideface\Run;
 
 class RunData implements RunDataInterface
 {

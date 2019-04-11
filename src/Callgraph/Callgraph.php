@@ -1,5 +1,8 @@
 <?php
-namespace Rarst\Sideface;
+namespace Rarst\Sideface\Callgraph;
+
+use Rarst\Sideface\Run\RunData;
+use Rarst\Sideface\Run\RunInterface;
 
 class Callgraph
 {

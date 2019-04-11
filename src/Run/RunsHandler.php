@@ -1,7 +1,8 @@
 <?php
-namespace Rarst\Sideface;
+namespace Rarst\Sideface\Run;
 
 use iUprofilerRuns;
+use Rarst\Sideface\UprofilerCompatTrait;
 
 class RunsHandler implements iUprofilerRuns
 {
@@ -21,7 +22,7 @@ class RunsHandler implements iUprofilerRuns
             $dir = ini_get($suffix . '.output_dir');
         }
         if (empty($dir)) {
-            $dir = __DIR__ . '/../resources/runs/';
+            $dir = __DIR__ . '/../../resources/runs/';
         }
         $this->dir = $dir;
     }

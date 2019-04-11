@@ -3,8 +3,7 @@ declare(strict_types=1);
 
 namespace Rarst\Sideface\Callgraph;
 
-use Rarst\Sideface\Callgraph;
-use Rarst\Sideface\RunsHandler;
+use Rarst\Sideface\Run\RunsHandler;
 
 class CallgraphDomainLogic
 {

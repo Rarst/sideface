@@ -5,7 +5,6 @@ namespace Rarst\Sideface\Run;
 
 use Pimple\Container;
 use Pimple\ServiceProviderInterface;
-use Rarst\Sideface\RunsHandler;
 
 class RunServiceProvider implements ServiceProviderInterface
 {
