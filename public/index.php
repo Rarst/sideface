@@ -22,19 +22,19 @@ $container->register(new RunServiceProvider());
 $container->register(new CallgraphServiceProvider());
 $container->register(new ResponderServiceProvider());
 
-    ->setName('runs_list');
 $app->get('/[{source}]', 'action.run:list')
+    ->setName('run:list');
 
 $app->get('/{source}/{run1}-{run2}/callgraph[{callgraphType}]', 'action.callgraph:diff')
-    ->setName('diff_callgraph');
+    ->setName('callgraph:diff');
 
 $app->get('/{source}/{run1}-{run2}[/{symbol}]', 'action.run:diff')
-    ->setName('diff_runs');
+    ->setName('run:diff');
 
 $app->get('/{source}/{run}/callgraph[{callgraphType}]', 'action.callgraph:show')
-    ->setName('single_callgraph');
+    ->setName('callgraph:show');
 
 $app->get('/{source}/{run}[/{symbol}]', 'action.run:show')
-    ->setName('single_run');
+    ->setName('run:show');
 
 $app->run();

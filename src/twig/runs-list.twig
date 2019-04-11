@@ -2,7 +2,7 @@
 
 {% block breadcrumb_items %}
     {% if source %}
-        <li><a href="{{ path_for('runs_list') }}">Runs</a></li>
+        <li><a href="{{ path_for('run:list') }}">Runs</a></li>
         <li>{{ source }}</li>
     {% else %}
         <li>Runs</li>
@@ -31,9 +31,9 @@
                     <label class="radio-inline"><input type="radio" name="from" value="{{ run.id }}"/> from</label>
                     <label class="radio-inline"><input type="radio" name="to" value="{{ run.id }}"/> to</label>
                 </td>
-                <td><a href="{{ path_for('single_run', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
+                <td><a href="{{ path_for('run:show', {source:run.source,run:run.id}) }}">{{ run.id }}</a></td>
                 {% if not source %}
-                    <td><a href="{{ path_for('runs_list', {source:run.source}) }}">{{ run.source }}</a></td>
+                    <td><a href="{{ path_for('run:list', {source:run.source}) }}">{{ run.source }}</a></td>
                 {% endif %}
                 <td>{{ run.time|date('Y-m-d H:i:s') }}</td>
             </tr>

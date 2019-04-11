@@ -1,9 +1,9 @@
 {% extends 'index.twig' %}
 
 {% block breadcrumb_items %}
-    <li><a href="{{ path_for('runs_list') }}">Runs</a></li>
-    <li><a href="{{ path_for('runs_list', {source:source}) }}">{{ source }}</a></li>
-    <li><a href="{{ path_for('single_run', {source:source,run:run}) }}">{{ run }}</a></li>
+    <li><a href="{{ path_for('run:list') }}">Runs</a></li>
+    <li><a href="{{ path_for('run:list', {source:source}) }}">{{ source }}</a></li>
+    <li><a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a></li>
     <li>callgraph</li>
 {% endblock %}
 
