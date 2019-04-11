@@ -57,7 +57,7 @@ class CallgraphAction
 
         return $this->responder->callgraph($response, [
             'source' => $args['source'],
-            'run'    => $args['run1'] . '–' . $args['run2'],
+            'run'    => $args['run1'] . ' – ' . $args['run2'],
             'run1'   => $args['run1'],
             'run2'   => $args['run2'],
             'svg'    => $image,

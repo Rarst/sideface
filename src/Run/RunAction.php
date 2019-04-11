@@ -50,7 +50,9 @@ class RunAction
 
         return $this->responder->report($response, [
             'source' => $args['source'],
-            'run'    => $args['run1'] . '–' . $args['run2'],
+            'run'    => $args['run1'] . ' – ' . $args['run2'],
+            'run1'   => $args['run1'],
+            'run2'   => $args['run2'],
             'symbol' => $symbol,
             'body'   => $this->domain->getDiffReport($args['run1'], $args['run2'], $args['source'], $symbol),
         ]);

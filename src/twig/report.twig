@@ -4,12 +4,26 @@
     <li><a href="{{ path_for('run:list') }}">Runs</a></li>
     <li><a href="{{ path_for('run:list', {source:source}) }}">{{ source }}</a></li>
     {% if symbol %}
-        <li><a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a></li>
+        {% if run2 %}
+            <li><a href="{{ path_for('run:diff', {source:source,run1:run1,run2:run2}) }}">{{ run }}</a></li>
+        {% else %}
+            <li><a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a></li>
+        {% endif %}
         <li>{{ symbol }}</li>
     {% else %}
-        <li>{{ run }}</li>
+        {% if run2 %}
+            <li>
+                <a href="{{ path_for('run:show', {source:source,run:run1}) }}">{{ run1 }}</a> –
+                <a href="{{ path_for('run:show', {source:source,run:run2}) }}">{{ run2 }}</a>
+            </li>
+            <li><a class="btn btn-default btn-xs"
+                   href="{{ path_for('callgraph:diff', {source:source,run1:run1,run2:run2,symbol:symbol}) }}">callgraph</a></li>
+        {% else %}
+            <li>{{ run }}</li>
+            <li><a class="btn btn-default btn-xs"
+                   href="{{ path_for('callgraph:show', {source:source,run:run}) }}">callgraph</a></li>
+        {% endif %}
     {% endif %}
-        <li><a class="btn btn-default btn-xs" href="{{ path_for('callgraph:show', {source:source,run:run}) }}">callgraph</a></li>
 {% endblock %}
 
 {% block body %}

@@ -3,7 +3,13 @@
 {% block breadcrumb_items %}
     <li><a href="{{ path_for('run:list') }}">Runs</a></li>
     <li><a href="{{ path_for('run:list', {source:source}) }}">{{ source }}</a></li>
-    <li><a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a></li>
+    <li>
+        {% if run2 %}
+            <a href="{{ path_for('run:diff', {source:source,run1:run1,run2:run2}) }}">{{ run }}</a>
+        {% else %}
+            <a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a>
+        {% endif %}
+    </li>
     <li>callgraph</li>
     <li>download
         {% if run2 %}

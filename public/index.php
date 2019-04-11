@@ -25,12 +25,14 @@ $container->register(new ResponderServiceProvider());
 $app->get('/[{source}]', 'action.run:list')
     ->setName('run:list');
 
+// TODO symbol callgraphs?
 $app->get('/{source}/{run1}-{run2}/callgraph[{callgraphType}]', 'action.callgraph:diff')
     ->setName('callgraph:diff');
 
 $app->get('/{source}/{run1}-{run2}[/{symbol}]', 'action.run:diff')
     ->setName('run:diff');
 
+// TODO symbol callgraphs?
 $app->get('/{source}/{run}/callgraph[{callgraphType}]', 'action.callgraph:show')
     ->setName('callgraph:show');
 
