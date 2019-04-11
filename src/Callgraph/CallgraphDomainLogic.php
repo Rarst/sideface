@@ -15,19 +15,30 @@ class CallgraphDomainLogic
         $this->handler = $handler;
     }
 
-    public function getImage(string $runId, string $source, string $type = 'svg')
+    public function getImage(string $runId, string $source, string $type = 'svg', string $symbol = null)
     {
         $run       = $this->handler->getRun($runId, $source);
-        $callgraph = new Callgraph(['type' => $type]);
+        $callgraph = new Callgraph([
+            'type' => $type,
+            'func' => $symbol,
+        ]);
 
         return $callgraph->render_image($run);
     }
 
-    public function getDiffImage(string $runId1, string $runId2, string $source, string $type = 'svg')
-    {
+    public function getDiffImage(
+        string $runId1,
+        string $runId2,
+        string $source,
+        string $type = 'svg',
+        string $symbol = null
+    ) {
         $run1      = $this->handler->getRun($runId1, $source);
         $run2      = $this->handler->getRun($runId2, $source);
-        $callgraph = new Callgraph(['type' => $type]);
+        $callgraph = new Callgraph([
+            'type' => $type,
+            'func' => $symbol,
+        ]);
 
         return $callgraph->render_diff_image($run1, $run2);
     }

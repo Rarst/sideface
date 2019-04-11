@@ -3,27 +3,47 @@
 {% block breadcrumb_items %}
     <li><a href="{{ path_for('run:list') }}">Runs</a></li>
     <li><a href="{{ path_for('run:list', {source:source}) }}">{{ source }}</a></li>
-    <li>
-        {% if run2 %}
-            <a href="{{ path_for('run:diff', {source:source,run1:run1,run2:run2}) }}">{{ run }}</a>
-        {% else %}
-            <a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a>
-        {% endif %}
-    </li>
-    <li>callgraph</li>
-    <li>download
-        {% if run2 %}
-            <a href="{{ path_for('callgraph:diff', {source:source,run1:run1,run2:run2,callgraphType:'.jpg'}) }}"
-               class="btn btn-default btn-xs">JPG</a>
-            <a href="{{ path_for('callgraph:diff', {source:source,run1:run1,run2:run2,callgraphType:'.svg'}) }}"
-               class="btn btn-default btn-xs">SVG</a>
-        {% else %}
-            <a href="{{ path_for('callgraph:show', {source:source,run:run,callgraphType:'.jpg'}) }}"
-               class="btn btn-default btn-xs">JPG</a>
-            <a href="{{ path_for('callgraph:show', {source:source,run:run,callgraphType:'.svg'}) }}"
-               class="btn btn-default btn-xs">SVG</a>
-        {% endif %}
-    </li>
+    {% if symbol %}
+        <li><a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a></li>
+        <li><a href="{{ path_for('run:show', {source:source,run:run,symbol:symbol}) }}">{{ symbol }}</a></li>
+        <li>callgraph</li>
+        <li>download
+            {% if run2 %}
+                <a href="{{ path_for('callgraph:diff-symbol', {source:source,run1:run1,run2:run2,callgraphType:'.jpg',symbol:symbol}) }}"
+                   class="btn btn-default btn-xs">JPG</a>
+                <a href="{{ path_for('callgraph:diff-symbol', {source:source,run1:run1,run2:run2,callgraphType:'.svg',symbol:symbol}) }}"
+                   class="btn btn-default btn-xs">SVG</a>
+            {% else %}
+                <a href="{{ path_for('callgraph:show-symbol', {source:source,run:run,callgraphType:'.jpg',symbol:symbol}) }}"
+                   class="btn btn-default btn-xs">JPG</a>
+                <a href="{{ path_for('callgraph:show-symbol', {source:source,run:run,callgraphType:'.svg',symbol:symbol}) }}"
+                   class="btn btn-default btn-xs">SVG</a>
+            {% endif %}
+        </li>
+    {% else %}
+        <li>
+            {% if run2 %}
+                <a href="{{ path_for('run:diff', {source:source,run1:run1,run2:run2}) }}">{{ run }}</a>
+            {% else %}
+                <a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a>
+            {% endif %}
+        </li>
+        <li>callgraph</li>
+        <li>download
+            {% if run2 %}
+                <a href="{{ path_for('callgraph:diff', {source:source,run1:run1,run2:run2,callgraphType:'.jpg'}) }}"
+                   class="btn btn-default btn-xs">JPG</a>
+                <a href="{{ path_for('callgraph:diff', {source:source,run1:run1,run2:run2,callgraphType:'.svg'}) }}"
+                   class="btn btn-default btn-xs">SVG</a>
+            {% else %}
+                <a href="{{ path_for('callgraph:show', {source:source,run:run,callgraphType:'.jpg'}) }}"
+                   class="btn btn-default btn-xs">JPG</a>
+                <a href="{{ path_for('callgraph:show', {source:source,run:run,callgraphType:'.svg'}) }}"
+                   class="btn btn-default btn-xs">SVG</a>
+            {% endif %}
+        </li>
+    {% endif %}
+
 {% endblock %}
 
 {% block body %}

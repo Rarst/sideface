@@ -10,6 +10,7 @@
             <li><a href="{{ path_for('run:show', {source:source,run:run}) }}">{{ run }}</a></li>
         {% endif %}
         <li>{{ symbol }}</li>
+        <li><a href="{{ path_for('callgraph:show-symbol', {source:source,run:run,symbol:symbol}) }}" class="btn btn-default btn-xs">callgraph</a></li>
     {% else %}
         {% if run2 %}
             <li>

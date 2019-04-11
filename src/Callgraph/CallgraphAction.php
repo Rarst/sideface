@@ -26,8 +26,9 @@ class CallgraphAction
 
     public function show(Request $request, Response $response, array $args): ResponseInterface
     {
+        $symbol    = $args['symbol'] ?? null;
         $imageType = ltrim($args['callgraphType'] ?? 'svg', '.');
-        $image     = $this->domain->getImage($args['run'], $args['source'], $imageType);
+        $image     = $this->domain->getImage($args['run'], $args['source'], $imageType, $symbol);
 
         if (! empty($args['callgraphType'])) {
             return $this->responder->image($response, [
@@ -39,14 +40,16 @@ class CallgraphAction
         return $this->responder->callgraph($response, [
             'source' => $args['source'],
             'run'    => $args['run'],
+            'symbol' => $symbol,
             'svg'    => $image
         ]);
     }
 
     public function diff(Request $request, Response $response, array $args): ResponseInterface
     {
+        $symbol    = $args['symbol'] ?? null;
         $imageType = ltrim($args['callgraphType'] ?? 'svg', '.');
-        $image     = $this->domain->getDiffImage($args['run1'], $args['run2'], $args['source'], $imageType);
+        $image     = $this->domain->getDiffImage($args['run1'], $args['run2'], $args['source'], $imageType, $symbol);
 
         if (! empty($args['callgraphType'])) {
             return $this->responder->image($response, [
@@ -60,6 +63,7 @@ class CallgraphAction
             'run'    => $args['run1'] . ' – ' . $args['run2'],
             'run1'   => $args['run1'],
             'run2'   => $args['run2'],
+            'symbol' => $symbol,
             'svg'    => $image,
         ]);
     }
