@@ -74,45 +74,31 @@ class DotScript
             $width    = ', width=' . sprintf('%.1f', $max_width / $sizing_factor);
             $height   = ', height=' . sprintf('%.1f', $max_height / $sizing_factor);
 
-            if ($symbol === 'main()') {
-                $shape = 'octagon';
-                $name  = 'Total: ' . $t->ms($totals['wt']) . "\\n";
-                $name  .= addslashes($symbol);
-            } else {
-                $shape = 'box';
-                $name  = addslashes($symbol) . "\\n" . '● ' . $t->ms($i['wt']) .
-                         ' (' . sprintf('%.1f%%', 100 * $i['wt'] / $totals['wt']) . ')';
-            }
+            $shape = $symbol === 'main()' ? 'octagon' : 'box';
 
             $l = $left[$symbol] ?? [];
             $r = $right[$symbol] ?? [];
 
-            if ($left === null) {
-                $label = ', label="' . $name . "\\n" .
-                         '○ ' . $t->ms($i['excl_wt']) . ' ('
-                         . sprintf('%.1f%%', 100 * $i['excl_wt'] / $totals['wt'])
-                         . ")\\n"
+            if (! $l) {
+                $label = ', label="'
+                         . addslashes($symbol) . '\n'
+                         . '● ' . $t->ms($i['wt']) . ' (' . $t->pc($i['wt'], $totals['wt']) . ')\n'
+                         . '○ ' . $t->ms($i['excl_wt']) . ' (' . $t->pc($i['excl_wt'], $totals['wt']) . ')\n'
                          . $i['ct'] . ' calls"';
-            } elseif (isset($left[$symbol], $right[$symbol])) {
-                $label = ', label="' . addslashes($symbol) . "\\n"
-                         . '● ' . $t->ms($l['wt']) . ' - ' . $t->ms($r['wt'])
-                         . ' = ' . $t->ms($i['wt']) . "\\n"
-                         . '○ ' . $t->ms($l['excl_wt']) . ' - ' . $t->ms($r['excl_wt'])
-                         . ' = ' . $t->ms($i['excl_wt']) . "\\n"
+            } elseif ($l && $r) {
+                $label = ', label="' . addslashes($symbol) . '\n'
+                         . '● ' . $t->sub($l['wt'], $r['wt'], $i['wt'])
+                         . '○ ' . $t->sub($l['excl_wt'], $r['excl_wt'], $i['excl_wt'])
                          . 'Calls: ' . $l['ct'] . ' - ' . $r['ct'] . ' = ' . $i['ct'] . '"';
-            } elseif (isset($left[$symbol])) {
-                $label = ', label="' . addslashes($symbol) . "\\n"
-                         . '● ' . $t->ms($l['wt'])
-                         . ' - 0 ms = ' . $t->ms($i['wt']) . "\\n"
-                         . '○ ' . $t->ms($l['excl_wt'])
-                         . ' - 0 ms = ' . $t->ms($i['excl_wt']) . "\\n"
+            } elseif ($l) {
+                $label = ', label="' . addslashes($symbol) . '\n'
+                         . '● ' . $t->sub($l['wt'], 0, $i['wt'])
+                         . '○ ' . $t->sub($l['excl_wt'], 0, $i['excl_wt'])
                          . 'Calls: ' . $l['ct'] . ' - 0 = ' . $i['ct'] . '"';
             } else {
-                $label = ', label="' . addslashes($symbol) . "\\n"
-                         . '● 0 ms - ' . $t->ms($r['wt'])
-                         . ' = ' . $t->ms($i['wt']) . ' ms' . "\\n"
-                         . '○ 0 ms - ' . $t->ms($r['excl_wt'])
-                         . ' = ' . $t->ms($i['excl_wt']) . "\\n"
+                $label = ', label="' . addslashes($symbol) . '\n'
+                         . '● ' . $t->sub(0, $r['wt'], $i['wt'])
+                         . '○ ' . $t->sub(0, $r['excl_wt'], $i['excl_wt'])
                          . 'Calls: 0 - ' . $r['ct'] . ' = ' . $i['ct'] . '"';
             }
             $result .= 'N' . $sym_table[$symbol]['id'];
@@ -163,12 +149,25 @@ class DotScript
         return $result;
     }
 
-    private function ms($microseconds)
+    private function sub($left, $right, $result): string
     {
+        return sprintf('%s - %s = %s\n', $this->ms($left), $this->ms($right), $this->ms($result));
+    }
+
+    private function ms($microseconds): string
+    {
+        if (0 === $microseconds) {
+            return '0 ms';
+        }
         $milliseconds = $microseconds / 1000.0;
         $format       = (abs($milliseconds) > 1) ? '%.1f' : '%.3f';
 
         return sprintf($format, $milliseconds) . ' ms';
+    }
+
+    private function pc($part, $total)
+    {
+        return sprintf('%.1f%%', 100 * $part / $total);
     }
 
     private function getCriticalPath(array $data): array
