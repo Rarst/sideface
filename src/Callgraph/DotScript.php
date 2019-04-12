@@ -34,45 +34,12 @@ class DotScript
         $max_height       = 3.5;
         $max_fontsize     = 35;
         $max_sizing_ratio = 20;
-
-//        if ($left === null) {
-        // init_metrics($raw_data, null, null);
-//        }
-
-        $runDataObject = new RunData($raw_data);
-        $sym_table     = $runDataObject->getFlat();
-        $totals        = $runDataObject->getTotals();
+        $runDataObject    = new RunData($raw_data);
+        $sym_table        = $runDataObject->getFlat();
+        $totals           = $runDataObject->getTotals();
 
         if ($this->critical) {
-            $children_table = $this->getChildrenTable($raw_data);
-            $node           = 'main()';
-            $path           = [];
-            $path_edges     = [];
-            $visited        = [];
-            while ($node) {
-                $visited[$node] = true;
-                if (isset($children_table[$node])) {
-                    $max_child = null;
-                    foreach ($children_table[$node] as $child) {
-                        if (isset($visited[$child])) {
-                            continue;
-                        }
-                        if ($max_child === null ||
-                            abs($raw_data[uprofiler_build_parent_child_key($node, $child)]['wt']) >
-                            abs($raw_data[uprofiler_build_parent_child_key($node, $max_child)]['wt'])
-                        ) {
-                            $max_child = $child;
-                        }
-                    }
-                    if ($max_child !== null) {
-                        $path[$max_child]                                                = true;
-                        $path_edges[uprofiler_build_parent_child_key($node, $max_child)] = true;
-                    }
-                    $node = $max_child;
-                } else {
-                    $node = null;
-                }
-            }
+            [$path, $path_edges] = $this->getCriticalPath($raw_data);
         }
 
         // if it is a benchmark callgraph, we make the benchmarked function the root.
@@ -247,6 +214,47 @@ class DotScript
         $result .= "\n}";
 
         return $result;
+    }
+
+    private function getCriticalPath(array $data): array
+    {
+        $children_table = $this->getChildrenTable($data);
+        $node           = 'main()';
+        $path           = [];
+        $path_edges     = [];
+        $visited        = [];
+
+        while ($node) {
+            $visited[$node] = true;
+
+            if (isset($children_table[$node])) {
+                $max_child = null;
+
+                foreach ($children_table[$node] as $child) {
+                    if (isset($visited[$child])) {
+                        continue;
+                    }
+
+                    if ($max_child === null ||
+                        abs($data[uprofiler_build_parent_child_key($node, $child)]['wt']) >
+                        abs($data[uprofiler_build_parent_child_key($node, $max_child)]['wt'])
+                    ) {
+                        $max_child = $child;
+                    }
+                }
+
+                if ($max_child !== null) {
+                    $path[$max_child]                                                = true;
+                    $path_edges[uprofiler_build_parent_child_key($node, $max_child)] = true;
+                }
+
+                $node = $max_child;
+            } else {
+                $node = null;
+            }
+        }
+
+        return [$path, $path_edges];
     }
 
     private function getChildrenTable($raw_data): array
