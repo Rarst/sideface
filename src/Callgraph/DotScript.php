@@ -23,13 +23,8 @@ class DotScript
         $this->func      = $func;
     }
 
-    public function getScript(
-        $raw_data,
-        $source,
-        $page,
-        $right = null,
-        $left = null
-    ): string {
+    public function getScript($raw_data, $right = null, $left = null): string
+    {
         $max_width        = 5;
         $max_height       = 3.5;
         $max_fontsize     = 35;
@@ -100,10 +95,10 @@ class DotScript
             $width    = ', width=' . sprintf('%.1f', $max_width / $sizing_factor);
             $height   = ', height=' . sprintf('%.1f', $max_height / $sizing_factor);
 
-            if ($symbol == 'main()') {
+            if ($symbol === 'main()') {
                 $shape = 'octagon';
                 $name  = 'Total: ' . ($totals['wt'] / 1000.0) . " ms\\n";
-                $name  .= addslashes($page ?? $symbol);
+                $name  .= addslashes($symbol);
             } else {
                 $shape = 'box';
                 $name  = addslashes($symbol) . "\\nInc: " . sprintf('%.3f', $info['wt'] / 1000) .

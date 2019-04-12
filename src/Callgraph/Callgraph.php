@@ -29,7 +29,7 @@ class Callgraph
 
     public function render_image(RunInterface $run)
     {
-        $script = $this->generate_dot_script($run->getData(), $run->getSource(), '');
+        $script = $this->generate_dot_script($run->getData());
 
         return $this->generate_image_by_dot($script);
     }
@@ -43,19 +43,14 @@ class Callgraph
         $runDataObject2 = new RunData($raw_data2);
         $symbol_tab2    = $runDataObject2->getFlat();
         $run_delta      = $runDataObject1->diffTo($raw_data2);
-        $script         = $this->generate_dot_script($run_delta, $run1->getSource(), null, $symbol_tab1, $symbol_tab2);
+        $script         = $this->generate_dot_script($run_delta, $symbol_tab1, $symbol_tab2);
 
         return $this->generate_image_by_dot($script);
     }
 
-    public function generate_dot_script(
-        $raw_data,
-        $source,
-        $page,
-        $right = null,
-        $left = null
-    ): string {
-        return $this->dotScript->getScript($raw_data, $source, $page, $right, $left);
+    public function generate_dot_script($raw_data, $right = null, $left = null): string
+    {
+        return $this->dotScript->getScript($raw_data, $right, $left);
     }
 
     public function generate_image_by_dot($dot_script)
