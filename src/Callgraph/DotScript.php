@@ -32,7 +32,6 @@ class DotScript
         $runDataObject    = new RunData($raw_data);
         $sym_table        = $runDataObject->getFlat();
         $totals           = $runDataObject->getTotals();
-        $t                = $this;
 
         if ($this->critical) {
             [$path, $path_edges] = $this->getCriticalPath($raw_data);
@@ -54,11 +53,11 @@ class DotScript
         $result = "digraph call_graph {\n";
 
         // Generate all nodes' information.
-        foreach ($sym_table as $symbol => $i) {
-            if ($i['excl_wt'] == 0) {
+        foreach ($sym_table as $symbol => $info) {
+            if ($info['excl_wt'] == 0) {
                 $sizing_factor = $max_sizing_ratio;
             } else {
-                $sizing_factor = $max_wt / abs($i['excl_wt']);
+                $sizing_factor = $max_wt / abs($info['excl_wt']);
                 if ($sizing_factor > $max_sizing_ratio) {
                     $sizing_factor = $max_sizing_ratio;
                 }
@@ -75,32 +74,8 @@ class DotScript
             $height   = ', height=' . sprintf('%.1f', $max_height / $sizing_factor);
 
             $shape = $symbol === 'main()' ? 'octagon' : 'box';
+            $label = $this->getLabel($symbol, $info, $left[$symbol] ?? [], $right[$symbol] ?? [], $totals['wt']);
 
-            $l = $left[$symbol] ?? [];
-            $r = $right[$symbol] ?? [];
-
-            if (! $l) {
-                $label = ', label="'
-                         . addslashes($symbol) . '\n'
-                         . '● ' . $t->ms($i['wt']) . ' (' . $t->pc($i['wt'], $totals['wt']) . ')\n'
-                         . '○ ' . $t->ms($i['excl_wt']) . ' (' . $t->pc($i['excl_wt'], $totals['wt']) . ')\n'
-                         . $i['ct'] . ' calls"';
-            } elseif ($l && $r) {
-                $label = ', label="' . addslashes($symbol) . '\n'
-                         . '● ' . $t->sub($l['wt'], $r['wt'], $i['wt'])
-                         . '○ ' . $t->sub($l['excl_wt'], $r['excl_wt'], $i['excl_wt'])
-                         . 'Calls: ' . $l['ct'] . ' - ' . $r['ct'] . ' = ' . $i['ct'] . '"';
-            } elseif ($l) {
-                $label = ', label="' . addslashes($symbol) . '\n'
-                         . '● ' . $t->sub($l['wt'], 0, $i['wt'])
-                         . '○ ' . $t->sub($l['excl_wt'], 0, $i['excl_wt'])
-                         . 'Calls: ' . $l['ct'] . ' - 0 = ' . $i['ct'] . '"';
-            } else {
-                $label = ', label="' . addslashes($symbol) . '\n'
-                         . '● ' . $t->sub(0, $r['wt'], $i['wt'])
-                         . '○ ' . $t->sub(0, $r['excl_wt'], $i['excl_wt'])
-                         . 'Calls: 0 - ' . $r['ct'] . ' = ' . $i['ct'] . '"';
-            }
             $result .= 'N' . $sym_table[$symbol]['id'];
             $result .= "[shape=$shape $label $width $height $fontsize $fillcolor];\n";
         }
@@ -147,6 +122,22 @@ class DotScript
         $result .= "\n" . '}';
 
         return $result;
+    }
+
+    private function getLabel($symbol, $i, $l, $r, $total_wt): string
+    {
+        if (! $l) {
+            return ', label="'
+                   . addslashes($symbol) . '\n'
+                   . '● ' . $this->ms($i['wt']) . ' (' . $this->pc($i['wt'], $total_wt) . ')\n'
+                   . '○ ' . $this->ms($i['excl_wt']) . ' (' . $this->pc($i['excl_wt'], $total_wt) . ')\n'
+                   . $i['ct'] . ' calls"';
+        }
+
+        return ', label="' . addslashes($symbol) . '\n'
+               . '● ' . $this->sub($l['wt'] ?? 0, $r['wt'] ?? 0, $i['wt'])
+               . '○ ' . $this->sub($l['excl_wt'] ?? 0, $r['excl_wt'] ?? 0, $i['excl_wt'])
+               . 'Calls: ' . ($l['ct'] ?? 0) . ' - ' . ($r['ct'] ?? 0) . ' = ' . $i['ct'] . '"';
     }
 
     private function sub($left, $right, $result): string
