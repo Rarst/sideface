@@ -8,34 +8,23 @@ class Callgraph
 {
     protected $legal_image_types = [ 'jpg', 'gif', 'png', 'svg', 'ps' ];
 
-    /** @var float */
-    protected $threshold;
-
     /** @var string */
-    protected $type;
+    protected $type = 'svg';
 
-    /** @var bool */
-    protected $critical;
-
-    /** @var string */
-    protected $func;
+    /** @var DotScript */
+    private $dotScript;
 
     public function __construct(array $args = [ ])
     {
-        if (empty($args['threshold']) || $args['threshold'] < 0 || $args['threshold'] > 1) {
-            $this->threshold = '0.01';
-        } else {
-            $this->threshold = $args['threshold'];
-        }
-
-        if (empty($args['type']) || ! in_array($args['type'], $this->legal_image_types)) {
-            $this->type = 'svg';
-        } else {
+        if (in_array($args['type'] ?? 'svg', $this->legal_image_types, true)) {
             $this->type = $args['type'];
         }
 
-        $this->critical = isset($args['critical']) ? (bool) $args['critical'] : true;
-        $this->func     = empty($args['func']) ? '' : $args['func'];
+        $this->dotScript = new DotScript(
+            $args['threshold'] ?? 0.01,
+            $args['critical'] ?? true,
+            $args['func'] ?? ''
+        );
     }
 
     public function render_image(RunInterface $run)
@@ -66,9 +55,7 @@ class Callgraph
         $right = null,
         $left = null
     ): string {
-        $dotScript = new DotScript($this->threshold, $this->critical, $this->func);
-
-        return $dotScript->getScript($raw_data, $source, $page, $right, $left);
+        return $this->dotScript->getScript($raw_data, $source, $page, $right, $left);
     }
 
     public function generate_image_by_dot($dot_script)
