@@ -42,25 +42,6 @@ class DotScript
             [$path, $path_edges] = $this->getCriticalPath($raw_data);
         }
 
-        // if it is a benchmark callgraph, we make the benchmarked function the root.
-        if ($source == 'bm' && array_key_exists('main()', $sym_table)) {
-            $total_times  = $sym_table['main()']['ct'];
-            $remove_funcs = [
-                'main()',
-                'hotprofiler_disable',
-                'call_user_func_array',
-                'uprofiler_disable'
-            ];
-
-            foreach ($remove_funcs as $cur_del_func) {
-                if (array_key_exists($cur_del_func, $sym_table) &&
-                    $sym_table[$cur_del_func]['ct'] == $total_times
-                ) {
-                    unset($sym_table[$cur_del_func]);
-                }
-            }
-        }
-
         // use the function to filter out irrelevant functions.
         if (! empty($this->func)) {
             $interested_funcs = [];
