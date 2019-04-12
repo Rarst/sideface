@@ -37,21 +37,8 @@ class DotScript
             [$path, $path_edges] = $this->getCriticalPath($raw_data);
         }
 
-        // use the function to filter out irrelevant functions.
-        if (! empty($this->func)) {
-            $interested_funcs = [];
-            foreach ($raw_data as $parent_child => $info) {
-                [$parent, $child] = uprofiler_parse_parent_child($parent_child);
-                if ($parent == $this->func || $child == $this->func) {
-                    $interested_funcs[$parent] = 1;
-                    $interested_funcs[$child]  = 1;
-                }
-            }
-            foreach ($sym_table as $symbol => $info) {
-                if (! array_key_exists($symbol, $interested_funcs)) {
-                    unset($sym_table[$symbol]);
-                }
-            }
+        if ($this->func) {
+            $sym_table = array_intersect_key($sym_table, $this->getRelatedToFunction($raw_data));
         }
 
         $result = "digraph call_graph {\n";
@@ -231,6 +218,22 @@ class DotScript
         }
 
         return [$path, $path_edges];
+    }
+
+    private function getRelatedToFunction($raw_data): array
+    {
+        $related = [];
+
+        foreach (array_keys($raw_data) as $parent_child) {
+            [$parent, $child] = uprofiler_parse_parent_child($parent_child);
+
+            if ($parent === $this->func || $child === $this->func) {
+                $related[$parent] = true;
+                $related[$child]  = true;
+            }
+        }
+
+        return $related;
     }
 
     private function getChildrenTable($raw_data): array
