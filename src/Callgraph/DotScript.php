@@ -39,27 +39,18 @@ class DotScript
 
         if ($this->func) {
             $sym_table = array_intersect_key($sym_table, $this->getRelatedToFunction($raw_data));
+        } else {
+            $sym_table = array_intersect_key($sym_table, $this->getAboveThreshold($sym_table, $totals['wt']));
+        }
+
+        $max_wt = max(array_map('abs', array_column($sym_table, 'excl_wt')));
+
+        $cur_id = 0;
+        foreach ($sym_table as $symbol => $info) {
+            $sym_table[$symbol]['id'] = $cur_id++;
         }
 
         $result = "digraph call_graph {\n";
-
-        // Filter out functions whose exclusive time ratio is below threshold, and
-        // also assign a unique integer id for each function to be generated. In the
-        // meantime, find the function with the most exclusive time (potentially the
-        // performance bottleneck).
-        $cur_id = 0;
-        $max_wt = 0;
-        foreach ($sym_table as $symbol => $info) {
-            if (empty($this->func) && abs($info['wt'] / $totals['wt']) < $this->threshold) {
-                unset($sym_table[$symbol]);
-                continue;
-            }
-            if ($max_wt == 0 || $max_wt < abs($info['excl_wt'])) {
-                $max_wt = abs($info['excl_wt']);
-            }
-            $sym_table[$symbol]['id'] = $cur_id;
-            $cur_id++;
-        }
 
         // Generate all nodes' information.
         foreach ($sym_table as $symbol => $info) {
@@ -234,6 +225,19 @@ class DotScript
         }
 
         return $related;
+    }
+
+    private function getAboveThreshold($sym_table, $total_wt): array
+    {
+        $above = [];
+
+        foreach ($sym_table as $symbol => $info) {
+            if (abs($info['wt'] / $total_wt) > $this->threshold) {
+                $above[$symbol] = true;
+            }
+        }
+
+        return $above;
     }
 
     private function getChildrenTable($raw_data): array
