@@ -25,16 +25,24 @@ class DotScript
 
     public function getScript($raw_data, $right = null, $left = null): string
     {
+        [$sym_table, $totals, $path, $path_edges, $max_wt] = $this->prepareData($raw_data);
+
+        $result = "digraph call_graph {\n";
+        $result .= $this->getNodes($sym_table, $left, $right, $path, $max_wt, $totals);
+        $result .= $this->getEdges($raw_data, $sym_table, $path_edges);
+        $result .= "\n" . '}';
+
+        return $result;
+    }
+
+    private function getNodes($sym_table, $left, $right, $path, $max_wt, $totals): string
+    {
         $max_width        = 5;
         $max_height       = 3.5;
         $max_fontsize     = 35;
         $max_sizing_ratio = 20;
+        $result           = '';
 
-        [$sym_table, $totals, $path, $path_edges, $max_wt] = $this->prepareData($raw_data);
-
-        $result = "digraph call_graph {\n";
-
-        // Generate all nodes' information.
         foreach ($sym_table as $symbol => $info) {
             if ($info['excl_wt'] == 0) {
                 $sizing_factor = $max_sizing_ratio;
@@ -60,7 +68,13 @@ class DotScript
             $result .= "[shape=$shape $label $width $height $fontsize $fillcolor];\n";
         }
 
-        // Generate all the edges' information.
+        return $result;
+    }
+
+    private function getEdges($raw_data, $sym_table, $path_edges): string
+    {
+        $result = '';
+
         foreach ($raw_data as $parent_child => $info) {
             [$parent, $child] = uprofiler_parse_parent_child($parent_child);
 
@@ -79,7 +93,7 @@ class DotScript
                     ? $this->pc($info['wt'], $sym_table[$parent]['wt'] - $sym_table[$parent]['excl_wt'])
                     : '0.0%';
 
-                $linewidth  = 1;
+                $linewidth = 1;
 
                 if ($this->critical && isset($path_edges[$parent_child])) {
                     $linewidth = 5;
@@ -94,7 +108,6 @@ class DotScript
                 $result .= ";\n";
             }
         }
-        $result .= "\n" . '}';
 
         return $result;
     }
