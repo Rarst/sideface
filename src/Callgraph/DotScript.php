@@ -25,29 +25,36 @@ class DotScript
 
     public function getScript($raw_data, $right = null, $left = null): string
     {
-        [$sym_table, $totals, $path, $path_edges, $max_wt] = $this->prepareData($raw_data);
+        $path       = [];
+        $path_edges = [];
 
-        $result = "digraph call_graph {\n";
-        $result .= $this->getNodes($sym_table, $left, $right, $path, $max_wt, $totals);
+        if ($this->critical) {
+            [$path, $path_edges] = $this->getCriticalPath($raw_data);
+        }
+
+        $sym_table = $this->prepareData($raw_data);
+
+        $result = $this->getNodes($sym_table, $left, $right, $path);
         $result .= $this->getEdges($raw_data, $sym_table, $path_edges);
-        $result .= "\n" . '}';
 
-        return $result;
+        return "digraph call_graph {\n{$result}\n}";
     }
 
-    private function getNodes($sym_table, $left, $right, $path, $max_wt, $totals): string
+    private function getNodes($sym_table, $left, $right, $path): string
     {
-        $max_width        = 5;
-        $max_height       = 3.5;
-        $max_fontsize     = 35;
-        $max_sizing_ratio = 20;
-        $result           = '';
+        $result               = '';
+        $max_width            = 5;
+        $max_height           = 3.5;
+        $max_fontsize         = 35;
+        $max_sizing_ratio     = 20;
+        $totalWallTime        = $sym_table['main()']['wt'];
+        $maxExclusiveWallTime = max(array_map('abs', array_column($sym_table, 'excl_wt')));
 
         foreach ($sym_table as $symbol => $info) {
             if ($info['excl_wt'] == 0) {
                 $sizing_factor = $max_sizing_ratio;
             } else {
-                $sizing_factor = $max_wt / abs($info['excl_wt']);
+                $sizing_factor = $maxExclusiveWallTime / abs($info['excl_wt']);
                 $sizing_factor = min($sizing_factor, $max_sizing_ratio);
             }
             $fillcolor = (($sizing_factor < 1.5) ? ', style=filled, fillcolor=red' : '');
@@ -62,7 +69,7 @@ class DotScript
             $height   = ', height=' . sprintf('%.1f', $max_height / $sizing_factor);
 
             $shape = $symbol === 'main()' ? 'octagon' : 'box';
-            $label = $this->getLabel($symbol, $info, $left[$symbol] ?? [], $right[$symbol] ?? [], $totals['wt']);
+            $label = $this->getLabel($symbol, $info, $left[$symbol] ?? [], $right[$symbol] ?? [], $totalWallTime);
 
             $result .= 'N' . $sym_table[$symbol]['id'];
             $result .= "[shape=$shape $label $width $height $fontsize $fillcolor];\n";
@@ -153,28 +160,20 @@ class DotScript
     {
         $runDataObject = new RunData($raw_data);
         $sym_table     = $runDataObject->getFlat();
-        $totals        = $runDataObject->getTotals();
-        $path          = [];
-        $path_edges    = [];
-
-        if ($this->critical) {
-            [$path, $path_edges] = $this->getCriticalPath($raw_data);
-        }
+        $totalWallTime = $sym_table['main()']['wt'];
 
         if ($this->func) {
             $sym_table = array_intersect_key($sym_table, $this->getRelatedToFunction($raw_data));
         } else {
-            $sym_table = array_intersect_key($sym_table, $this->getAboveThreshold($sym_table, $totals['wt']));
+            $sym_table = array_intersect_key($sym_table, $this->getAboveThreshold($sym_table, $totalWallTime));
         }
-
-        $max_wt = max(array_map('abs', array_column($sym_table, 'excl_wt')));
 
         $cur_id = 0;
         foreach ($sym_table as $symbol => $info) {
             $sym_table[$symbol]['id'] = $cur_id++;
         }
 
-        return [$sym_table, $totals, $path, $path_edges, $max_wt];
+        return $sym_table;
     }
 
     private function getCriticalPath(array $data): array
