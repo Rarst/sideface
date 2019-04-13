@@ -158,201 +158,204 @@ class Report
         }
     }
 
-    /**
-     * @param iUprofilerRuns $uprofiler_runs_impl An object that implements the iUprofilerRuns interface
-     * @param  array         $runs                run ids of the uprofiler runs..
-     * @param  array         $wts                 integral (ideally) weights for $runs
-     * @param  string        $source              source to fetch raw data for run from
-     * @param  bool          $use_script_name     If true, a fake edge from main() to
-     *                                            to __script::<scriptname> is introduced
-     *                                            in the raw data so that after aggregations
-     *                                            the script name is still preserved.
-     *
-     * @return array Return aggregated raw data
-     */
-    public function aggregate_runs(
-        iUprofilerRuns $uprofiler_runs_impl,
-        $runs,
-        $wts,
-        $source = 'phprof',
-        $use_script_name = false
-    ) {
-        $raw_data_total = null;
-        $raw_data       = null;
-        $metrics        = [ ];
+//region Aggregate runs
 
-        $run_count = count($runs);
-        $wts_count = count($wts);
+//    /**
+//     * @param iUprofilerRuns $uprofiler_runs_impl An object that implements the iUprofilerRuns interface
+//     * @param  array         $runs                run ids of the uprofiler runs..
+//     * @param  array         $wts                 integral (ideally) weights for $runs
+//     * @param  string        $source              source to fetch raw data for run from
+//     * @param  bool          $use_script_name     If true, a fake edge from main() to
+//     *                                            to __script::<scriptname> is introduced
+//     *                                            in the raw data so that after aggregations
+//     *                                            the script name is still preserved.
+//     *
+//     * @return array Return aggregated raw data
+//     */
+//    public function aggregate_runs(
+//        iUprofilerRuns $uprofiler_runs_impl,
+//        $runs,
+//        $wts,
+//        $source = 'phprof',
+//        $use_script_name = false
+//    ) {
+//        $raw_data_total = null;
+//        $raw_data       = null;
+//        $metrics        = [ ];
+//
+//        $run_count = count($runs);
+//        $wts_count = count($wts);
+//
+//        if (( $run_count == 0 ) ||
+//            ( ( $wts_count > 0 ) && ( $run_count != $wts_count ) )
+//        ) {
+//            return [
+//                'description' => 'Invalid input..',
+//                'raw'         => null
+//            ];
+//        }
+//
+//        $bad_runs = [ ];
+//        foreach ($runs as $idx => $run_id) {
+//            $raw_data = $uprofiler_runs_impl->get_run($run_id, $source, $description);
+//
+//            // use the first run to derive what metrics to aggregate on.
+//            if ($idx == 0) {
+//                foreach ($raw_data['main()'] as $metric => $val) {
+//                    if ($metric != 'pmu') {
+//                        // for now, just to keep data size small, skip "peak" memory usage
+//                        // data while aggregating.
+//                        // The "regular" memory usage data will still be tracked.
+//                        if (isset($val)) {
+//                            $metrics[] = $metric;
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (! $this->is_valid_run($run_id, $raw_data)) {
+//                $bad_runs[] = $run_id;
+//                continue;
+//            }
+//
+//            if ($use_script_name) {
+//                $page = $description;
+//
+//                // create a fake function '__script::$page', and have and edge from
+//                // main() to '__script::$page'. We will also need edges to transfer
+//                // all edges originating from main() to now originate from
+//                // '__script::$page' to all function called from main().
+//                //
+//                // We also weight main() ever so slightly higher so that
+//                // it shows up above the new entry in reports sorted by
+//                // inclusive metrics or call counts.
+//                if ($page) {
+//                    foreach ($raw_data['main()'] as $metric => $val) {
+//                        $fake_edge[$metric] = $val;
+//                        $new_main[$metric]  = $val + 0.00001;
+//                    }
+//                    $raw_data['main()']                                                      = $new_main;
+//                    $raw_data[uprofiler_build_parent_child_key('main()', "__script::$page")] = $fake_edge;
+//                } else {
+//                    $use_script_name = false;
+//                }
+//            }
+//
+//            // if no weights specified, use 1 as the default weightage..
+//            $wt = ( $wts_count == 0 ) ? 1 : $wts[$idx];
+//
+//            // aggregate $raw_data into $raw_data_total with appropriate weight ($wt)
+//            foreach ($raw_data as $parent_child => $info) {
+//                if ($use_script_name) {
+//                    // if this is an old edge originating from main(), it now
+//                    // needs to be from '__script::$page'
+//                    if (substr($parent_child, 0, 9) == 'main()==>') {
+//                        $child = substr($parent_child, 9);
+//                        // ignore the newly added edge from main()
+//                        if (substr($child, 0, 10) != '__script::') {
+//                            $parent_child = uprofiler_build_parent_child_key("__script::$page", $child);
+//                        }
+//                    }
+//                }
+//
+//                if (! isset($raw_data_total[$parent_child])) {
+//                    foreach ($metrics as $metric) {
+//                        $raw_data_total[$parent_child][$metric] = ( $wt * $info[$metric] );
+//                    }
+//                } else {
+//                    foreach ($metrics as $metric) {
+//                        $raw_data_total[$parent_child][$metric] += ( $wt * $info[$metric] );
+//                    }
+//                }
+//            }
+//        }
+//
+//        $runs_string = implode(',', $runs);
+//
+//        if (isset($wts)) {
+//            $wts_string          = 'in the ratio (' . implode(':', $wts) . ')';
+//            $normalization_count = array_sum($wts);
+//        } else {
+//            $wts_string          = '';
+//            $normalization_count = $run_count;
+//        }
+//
+//        $run_count           = $run_count - count($bad_runs);
+//        $data['description'] = "Aggregated Report for $run_count runs:  {$runs_string} {$wts_string}\n";
+//        $data['raw']         = $this->normalizeMetrics($raw_data_total, $normalization_count);
+//        $data['bad_runs']    = $bad_runs;
+//
+//        return $data;
+//    }
 
-        if (( $run_count == 0 ) ||
-            ( ( $wts_count > 0 ) && ( $run_count != $wts_count ) )
-        ) {
-            return [
-                'description' => 'Invalid input..',
-                'raw'         => null
-            ];
-        }
+//    /**
+//     * @param array   $data
+//     * @param integer $runs
+//     *
+//     * @return array
+//     */
+//    public function normalizeMetrics($data, $runs)
+//    {
+//        if (empty($data) || ( $runs == 0 )) {
+//            return $data;
+//        }
+//
+//        $normalized = [ ];
+//
+//        if (isset($data['==>main()']) && isset($data['main()'])) {
+//            error_log('Error: both ==>main() and main() set in raw data.');
+//        }
+//
+//        foreach ($data as $parent_child => $info) {
+//            foreach ($info as $metric => $value) {
+//                $normalized[$parent_child][$metric] = ( $value / $runs );
+//            }
+//        }
+//
+//        return $normalized;
+//    }
 
-        $bad_runs = [ ];
-        foreach ($runs as $idx => $run_id) {
-            $raw_data = $uprofiler_runs_impl->get_run($run_id, $source, $description);
+//    /**
+//     * @param   int   $run_id   Run id of run to be pruned.[Used only for reporting errors.]
+//     * @param   array $raw_data uprofiler raw data to be pruned & validated.
+//     *
+//     * @return bool
+//     */
+//    public function is_valid_run($run_id, $raw_data)
+//    {
+//        $main_info = $raw_data['main()'];
+//        if (empty($main_info)) {
+//            error_log("uprofiler: main() missing in raw data for Run ID: $run_id");
+//            return false;
+//        }
+//
+//        // raw data should contain either wall time or samples information...
+//        if (isset($main_info['wt'])) {
+//            $metric = 'wt';
+//        } elseif (isset($main_info['samples'])) {
+//            $metric = 'samples';
+//        } else {
+//            error_log("uprofiler: Wall Time information missing from Run ID: $run_id");
+//            return false;
+//        }
+//
+//        foreach ($raw_data as $info) {
+//            $val = $info[$metric];
+//
+//            // basic sanity checks...
+//            if ($val < 0) {
+//                error_log("uprofiler: $metric should not be negative: Run ID $run_id" . serialize($info));
+//                return false;
+//            }
+//            if ($val > 86400000000) {
+//                error_log("uprofiler: $metric > 1 day found in Run ID: $run_id " . serialize($info));
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
 
-            // use the first run to derive what metrics to aggregate on.
-            if ($idx == 0) {
-                foreach ($raw_data['main()'] as $metric => $val) {
-                    if ($metric != 'pmu') {
-                        // for now, just to keep data size small, skip "peak" memory usage
-                        // data while aggregating.
-                        // The "regular" memory usage data will still be tracked.
-                        if (isset($val)) {
-                            $metrics[] = $metric;
-                        }
-                    }
-                }
-            }
-
-            if (! $this->is_valid_run($run_id, $raw_data)) {
-                $bad_runs[] = $run_id;
-                continue;
-            }
-
-            if ($use_script_name) {
-                $page = $description;
-
-                // create a fake function '__script::$page', and have and edge from
-                // main() to '__script::$page'. We will also need edges to transfer
-                // all edges originating from main() to now originate from
-                // '__script::$page' to all function called from main().
-                //
-                // We also weight main() ever so slightly higher so that
-                // it shows up above the new entry in reports sorted by
-                // inclusive metrics or call counts.
-                if ($page) {
-                    foreach ($raw_data['main()'] as $metric => $val) {
-                        $fake_edge[$metric] = $val;
-                        $new_main[$metric]  = $val + 0.00001;
-                    }
-                    $raw_data['main()']                                                      = $new_main;
-                    $raw_data[uprofiler_build_parent_child_key('main()', "__script::$page")] = $fake_edge;
-                } else {
-                    $use_script_name = false;
-                }
-            }
-
-            // if no weights specified, use 1 as the default weightage..
-            $wt = ( $wts_count == 0 ) ? 1 : $wts[$idx];
-
-            // aggregate $raw_data into $raw_data_total with appropriate weight ($wt)
-            foreach ($raw_data as $parent_child => $info) {
-                if ($use_script_name) {
-                    // if this is an old edge originating from main(), it now
-                    // needs to be from '__script::$page'
-                    if (substr($parent_child, 0, 9) == 'main()==>') {
-                        $child = substr($parent_child, 9);
-                        // ignore the newly added edge from main()
-                        if (substr($child, 0, 10) != '__script::') {
-                            $parent_child = uprofiler_build_parent_child_key("__script::$page", $child);
-                        }
-                    }
-                }
-
-                if (! isset($raw_data_total[$parent_child])) {
-                    foreach ($metrics as $metric) {
-                        $raw_data_total[$parent_child][$metric] = ( $wt * $info[$metric] );
-                    }
-                } else {
-                    foreach ($metrics as $metric) {
-                        $raw_data_total[$parent_child][$metric] += ( $wt * $info[$metric] );
-                    }
-                }
-            }
-        }
-
-        $runs_string = implode(',', $runs);
-
-        if (isset($wts)) {
-            $wts_string          = 'in the ratio (' . implode(':', $wts) . ')';
-            $normalization_count = array_sum($wts);
-        } else {
-            $wts_string          = '';
-            $normalization_count = $run_count;
-        }
-
-        $run_count           = $run_count - count($bad_runs);
-        $data['description'] = "Aggregated Report for $run_count runs:  {$runs_string} {$wts_string}\n";
-        $data['raw']         = $this->normalizeMetrics($raw_data_total, $normalization_count);
-        $data['bad_runs']    = $bad_runs;
-
-        return $data;
-    }
-
-    /**
-     * @param array   $data
-     * @param integer $runs
-     *
-     * @return array
-     */
-    public function normalizeMetrics($data, $runs)
-    {
-        if (empty($data) || ( $runs == 0 )) {
-            return $data;
-        }
-
-        $normalized = [ ];
-
-        if (isset($data['==>main()']) && isset($data['main()'])) {
-            error_log('Error: both ==>main() and main() set in raw data.');
-        }
-
-        foreach ($data as $parent_child => $info) {
-            foreach ($info as $metric => $value) {
-                $normalized[$parent_child][$metric] = ( $value / $runs );
-            }
-        }
-
-        return $normalized;
-    }
-
-    /**
-     * @param   int   $run_id   Run id of run to be pruned.[Used only for reporting errors.]
-     * @param   array $raw_data uprofiler raw data to be pruned & validated.
-     *
-     * @return bool
-     */
-    public function is_valid_run($run_id, $raw_data)
-    {
-        $main_info = $raw_data['main()'];
-        if (empty($main_info)) {
-            error_log("uprofiler: main() missing in raw data for Run ID: $run_id");
-            return false;
-        }
-
-        // raw data should contain either wall time or samples information...
-        if (isset($main_info['wt'])) {
-            $metric = 'wt';
-        } elseif (isset($main_info['samples'])) {
-            $metric = 'samples';
-        } else {
-            error_log("uprofiler: Wall Time information missing from Run ID: $run_id");
-            return false;
-        }
-
-        foreach ($raw_data as $info) {
-            $val = $info[$metric];
-
-            // basic sanity checks...
-            if ($val < 0) {
-                error_log("uprofiler: $metric should not be negative: Run ID $run_id" . serialize($info));
-                return false;
-            }
-            if ($val > 86400000000) {
-                error_log("uprofiler: $metric > 1 day found in Run ID: $run_id " . serialize($info));
-                return false;
-            }
-        }
-        return true;
-    }
-
+//endregion
 
     /**
      * @param RunInterface $run
