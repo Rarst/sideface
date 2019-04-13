@@ -40,9 +40,7 @@ class DotScript
                 $sizing_factor = $max_sizing_ratio;
             } else {
                 $sizing_factor = $max_wt / abs($info['excl_wt']);
-                if ($sizing_factor > $max_sizing_ratio) {
-                    $sizing_factor = $max_sizing_ratio;
-                }
+                $sizing_factor = min($sizing_factor, $max_sizing_ratio);
             }
             $fillcolor = (($sizing_factor < 1.5) ? ', style=filled, fillcolor=red' : '');
 
@@ -66,34 +64,29 @@ class DotScript
         foreach ($raw_data as $parent_child => $info) {
             [$parent, $child] = uprofiler_parse_parent_child($parent_child);
 
-            if (isset($sym_table[$parent], $sym_table[$child]) && (
-                    empty($this->func)
-                    || (! empty($this->func) && ($parent == $this->func || $child == $this->func))
-                )
-            ) {
+            if (! isset($sym_table[$parent], $sym_table[$child])) {
+                continue;
+            }
+
+            if (empty($this->func) || $parent === $this->func || $child === $this->func) {
                 $label = $info['ct'] == 1 ? $info['ct'] . ' call' : $info['ct'] . ' calls';
 
                 $headlabel = $sym_table[$child]['wt'] > 0
-                    ? sprintf('%.1f%%', 100 * $info['wt'] / $sym_table[$child]['wt'])
+                    ? $this->pc($info['wt'], $sym_table[$child]['wt'])
                     : '0.0%';
 
-                $taillabel = ($sym_table[$parent]['wt'] > 0)
-                    ? sprintf(
-                        '%.1f%%',
-                        100 * $info['wt'] / ($sym_table[$parent]['wt'] - $sym_table[$parent]['excl_wt'])
-                    )
+                $taillabel = $sym_table[$parent]['wt'] > 0
+                    ? $this->pc($info['wt'], $sym_table[$parent]['wt'] - $sym_table[$parent]['excl_wt'])
                     : '0.0%';
 
                 $linewidth  = 1;
-                $arrow_size = 1;
 
-                if ($this->critical && isset($path_edges[uprofiler_build_parent_child_key($parent, $child)])) {
-                    $linewidth  = 10;
-                    $arrow_size = 2;
+                if ($this->critical && isset($path_edges[$parent_child])) {
+                    $linewidth = 5;
                 }
 
                 $result .= 'N' . $sym_table[$parent]['id'] . ' -> N' . $sym_table[$child]['id'];
-                $result .= "[arrowsize=$arrow_size, color=grey, style=\"setlinewidth($linewidth)\","
+                $result .= "[arrowsize=1, color=grey, style=\"setlinewidth($linewidth)\","
                            . ' label="' . $label
                            . '", headlabel="' . $headlabel
                            . '", taillabel="' . $taillabel
