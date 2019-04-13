@@ -29,26 +29,8 @@ class DotScript
         $max_height       = 3.5;
         $max_fontsize     = 35;
         $max_sizing_ratio = 20;
-        $runDataObject    = new RunData($raw_data);
-        $sym_table        = $runDataObject->getFlat();
-        $totals           = $runDataObject->getTotals();
 
-        if ($this->critical) {
-            [$path, $path_edges] = $this->getCriticalPath($raw_data);
-        }
-
-        if ($this->func) {
-            $sym_table = array_intersect_key($sym_table, $this->getRelatedToFunction($raw_data));
-        } else {
-            $sym_table = array_intersect_key($sym_table, $this->getAboveThreshold($sym_table, $totals['wt']));
-        }
-
-        $max_wt = max(array_map('abs', array_column($sym_table, 'excl_wt')));
-
-        $cur_id = 0;
-        foreach ($sym_table as $symbol => $info) {
-            $sym_table[$symbol]['id'] = $cur_id++;
-        }
+        [$sym_table, $totals, $path, $path_edges, $max_wt] = $this->prepareData($raw_data);
 
         $result = "digraph call_graph {\n";
 
@@ -159,6 +141,34 @@ class DotScript
     private function pc($part, $total): string
     {
         return sprintf('%.1f%%', 100 * $part / $total);
+    }
+
+    private function prepareData(array $raw_data): array
+    {
+        $runDataObject = new RunData($raw_data);
+        $sym_table     = $runDataObject->getFlat();
+        $totals        = $runDataObject->getTotals();
+        $path          = [];
+        $path_edges    = [];
+
+        if ($this->critical) {
+            [$path, $path_edges] = $this->getCriticalPath($raw_data);
+        }
+
+        if ($this->func) {
+            $sym_table = array_intersect_key($sym_table, $this->getRelatedToFunction($raw_data));
+        } else {
+            $sym_table = array_intersect_key($sym_table, $this->getAboveThreshold($sym_table, $totals['wt']));
+        }
+
+        $max_wt = max(array_map('abs', array_column($sym_table, 'excl_wt')));
+
+        $cur_id = 0;
+        foreach ($sym_table as $symbol => $info) {
+            $sym_table[$symbol]['id'] = $cur_id++;
+        }
+
+        return [$sym_table, $totals, $path, $path_edges, $max_wt];
     }
 
     private function getCriticalPath(array $data): array
