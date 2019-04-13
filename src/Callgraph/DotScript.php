@@ -124,39 +124,39 @@ class DotScript
         return $result;
     }
 
-    private function getLabel($symbol, $i, $l, $r, $total_wt): string
+    private function getLabel($symbol, $info, $left, $right, $total_wt): string
     {
-        if (! $l) {
+        if (! $left) {
             return ', label="'
                    . addslashes($symbol) . '\n'
-                   . '● ' . $this->ms($i['wt']) . ' (' . $this->pc($i['wt'], $total_wt) . ')\n'
-                   . '○ ' . $this->ms($i['excl_wt']) . ' (' . $this->pc($i['excl_wt'], $total_wt) . ')\n'
-                   . $i['ct'] . ' calls"';
+                   . '● ' . $this->ms($info['wt']) . ' (' . $this->pc($info['wt'], $total_wt) . ')\n'
+                   . '○ ' . $this->ms($info['excl_wt']) . ' (' . $this->pc($info['excl_wt'], $total_wt) . ')\n'
+                   . $info['ct'] . ' calls"';
         }
 
         return ', label="' . addslashes($symbol) . '\n'
-               . '● ' . $this->sub($l['wt'] ?? 0, $r['wt'] ?? 0, $i['wt'])
-               . '○ ' . $this->sub($l['excl_wt'] ?? 0, $r['excl_wt'] ?? 0, $i['excl_wt'])
-               . 'Calls: ' . ($l['ct'] ?? 0) . ' - ' . ($r['ct'] ?? 0) . ' = ' . $i['ct'] . '"';
+               . '● ' . $this->sub($left['wt'] ?? 0, $right['wt'] ?? 0, $info['wt'])
+               . '○ ' . $this->sub($left['excl_wt'] ?? 0, $right['excl_wt'] ?? 0, $info['excl_wt'])
+               . ($left['ct'] ?? 0) . ' &minus; ' . ($right['ct'] ?? 0) . ' = ' . $info['ct'] . ' calls"';
     }
 
     private function sub($left, $right, $result): string
     {
-        return sprintf('%s - %s = %s\n', $this->ms($left), $this->ms($right), $this->ms($result));
+        return sprintf('%s &minus; %s = %s\n', $this->ms($left, ''), $this->ms($right, ''), $this->ms($result));
     }
 
-    private function ms($microseconds): string
+    private function ms($microseconds, string $suffix = ' ms'): string
     {
         if (0 === $microseconds) {
-            return '0 ms';
+            return '0' . $suffix;
         }
         $milliseconds = $microseconds / 1000.0;
         $format       = (abs($milliseconds) > 1) ? '%.1f' : '%.3f';
 
-        return sprintf($format, $milliseconds) . ' ms';
+        return sprintf($format, $milliseconds) . $suffix;
     }
 
-    private function pc($part, $total)
+    private function pc($part, $total): string
     {
         return sprintf('%.1f%%', 100 * $part / $total);
     }
